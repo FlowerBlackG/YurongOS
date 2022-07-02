@@ -8,13 +8,15 @@ TARGET = ../../targets/objs/kernel
 
 ENTRY_POINT = 0x10000
 
-ASM_SOURCE = $(wildcard *.asm) # 目录下所有 .asm 文件。空格分隔。
+# 目录下所有 .asm 文件。空格分隔。
+ASM_SOURCE = $(wildcard *.asm)
 
 # patsubst 为模式替换。
 # 将 *.asm 替换为 $(TARGET)/*.bin。第三个参数为空格分隔的待查找串。
 ASM_OBJS = $(patsubst %.asm, $(TARGET)/%.o, $(ASM_SOURCE))
 
-OBJS = $(ASM_OBJS) $(TARGET)/kernel.o
+# 注意：必须将 start 放在开头，不然地址无法正常跳转。
+OBJS = $(TARGET)/start.o $(TARGET)/io.o $(TARGET)/kernel.o
 
 $(TARGET)/kernel.exe: $(OBJS)
 	$(shell mkdir -p $(dir $@))

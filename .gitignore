@@ -13,6 +13,5 @@ bochsrc.gdb
 PKGBUILD
 
 bochs/
-.vscode
 
 *.ini
