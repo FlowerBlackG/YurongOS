@@ -1,0 +1,23 @@
+; io 操作。
+; 创建于 2022年7月2日。
+
+[bits 32]
+
+section .text ; 代码段。
+
+global io_in_byte
+io_in_byte:
+    ret
+
+
+global io_in_word
+io_in_word:
+    ret
+
+global io_out_byte
+io_out_byte:
+    ret
+
+global io_out_word
+io_out_word:
+    ret

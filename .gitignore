@@ -1,0 +1,18 @@
+# 版本控制忽略文件列表。
+
+*.o
+*.bin
+*.exe
+*.img
+*.log
+*.vmdk
+
+bochsrc
+bochsrc.gdb
+
+PKGBUILD
+
+bochs/
+.vscode
+
+*.ini
