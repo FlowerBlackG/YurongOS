@@ -213,6 +213,8 @@ char* strstr(const char* str, const char* substr) {
         }
     }
 
+    return NULL;
+
     // 注意：现在这种算法效率很低。可以考虑研究更好的算法。
 }
 
@@ -231,18 +233,18 @@ char* strtok(char* str, const char* delim) {
     }
 
     char* pToken = NULL;
-    while (*str != '\0') {
-        if (p[*str]) {
+    while (*searchPtr != '\0') {
+        if (p[*searchPtr]) {
             if (pToken != NULL) {
-                *str = '\0';
-                ++str;
+                *searchPtr = '\0';
+                ++searchPtr;
                 return pToken;
             }
         } else if (pToken == NULL) {
             pToken = (char*) str;
         }
 
-        ++str;
+        ++searchPtr;
     }
 
     return NULL;

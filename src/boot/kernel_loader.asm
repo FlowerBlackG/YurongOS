@@ -174,8 +174,7 @@ detect_memory:
     call print
 
     jmp prepare_protect_mode
-
-
+    
 
 ; 输出字符串。
 print:

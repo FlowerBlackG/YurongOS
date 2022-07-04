@@ -9,7 +9,7 @@ TARGET = ../targets/objs
 YROSTARGET = ../targets/YurongOS
 
 # 递归构建目录。
-DIRS = boot kernel
+DIRS = boot kernel lib
 .PHONY: $(DIRS)
 $(DIRS):
 	make --directory=$@
