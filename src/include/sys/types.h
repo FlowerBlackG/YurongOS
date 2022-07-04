@@ -21,3 +21,5 @@
 #ifndef __packed
     #define __packed __attribute__((packed))
 #endif
+
+typedef unsigned long size_t;

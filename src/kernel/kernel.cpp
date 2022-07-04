@@ -4,7 +4,7 @@
  */
 
 #include <sys/types.h>
-#include <yros/io.h>
+#include <yros/IO.h>
 #include <yros/kernel.h>
 #include <crt.h>
 
@@ -16,6 +16,19 @@
 extern "C" void kernel_init() {
     char* video = (char*) 0xb8000;
     video[0]='z';
-    uint8_t data = io_in_byte(CRT_DATA_REG);
-    uint16_t a = 1;
+
+    IO::outByte(CRT_ADDR_REG, CRT_REG_CURSOR_HIGH);
+    uint16_t pos = IO::inByte(CRT_DATA_REG) << 8;
+    IO::outByte(CRT_ADDR_REG, CRT_REG_CURSOR_LOW);
+    pos |= IO::inByte(CRT_DATA_REG);
+
+    uint16_t a = 10;
+
+    IO::outByte(CRT_ADDR_REG, CRT_REG_CURSOR_HIGH);
+    IO::outByte(CRT_DATA_REG, 0);
+    
+    IO::outByte(CRT_ADDR_REG, CRT_REG_CURSOR_LOW);
+    IO::outByte(CRT_DATA_REG, 0);
+
+    uint16_t ab = 10;
 }
