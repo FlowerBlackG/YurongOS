@@ -16,3 +16,4 @@ bochs/
 
 *.ini
 *.img.lock
+*.map

@@ -5,30 +5,43 @@
 
 #include <sys/types.h>
 #include <yros/IO.h>
-#include <yros/kernel.h>
-#include <crt.h>
+#include <yros/Kernel.h>
+#include <CRT.h>
+
+/*
+ * 手动列出所有需要构造的对象的静态对象。
+ */
+
+// 例如：SomeClass SomeClass::instance;
+
+
 
 /**
- * 内核初始化。
- * 加入 extern "C" 以防止 C++ 编译器将函数重命名，导致链接失败。
- * 
+ * 内核构造函数。不做任何事情。
  */
-extern "C" void kernel_init() {
-    char* video = (char*) 0xb8000;
-    video[0]='z';
+Kernel::Kernel() {
 
-    IO::outByte(CRT_ADDR_REG, CRT_REG_CURSOR_HIGH);
-    uint16_t pos = IO::inByte(CRT_DATA_REG) << 8;
-    IO::outByte(CRT_ADDR_REG, CRT_REG_CURSOR_LOW);
-    pos |= IO::inByte(CRT_DATA_REG);
+}
 
-    uint16_t a = 10;
-
-    IO::outByte(CRT_ADDR_REG, CRT_REG_CURSOR_HIGH);
-    IO::outByte(CRT_DATA_REG, 0);
+/**
+ * 调用内核所有模块的对象的构造函数。
+ */
+extern "C" void call_kernel_modules_constructors() {
+    extern void (* __CTOR_LIST__)();
+    extern void (* __CTOR_END__)();
     
-    IO::outByte(CRT_ADDR_REG, CRT_REG_CURSOR_LOW);
-    IO::outByte(CRT_DATA_REG, 0);
+    void (**constructors)() = &__CTOR_LIST__;
 
-    uint16_t ab = 10;
+    while (constructors != &__CTOR_END__) {
+        (*constructors)(); // 调用构造函数。
+        ++constructors; // 指向下一个构造函数。
+    }
+}
+
+/**
+ * 内核进入桥。用于连接汇编与C++对象。
+ * 加入 extern "C" 以防止 C++ 编译器将函数重命名，导致链接失败。
+ */
+extern "C" void kernel_bridge() {
+    
 }
