@@ -6,8 +6,9 @@
 #pragma once
 
 class Kernel {
-public:
+private:
     Kernel();
+public:
     static Kernel& getInstance() {
         return Kernel::instance;
     }

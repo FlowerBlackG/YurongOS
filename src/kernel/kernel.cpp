@@ -10,10 +10,11 @@
 
 /*
  * 手动列出所有需要构造的对象的静态对象。
+ * 注意：构造顺序是按照列出的顺序来的。
  */
 
-// 例如：SomeClass SomeClass::instance;
-
+Kernel Kernel::instance;
+CRT CRT::instance;
 
 
 /**
@@ -43,5 +44,7 @@ extern "C" void call_kernel_modules_constructors() {
  * 加入 extern "C" 以防止 C++ 编译器将函数重命名，导致链接失败。
  */
 extern "C" void kernel_bridge() {
-    
+    int a = 1;
+    CRT::getInstance().clear();
+    ++a;
 }

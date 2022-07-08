@@ -9,7 +9,7 @@ TARGET = ../targets/objs
 YROSTARGET = ../targets/YurongOS
 
 # 递归构建目录。
-DIRS = boot kernel lib
+DIRS = boot kernel lib crt
 .PHONY: $(DIRS)
 $(DIRS):
 	make --directory=$@
@@ -20,7 +20,9 @@ KERNEL_TARGET = $(TARGET)/kernel
 # 注意：必须将 kernel_entry 放在开头，不然地址无法正常跳转。
 KERNEL_OBJS = $(KERNEL_TARGET)/kernel_entry.o \
 			  $(KERNEL_TARGET)/io.o \
-			  $(KERNEL_TARGET)/kernel.o
+			  $(KERNEL_TARGET)/kernel.o \
+			  $(TARGET)/crt/CRT.o \
+			  $(TARGET)/lib/string.o
 
 # 内核进入点。
 KERNEL_ENTRY_POINT = 0x10000
