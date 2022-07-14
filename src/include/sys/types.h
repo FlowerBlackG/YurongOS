@@ -22,4 +22,9 @@
     #define __packed __attribute__((packed))
 #endif
 
+/** 内联汇编。 */
+#ifndef __asm
+    #define __asm __asm__ __volatile__
+#endif
+
 typedef unsigned long size_t;

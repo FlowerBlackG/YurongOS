@@ -12,6 +12,8 @@ public:
     static Kernel& getInstance() {
         return Kernel::instance;
     }
+
+    void main();
 private:
     static Kernel instance;
 };

@@ -32,7 +32,6 @@ int vsprintf(char* buffer, const char* format, va_list args) {
 #define __VPF_FLAG_MINUS_BIT 8
 #define __VPF_FLAG_NUMBER_SIGN_BIT 16
 
-
     // 长度限定符定义。
 #define __VPF_LENGTH_NULL 0
 #define __VPF_LENGTH_CHAR 1
@@ -65,12 +64,14 @@ int vsprintf(char* buffer, const char* format, va_list args) {
     // 工具闭包函数。
     // 拼接一个16进制数。自动补充对齐等。
     auto catHex = [&] (uint64_t hexVal, size_t nbytes, bool upper) {
-        
 
         char tmpStr[32];
         char* pTmpStr = tmpStr;
         size_t nHalfBytes = 2 * nbytes;
-        while (hexVal > 0 && (nHalfBytes--) > 0) {
+
+        if (hexVal == 0) {
+            *(pTmpStr++) = '0';
+        } else while (hexVal > 0 && (nHalfBytes--) > 0) {
             uint8_t digit = hexVal & 0xf;
             hexVal >>= 4;
 
@@ -247,10 +248,10 @@ int vsprintf(char* buffer, const char* format, va_list args) {
 
                 if (lengthSpecifier == __VPF_LENGTH_CHAR) {
                     mask = (1ULL << (sizeof(char) * 8)) - 1;
-                    val = va_arg(args, char) & mask;
+                    val = va_arg(args, int) & mask;
                 } else if (lengthSpecifier == __VPF_LENGTH_SHORT) {
                     mask = (1ULL << (sizeof(short) * 8)) - 1;
-                    val = va_arg(args, short) & mask;
+                    val = va_arg(args, int) & mask;
                 } else if (lengthSpecifier == __VPF_LENGTH_LONG) {
                     mask = (1ULL << (sizeof(long) * 8)) - 1;
                     val = va_arg(args, long) & mask;
@@ -295,7 +296,9 @@ int vsprintf(char* buffer, const char* format, va_list args) {
                 }
 
                 // 提取各位数字。
-                while (val > 0) {
+                if (val == 0) {
+                    *(pTmp++) = '0';
+                } else while (val > 0) {
                     *(pTmp++) = (val % base) + '0';
                     val /= base;
                 }
@@ -359,9 +362,9 @@ int vsprintf(char* buffer, const char* format, va_list args) {
             case 'x':
             case 'X': {
                 if (lengthSpecifier == __VPF_LENGTH_CHAR) {
-                    catHex(va_arg(args, char), sizeof(char), (specifier == 'X'));
+                    catHex(va_arg(args, int), sizeof(char), (specifier == 'X'));
                 } else if (lengthSpecifier == __VPF_LENGTH_SHORT) {
-                    catHex(va_arg(args, short), sizeof(short), (specifier == 'X'));
+                    catHex(va_arg(args, int), sizeof(short), (specifier == 'X'));
                 } else if (lengthSpecifier == __VPF_LENGTH_LONG) {
                     catHex(va_arg(args, long), sizeof(long), (specifier == 'X'));
                 } else if (lengthSpecifier == __VPF_LENGTH_LONG_LONG) {

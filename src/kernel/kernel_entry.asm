@@ -10,4 +10,6 @@ global kernel_entry
 kernel_entry:
     call call_kernel_modules_constructors
     call kernel_bridge
-    jmp $
+.beg_hlt:
+    hlt
+    jmp .beg_hlt
