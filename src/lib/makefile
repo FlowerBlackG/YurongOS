@@ -9,7 +9,7 @@ TARGET = ../../targets/objs/lib
 CPP_SOURCE = $(wildcard *.cpp)
 OBJS = $(patsubst %.cpp, $(TARGET)/%.o, $(CPP_SOURCE))
 
-$(OBJS): $(CPP_SOURCE)
+$(TARGET)/%.o: %.cpp
 	$(shell mkdir -p $(dir $@))
 	g++ $(CFLAGS) -I../include -c -o $@ $<
 

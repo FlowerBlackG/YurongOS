@@ -7,6 +7,8 @@
 #include <yros/IO.h>
 #include <yros/Kernel.h>
 #include <CRT.h>
+#include <stdarg.h>
+#include <stdio.h>
 
 /*
  * 手动列出所有需要构造的对象的静态对象。
@@ -39,12 +41,55 @@ extern "C" void call_kernel_modules_constructors() {
     }
 }
 
+
+void vaatest(int num, ...) {
+    va_list vl;
+    va_start(vl, num);
+
+    double x = va_arg(vl, double);
+    int x2 = va_arg(vl, int);
+    long long x3 = va_arg(vl, long long);
+    double x4 = va_arg(vl, double);
+    int x5=0;
+
+}
+
 /**
  * 内核进入桥。用于连接汇编与C++对象。
  * 加入 extern "C" 以防止 C++ 编译器将函数重命名，导致链接失败。
  */
 extern "C" void kernel_bridge() {
-    int a = 1;
-    CRT::getInstance().clear();
-    ++a;
+    char buf[4096];
+
+    if (sprintf(buf, "hello sprintf!\n") > 0) {
+        CRT::getInstance().write(buf);
+    } else {
+        CRT::getInstance().write("error!\n");
+    }
+
+    if (sprintf(buf, "1 + 2 = ? ans is: %d or %X.\n", 1+2, 1+2) > 0) {
+        CRT::getInstance().write(buf);
+    } else {
+        CRT::getInstance().write("error!\n");
+    }
+
+    if (sprintf(buf, "hello sprintf!\n") > 0) {
+        CRT::getInstance().write(buf);
+    } else {
+        CRT::getInstance().write("error!\n");
+    }
+
+    if (sprintf(buf, "hello sprintf!\n") > 0) {
+        CRT::getInstance().write(buf);
+    } else {
+        CRT::getInstance().write("error!\n");
+    }
+
+    if (sprintf(buf, "hello sprintf!\n") > 0) {
+        CRT::getInstance().write(buf);
+    } else {
+        CRT::getInstance().write("error!\n");
+    }
+
+    int x = 1;
 }

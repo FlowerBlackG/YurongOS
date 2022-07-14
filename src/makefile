@@ -22,7 +22,8 @@ KERNEL_OBJS = $(KERNEL_TARGET)/kernel_entry.o \
 			  $(KERNEL_TARGET)/io.o \
 			  $(KERNEL_TARGET)/kernel.o \
 			  $(TARGET)/crt/CRT.o \
-			  $(TARGET)/lib/string.o
+			  $(TARGET)/lib/string.o \
+			  $(TARGET)/lib/stdio.o
 
 # 内核进入点。
 KERNEL_ENTRY_POINT = 0x10000
@@ -40,6 +41,7 @@ yros_kernel: $(DIRS)
 #   第 [2, 5] 扇区（2KB）：kernel_loader
 .PHONY: deploy
 deploy: yros_kernel
+	$(shell mkdir -p $(YROSTARGET))
 	yes | bximage -q -hd=16 -func=create -sectsize=512 -imgmode=flat \
 		$(YROSTARGET)/disk.img
 	dd if=$(TARGET)/boot/boot.bin of=$(YROSTARGET)/disk.img \
@@ -63,6 +65,19 @@ bochs: deploy
 bochsg: deploy
 	cd $(YROSTARGET) && bochs-gdb -q -f ./bochsrc.gdb
 
+QEMU := qemu-system-i386 -m 32M -audiodev pa,id=hda -machine pcspk-audiodev=hda -rtc base=localtime
+QEMU_DISK := -boot c -drive file=$(YROSTARGET)/disk.img,if=ide,index=0,media=disk,format=raw
+
+# qemu。
+.PHONY: qemu
+qemu: deploy
+	$(QEMU) $(QEMU_DISK)
+
+.PHONY: qemug
+qemug: deploy
+	$(QEMU) $(QEMU_DISK) -s -S
+
+# vmware 硬盘。
 $(YROSTARGET)/disk.vmdk: $(YROSTARGET)/disk.img
 	qemu-img convert -pO vmdk $< $@
 
