@@ -2,6 +2,7 @@
 
 CC = g++
 ASM = nasm
+MAKE = make
 
 # CFLAGS 编译器参数。
 CFLAGS := -Wall -g -nostartfiles 

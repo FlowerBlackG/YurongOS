@@ -12,7 +12,7 @@ YROSTARGET = ../targets/YurongOS
 DIRS = boot kernel lib crt machine
 .PHONY: $(DIRS)
 $(DIRS):
-	make --directory=$@
+	$(MAKE) --directory=$@
 
 # 内核构建目标路径。
 KERNEL_TARGET = $(TARGET)/kernel
