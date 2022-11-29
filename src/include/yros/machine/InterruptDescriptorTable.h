@@ -43,12 +43,23 @@ struct GateDescriptor {
  */
 class InterruptDescriptorTable {
 public:
-    static void storeIDT(IdtRegister& idtr);
-    static void loadIDT(const IdtRegister& idtr);
+    static void storeIdt(IdtRegister& idtr);
+    static void loadIdt(const IdtRegister& idtr);
 
     GateDescriptor& getDescriptor(size_t idx) {
         return descriptors[idx];
     };
+    
+    static const int DESCRIPTOR_COUNT = 256;
+
 private:
-    GateDescriptor descriptors[256];
+    GateDescriptor descriptors[DESCRIPTOR_COUNT];
 };
+
+#if 1
+
+inline static void __sizetest() {
+    int x = sizeof(InterruptDescriptorTable);
+}
+
+#endif

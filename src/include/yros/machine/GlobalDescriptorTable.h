@@ -68,8 +68,8 @@ struct GdtRegister {
  */
 class GlobalDescriptorTable {
 public:
-    static void storeGDT(GdtRegister& gdtr);
-    static void loadGDT(const GdtRegister& gdtr);
+    static void storeGdt(GdtRegister& gdtr);
+    static void loadGdt(const GdtRegister& gdtr);
 private:
     SegmentDescriptor descriptors[16];
 };

@@ -10,6 +10,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <yros/machine/Machine.h>
+#include <yros/machine/X86Assembly.h>
 
 /*
  * 手动列出所有需要构造的对象的静态对象。
@@ -54,10 +55,19 @@ extern "C" void kernel_bridge() {
     Kernel::getInstance().main();
 }
 
+
 void Kernel::main() {
     Machine::getInstance().init();
 
-    __asm ("int $0x80");
 
-    while (1);
+    X86Assembly::sti();
+
+    while (1) {
+        char s[64];
+        sprintf(s, "main: tick\n");
+        CRT::getInstance().write(s);
+        int x = 100000000;
+        while (x--)
+            ;
+    }
 }

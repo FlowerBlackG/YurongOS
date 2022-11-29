@@ -7,14 +7,14 @@
 #include <yros/machine/GlobalDescriptorTable.h>
 
 
-void GlobalDescriptorTable::storeGDT(GdtRegister& gdtr) {
+void GlobalDescriptorTable::storeGdt(GdtRegister& gdtr) {
     __asm (
         "sgdt %0"
         : "=m" (gdtr)
     );
 }
 
-void GlobalDescriptorTable::loadGDT(const GdtRegister& gdtr) {
+void GlobalDescriptorTable::loadGdt(const GdtRegister& gdtr) {
     __asm (
         "lgdt %0"
         : /* null */

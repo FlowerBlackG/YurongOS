@@ -7,14 +7,14 @@
 
 
 
-void InterruptDescriptorTable::storeIDT(IdtRegister& idtr) {
+void InterruptDescriptorTable::storeIdt(IdtRegister& idtr) {
     __asm (
         "sidt %0"
         : "=m" (idtr)
     );
 }
 
-void InterruptDescriptorTable::loadIDT(const IdtRegister& idtr) {
+void InterruptDescriptorTable::loadIdt(const IdtRegister& idtr) {
     __asm (
         "lidt %0"
         : /* null */

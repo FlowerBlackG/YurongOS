@@ -26,7 +26,9 @@ KERNEL_OBJS = $(KERNEL_TARGET)/kernel_entry.o \
 			  $(TARGET)/lib/stdio.o \
 			  $(TARGET)/machine/Machine.o \
 			  $(TARGET)/machine/GlobalDescriptorTable.o \
-			  $(TARGET)/machine/InterruptDescriptorTable.o
+			  $(TARGET)/machine/InterruptDescriptorTable.o \
+			  $(TARGET)/machine/InterruptHandlers.o \
+			  $(TARGET)/machine/interrupt_bridge.o
 
 # 内核进入点。
 KERNEL_ENTRY_POINT = 0x10000
