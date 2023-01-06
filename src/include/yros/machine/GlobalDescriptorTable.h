@@ -31,11 +31,39 @@ struct SegmentDescriptor {
 
     // access byte
 
-    uint8_t type : 4;
+    /** 保留为 0，供 cpu 使用。 */
+    uint8_t access : 1;
+
+    /**
+     * readable bit or writable bit
+     * 
+     * 对于代码段，该变量规定指定内容是否可读。
+     * 代码段永远不可写。
+     * 
+     * 对于数据段，该变量规定内容是否可写。
+     * 数据段永远可读。
+     */
+    uint8_t rw : 1;
+
+    /**
+     * direction bit or conforming bit
+     * 
+     * 对于数据段，该值为 0 时表示“向上生长”，为 1 表示“向下生长”。
+     * 生长方向表示的是 limit 相对 base 的生长方向。
+     * 该“生长”并不会影响运行过程中 esp 的增长方向。
+     * （运行时，入栈时 esp 应该是向下增长的）
+     */
+    uint8_t dc : 1;
+
+    /**
+     * 0 表示描述符定义的是数据段。
+     * 1 表示描述符表示的段允许被执行。
+     */
+    uint8_t executable : 1;
 
     /** 0表示系统段，1表示代码/数据段。 */
     uint8_t descriptorType : 1;
-    uint8_t descriptorPrivilegeLevel : 2;
+    uint8_t privilegeLevel : 2;
     uint8_t present : 1;
 
     uint8_t limitHigh : 4;
@@ -71,5 +99,5 @@ public:
     static void storeGdt(GdtRegister& gdtr);
     static void loadGdt(const GdtRegister& gdtr);
 private:
-    SegmentDescriptor descriptors[16];
+    SegmentDescriptor descriptors[8];
 };

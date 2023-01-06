@@ -46,6 +46,9 @@ public:
     static void storeIdt(IdtRegister& idtr);
     static void loadIdt(const IdtRegister& idtr);
 
+    void setInterruptGate(int id, uint32_t handlerAddress);
+    void setTrapGate(int id, uint32_t handlerAddress);
+
     GateDescriptor& getDescriptor(size_t idx) {
         return descriptors[idx];
     };
@@ -56,7 +59,7 @@ private:
     GateDescriptor descriptors[DESCRIPTOR_COUNT];
 };
 
-#if 1
+#if 0
 
 inline static void __sizetest() {
     int x = sizeof(InterruptDescriptorTable);

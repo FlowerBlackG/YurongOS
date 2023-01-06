@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <yros/machine/Machine.h>
 #include <yros/machine/X86Assembly.h>
+#include <yros/machine/MemoryManager.h>
+
 
 /*
  * 手动列出所有需要构造的对象的静态对象。
@@ -20,7 +22,7 @@
 Kernel Kernel::instance;
 CRT CRT::instance;
 Machine Machine::instance;
-
+MemoryManager MemoryManager::instance;
 
 /**
  * 内核构造函数。不做任何事情。
@@ -32,7 +34,7 @@ Kernel::Kernel() {
 /**
  * 调用内核所有模块的对象的构造函数。
  */
-extern "C" void call_kernel_modules_constructors() {
+inline static void callKernelModuleConstructors() {
     extern void (* __CTOR_LIST__)();
     extern void (* __CTOR_END__)();
     
@@ -45,29 +47,61 @@ extern "C" void call_kernel_modules_constructors() {
 }
 
 
+inline static void callKernelModuleDestructors() {
+    extern void (* __DTOR_LIST__)();
+    extern void (* __DTOR_END__)();
 
+    void (**destructors)() = &__DTOR_LIST__;
+    
+    while (destructors != &__DTOR_END__) {
+        (*destructors)();
+        ++destructors;
+    }
+}
 
 /**
  * 内核进入桥。用于连接汇编与C++对象。
  * 加入 extern "C" 以防止 C++ 编译器将函数重命名，导致链接失败。
  */
 extern "C" void kernel_bridge() {
+    callKernelModuleConstructors();
     Kernel::getInstance().main();
+    callKernelModuleDestructors();
 }
+
+
 
 
 void Kernel::main() {
     Machine::getInstance().init();
 
+    x86asmSti();
+    x86asmCli();
 
-    X86Assembly::sti();
+
+    int x;
+    int y;
+
+    __asm (
+        "movl %%esp, %0"
+        : "=r" (x)
+    );
+
+    __asm ("pusha \n\t pusha");
+    
+    __asm (
+        "movl %%esp, %0"
+        : "=r" (y)
+    );
+
+
+    
+    char s[128];
+    sprintf(s, "x = %d, y = %d\n", x, y);
+    CRT::getInstance().write(s);
+
 
     while (1) {
-        char s[64];
-        sprintf(s, "main: tick\n");
-        CRT::getInstance().write(s);
-        int x = 100000000;
-        while (x--)
-            ;
+        
     }
 }

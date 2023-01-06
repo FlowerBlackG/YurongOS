@@ -24,7 +24,7 @@ interrupt_entry:
     push es
     push fs
     push gs
-    pusha ; push all general regs
+    pushad ; push all general regs, 共 8 个
 
     mov eax, [esp + 12 * 4] ; 找到中断向量。
 
@@ -36,7 +36,7 @@ interrupt_exit:
     
     add esp, 4
 
-    popa
+    popad
     pop gs
     pop fs
     pop es

@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <yros/machine/X86Assembly.h>
 #include <yros/machine/InterruptHandlers.h>
+#include <yros/machine/MemoryManager.h>
 
 Machine::Machine() {
 
@@ -21,8 +22,12 @@ void Machine::init() {
     this->initPic();
     this->initPit();
     this->initGdt();
-    this->initIdt();
 
+    // 需要在设置中断前初始化内存。
+    // 内存初始化过程中，会依赖 bios 提供的中断程序。
+    MemoryManager::getInstance().init();
+
+    this->initIdt();
 
 }
 
@@ -46,16 +51,18 @@ void test() {
 }
 
 int counter = 0;
-
+/* 该函数以后需要删除。 */
 void default_handler(int vector) {
 
     if (vector >= 0x20 && vector < 0x28) {
+    
         IO::outByte(Machine::PIC_MASTER_CTRL, Machine::PIC_EOI);
-    } 
-
-    if (vector >= 0x28 && vector < 0x30) {
+    
+    } else if (vector >= 0x28 && vector < 0x30) {
+    
         IO::outByte(Machine::PIC_MASTER_CTRL, Machine::PIC_EOI);
         IO::outByte(Machine::PIC_SLAVE_CTRL, Machine::PIC_EOI);
+    
     }
 
     counter++;
@@ -70,6 +77,7 @@ void Machine::initIdt() {
 
     size_t descriptorCount = sizeof(idt) / sizeof(GateDescriptor);
 
+// 该装载方式以后要改。
     for (size_t i = 0; i < 0x30; i++) {
         auto& gate = idt.getDescriptor(i);
         auto handlerBridge = interrupt_handler_bridges[i];
@@ -87,6 +95,9 @@ void Machine::initIdt() {
     for (size_t i = 20; i < 0x30; i++) {
         interruptHandlers[i] = (void*) default_handler;
     }
+
+
+    idt.setInterruptGate(0x20, (uint32_t)InterruptHandlers::clockInterruptEntrance);
 
     idtr.baseAddress = (uint32_t) &idt;
     idtr.limit = sizeof(idt) - 1;

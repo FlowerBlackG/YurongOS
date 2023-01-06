@@ -3,7 +3,7 @@
         {
             "name": "Linux",
             "includePath": [
-                "~/YurongOS/src/include"
+                "${workspaceFolder}/src/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/g++",

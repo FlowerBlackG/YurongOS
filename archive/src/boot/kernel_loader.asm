@@ -220,12 +220,6 @@ prepare_protect_mode:
 
     cli ; 关中断。
 
-    ; 打开 A20 线。
-    ; 若不打开，会触发回绕，即第20位（从0开始计数）及以上值被丢弃（取模）。
-    in al, 0x92
-    or al, 0b10
-    out 0x92, al
-
     ; 加载 gdt。
     lgdt [gdt_pointer]
 

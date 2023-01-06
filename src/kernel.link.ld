@@ -4,12 +4,12 @@ ENTRY(kernel_entry)
 
 SECTIONS
 {
-    .text 0x10000:
+    .text 0x30000:
     {
         *(.text)
         . = ALIGN(4096);
     }
-
+    
     .data :
     {
         /* 构造函数列表。
