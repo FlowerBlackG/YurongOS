@@ -6,8 +6,8 @@
 */
 
 #include <yros/IO.h>
-#include <yros/machine/Cmos.h>
-#include <yros/machine/X86Assembly.h>
+#include <machine/Cmos.h>
+#include <machine/X86Assembly.h>
 
 uint8_t Cmos::readByte(uint8_t offset) {
     uint8_t result;

@@ -3,10 +3,10 @@
 .DEFAULT_GOAL := all
 
 # 普通文件构建目标路径。
-TARGET = ../targets/objs
+TARGET = ../build/objs
 
 # 系统映像构建目标路径。
-YROSTARGET = ../targets/YurongOS
+YROSTARGET = ../build/YurongOS
 
 # 递归构建目录。
 DIRS = boot kernel lib crt machine
@@ -32,9 +32,6 @@ KERNEL_OBJS = $(KERNEL_TARGET)/kernel_entry.o \
 			  $(TARGET)/machine/Cmos.o \
 			  $(TARGET)/machine/MemoryManager.o 
 
-# 内核进入点。
-KERNEL_ENTRY_POINT = 0x10000
-
 # 构建内核。
 .PHONY: yros_kernel
 yros_kernel: $(DIRS)
@@ -44,9 +41,6 @@ yros_kernel: $(DIRS)
 	objdump -d $(KERNEL_TARGET)/kernel.exe > $(KERNEL_TARGET)/kernel.exe.dump.asm
 
 # 部署文件。
-# 硬盘映像格式（扇区从1开始编号）：
-#   第 [1, 1] 扇区（512B）：boot
-#   第 [2, 5] 扇区（2KB）：kernel_loader
 .PHONY: deploy
 deploy: yros_kernel
 	$(shell mkdir -p $(YROSTARGET))
@@ -54,8 +48,10 @@ deploy: yros_kernel
 		$(YROSTARGET)/disk.img
 	dd if=$(TARGET)/boot/boot.bin of=$(YROSTARGET)/disk.img \
 		bs=512 count=1 conv=notrunc
+	dd if=$(TARGET)/boot/kernel_loader.bin of=$(YROSTARGET)/disk.img \
+		bs=512 count=2 seek=2 conv=notrunc
 	dd if=$(TARGET)/kernel/kernel.bin of=$(YROSTARGET)/disk.img \
-		bs=512 count=798 seek=2 conv=notrunc
+		bs=512 count=1996 seek=4 conv=notrunc
 
 # 清空构建内容。
 .PHONY: clean
@@ -71,7 +67,7 @@ bochs: deploy
 bochsg: deploy
 	cd $(YROSTARGET) && bochs-gdb -q -f ./bochsrc.gdb
 
-QEMU := qemu-system-i386 -m 2560M -audiodev pa,id=hda -machine pcspk-audiodev=hda -rtc base=localtime
+QEMU := qemu-system-x86_64 -m 2560M -audiodev pa,id=hda -machine pcspk-audiodev=hda -rtc base=localtime
 QEMU_DISK := -boot c -drive file=$(YROSTARGET)/disk.img,if=ide,index=0,media=disk,format=raw
 
 # qemu。
@@ -94,3 +90,15 @@ vmdk: $(YROSTARGET)/disk.vmdk
 
 .PHONY: all
 all: deploy
+
+
+easyq: boot
+	$(shell mkdir -p $(YROSTARGET))
+	yes | bximage -q -hd=256 -func=create -sectsize=512 -imgmode=flat \
+		$(YROSTARGET)/disk.img
+	dd if=$(TARGET)/boot/boot.bin of=$(YROSTARGET)/disk.img \
+		bs=512 count=1 conv=notrunc
+	dd if=$(TARGET)/boot/kernel_loader.bin of=$(YROSTARGET)/disk.img \
+		bs=512 count=2 seek=2 conv=notrunc
+	$(QEMU) $(QEMU_DISK) -D ./qemu.log -monitor stdio -d cpu_reset
+	

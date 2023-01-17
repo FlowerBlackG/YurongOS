@@ -87,8 +87,8 @@ struct SegmentDescriptor {
 } __packed;
 
 struct GdtRegister {
-    uint16_t limit : 16;
-    uint32_t baseAddress : 32;
+    uint16_t limit;
+    uint64_t baseAddress;
 } __packed;
 
 /**
@@ -101,3 +101,9 @@ public:
 private:
     SegmentDescriptor descriptors[8];
 };
+
+#if 0
+static void __check_size() {
+    sizeof(GdtRegister);
+}
+#endif

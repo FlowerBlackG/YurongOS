@@ -1,7 +1,7 @@
 ; 内核进入点。
 ; 创建于 2022年7月1日
 
-[bits 32]
+[bits 64]
 
 extern kernel_bridge
 

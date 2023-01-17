@@ -6,12 +6,12 @@
 
 */
 
-#include <yros/machine/MemoryManager.h>
+#include <machine/MemoryManager.h>
 #include <CRT.h>
 #include <stdio.h>
 
 #include <sys/types.h>
-#include <yros/machine/Cmos.h>
+#include <machine/Cmos.h>
 
 void MemoryManager::init() {
     this->processArds();

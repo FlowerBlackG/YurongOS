@@ -13,7 +13,7 @@
 #define x86asmLeave() __asm ("leave")
 #define x86asmIret() __asm ("iret")
 
-#define x86asmDirectCall(function) __asm ("call *%%eax" :: "a" (function))
+#define x86asmDirectCall(function) __asm ("call *%%rax" :: "a" (function))
 
 /**
  * 软件现场。
@@ -49,8 +49,8 @@ struct ContextRegisters {
  * 保存后，栈顶值指向一个 CommonRegisters 保存结构。
  * 栈顶下的第一个元素指向保存的硬件现场。
  */
-#define x86asmSaveContext() \
-    __asm ( \
+#define x86asmSaveContext() 0
+ /*   __asm ( \
         "pushl %eax \n\t" \
         "pushl %ebp \n\t" \
         "pushl %edi \n\t" \
@@ -67,8 +67,9 @@ struct ContextRegisters {
         "lea 0x4(%esp), %edx \n\t" \
         "pushl %edx \n\t" \
     )
-
-#define x86asmRestoreContext() \
+*/
+#define x86asmRestoreContext() 0
+/*
     __asm ( \
         "addl $0x8, %esp \n\t" \
         "popl %gs \n\t" \
@@ -83,3 +84,4 @@ struct ContextRegisters {
         "popl %ebp \n\t" \
         "popl %eax \n\t" \
     )
+*/

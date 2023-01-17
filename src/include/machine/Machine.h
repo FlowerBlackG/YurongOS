@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <yros/machine/GlobalDescriptorTable.h>
-#include <yros/machine/InterruptDescriptorTable.h>
+#include <machine/GlobalDescriptorTable.h>
+#include <machine/InterruptDescriptorTable.h>
 
 class Machine {
 public:

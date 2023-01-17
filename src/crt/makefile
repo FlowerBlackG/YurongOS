@@ -2,7 +2,7 @@
 
 .DEFAULT_GOAL := all
 include ../makefile.inc
-TARGET = ../../targets/objs/crt
+TARGET = ../../build/objs/crt
 
 OBJS = $(TARGET)/CRT.o
 

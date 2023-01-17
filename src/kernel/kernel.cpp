@@ -9,9 +9,9 @@
 #include <CRT.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <yros/machine/Machine.h>
-#include <yros/machine/X86Assembly.h>
-#include <yros/machine/MemoryManager.h>
+#include <machine/Machine.h>
+#include <machine/X86Assembly.h>
+#include <machine/MemoryManager.h>
 
 
 /*
@@ -82,17 +82,7 @@ void Kernel::main() {
     int x;
     int y;
 
-    __asm (
-        "movl %%esp, %0"
-        : "=r" (x)
-    );
 
-    __asm ("pusha \n\t pusha");
-    
-    __asm (
-        "movl %%esp, %0"
-        : "=r" (y)
-    );
 
 
     

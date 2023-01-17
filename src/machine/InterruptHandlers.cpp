@@ -5,11 +5,11 @@
 
 */
 
-#include <yros/machine/InterruptHandlers.h>
+#include <machine/InterruptHandlers.h>
 
 #include <CRT.h>
 #include <yros/IO.h>
-#include <yros/machine/Machine.h>
+#include <machine/Machine.h>
 #include <string.h>
 #include <stdio.h>
 

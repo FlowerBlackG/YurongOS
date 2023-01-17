@@ -4,7 +4,7 @@
 
 include ../makefile.inc
 
-TARGET = ../../targets/objs/kernel
+TARGET = ../../build/objs/kernel
 
 # 目录下所有 .asm 文件。空格分隔。
 ASM_SOURCE = $(wildcard *.asm)
@@ -19,7 +19,7 @@ OBJS = $(CPP_OBJS) $(ASM_OBJS)
 
 $(TARGET)/%.o: %.asm
 	$(shell mkdir -p $(dir $@))
-	nasm -f elf32 $< -o $@
+	nasm -f elf64 $< -o $@
 
 $(TARGET)/%.o: %.cpp
 	$(shell mkdir -p $(dir $@))

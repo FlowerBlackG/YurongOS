@@ -3,15 +3,15 @@
  * 创建于 2022年7月15日。
  */
 
-#include <yros/machine/Machine.h>
+#include <machine/Machine.h>
 #include <stdint.h>
 #include <string.h>
 #include <CRT.h>
 #include <yros/IO.h>
 #include <stdio.h>
-#include <yros/machine/X86Assembly.h>
-#include <yros/machine/InterruptHandlers.h>
-#include <yros/machine/MemoryManager.h>
+#include <machine/X86Assembly.h>
+#include <machine/InterruptHandlers.h>
+#include <machine/MemoryManager.h>
 
 Machine::Machine() {
 

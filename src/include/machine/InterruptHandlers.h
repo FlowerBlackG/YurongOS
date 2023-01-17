@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <yros/machine/InterruptDescriptorTable.h>
-#include <yros/machine/X86Assembly.h>
+#include <machine/InterruptDescriptorTable.h>
+#include <machine/X86Assembly.h>
 #include <sys/types.h>
 
 extern void* interruptHandlers[InterruptDescriptorTable::DESCRIPTOR_COUNT];

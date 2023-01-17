@@ -2,7 +2,7 @@
 
 .DEFAULT_GOAL := all
 
-TARGET = ../../targets/objs/boot
+TARGET = ../../build/objs/boot
 
 SOURCE = $(wildcard *.asm) # 目录下所有 .asm 文件。空格分隔。
 

@@ -4,7 +4,7 @@
 
 include ../makefile.inc
 
-TARGET = ../../targets/objs/lib
+TARGET = ../../build/objs/lib
 
 CPP_SOURCE = $(wildcard *.cpp)
 OBJS = $(patsubst %.cpp, $(TARGET)/%.o, $(CPP_SOURCE))

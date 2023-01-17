@@ -117,25 +117,11 @@ org 0x7c00
 
 start:
 
-    ; 关中断。
-    cli
-    mov al, 0xff
-    out 0xa1, al
-    out 0x21, al
-
-
     ; 设置屏幕模式为文本模式，并清空屏幕。
     ; 中断指令号为 10H，当 AH=0H 时表示设置显示模式，模式具体为 AL。
     ; AL=3H 表示字符串包含
     mov ax, 3
     int 0x10
-
-    ; 初始化段寄存器。
-    xor ax, ax
-    mov ds, ax
-    mov es, ax
-    mov ss, ax
-    mov sp, 0x7000
 
     ; 打开 A20 线。
     ; 若不打开，会触发回绕，即第20位（从0开始计数）及以上值被丢弃（取模）。
@@ -143,89 +129,18 @@ start:
     or al, 2
     out 0x92, al
 
-    call check_long_mode_support ; 检查 cpu 是否支持 x86_64 模式。
-
     call detect_memory ; 执行内存检测。
-    mov si, msg_memory_detect_done
-    call print
 
-    ; 加载二级加载器。
-    mov bl, 2
-    mov ecx, 2
-    mov edi, 0x7000 ; 将二级启动器加载到内存 0x7000 的位置。
-    call read_disk
+    lgdt [gdt_pointer] ; 加载 gdt。
 
-    cmp dword [0x7000], 0x644f6f47 ; 检查魔数：GoOd
-    jnz error
-    mov si, msg_second_loader_copied
-    call print
+    cli ; 关中断。
+    
+    ; 启动保护模式。
+    mov eax, cr0
+    or eax, 1
+    mov cr0, eax
 
-    ; 加载内核代码。要求用户内存不小于 10MB。
-    ; 内核代码共 6MB，从 4MB 位置开始存放（0x 40 0000）
-    ; 每次读 128个扇区，即 64KB。总共读 96 轮。
-    mov ecx, 0
-    mov edx, 0x400000
-.loop_read_kernel:
-    push ecx
-    push edx
-
-    mov bl, 128
-    mov edi, edx
-    add ecx, 4
-    call read_disk
-
-    pop edx
-    pop ecx
-    inc ecx
-    add edx, (512 * 128)
-    cmp ecx, 8 ; 暂时只读取 512KB
-    jne .loop_read_kernel 
-
-    mov si, msg_kernel_copied
-    call print
-
-    ; 跳转到二级启动器。
-    jmp 0:0x7004 ; 前 4 字节是魔数。
-
-check_long_mode_support:
-     
-    ;    原理见：
-    ;        https://wiki.osdev.org/CPUID
-    ;        https://en.wikipedia.org/wiki/CPUID 
-
-    pushfd
-    pop eax
-    mov ecx, eax
-    xor eax, 0x200000
-    push eax
-    popfd
-
-    pushfd
-    pop eax
-    xor eax, ecx
-    shr eax, 21
-    and eax, 1
-    push ecx
-    popfd
-
-    test eax, eax
-    jz .no_long_mode
-
-    mov eax, 0x80000000
-    cpuid
-
-    cmp eax, 0x80000001
-    jb .no_long_mode
-
-    mov eax, 0x80000001
-    cpuid
-    test edx, 1 << 29
-    jz .no_long_mode
-
-    ret
-
-.no_long_mode:
-    jmp error
+    jmp dword code_selector:kernel_loader
 
 ; 检测内存。
 ; 结果存放位置：
@@ -257,8 +172,10 @@ detect_memory:
     jnz .detect_one
 
     ; 检测完毕。
-
+    mov si, msg_detect_memory_success
+    call print
     ret
+
 
 ; 输出字符串。
 print:
@@ -276,6 +193,13 @@ print:
     ret
 
 
+msg_detecting_memory:
+    db "info: detecing memory...", 0x0d, 0x0a, 0
+
+msg_detect_memory_success:
+    db "info: memory detection done.", 0x0d, 0x0a, 0
+
+
 ; 加载失败时，显示错误信息并停机。
 error:
     mov si, .msg
@@ -286,17 +210,37 @@ error:
     jmp .begin_hlt
 
 .msg:
-    db "error: failed to boot kernel.", 0x0d, 0x0a, 0
+    db "error: exception occurred. failed to load kernel.", 0x0d, 0x0a, 0
 
 
-msg_memory_detect_done:
-    db "info: memory detection done.", 0x0d, 0x0a, 0
-    
-msg_second_loader_copied:
-    db "info: secondary loader copied.", 0x0d, 0x0a, 0
+[bits 32] ; 提醒编译器后面是处于 32 位模式的代码。
 
-msg_kernel_copied:
-    db "info: kernel copied.", 0x0d, 0x0a, 0
+kernel_loader:
+
+    mov ax, data_selector
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax ; 初始化段寄存器。
+
+        mov si, msg_detect_memory_success
+    call print
+
+    mov esp, 0x2f000 ; 修改栈顶。值随便，但需要是可用的。
+
+    mov si, msg_detect_memory_success
+    call print
+
+    mov edi, 0x30000
+    mov ecx, 2
+    mov bl, kernel_size
+    call read_disk ; 读入内核。
+
+    ; 进入内核代码。
+    ; 0x30000 对应的代码为 kernel_entry.asm
+    jmp code_selector:0x30000 
+
 
 ; 读硬盘。
 ; 参数：edi 读取的目标内存。
@@ -376,10 +320,48 @@ read_disk:
         ret
 
 
-db "b-end" ; 标记结尾，便于在 16 进制查看器内观察。
+; 内存开始的位置（基地址）。
+memory_base equ 0
+; 内存界限（4G / 4K - 1）。
+memory_limit equ ((1024 * 1024 * 1024 * 4) / (1024 * 4) - 1)
+
+; 选择子。
+code_selector equ (1 << 3)
+data_selector equ (2 << 3)
+
+gdt_pointer:
+    dw (gdt_end - gdt_base) - 1 ; limit
+    dd gdt_base ; base
+gdt_base:
+    dd 0, 0 ; dd = double words
+; 代码段。
+gdt_code:
+    dw memory_limit & 0xffff ; limit low
+    dw memory_base & 0xffff ; base low (0-15)
+    db (memory_base >> 16) & 0xff ; base low (16-23)
+
+    ; 存在，dlp 0，代码或数据，代码，非依从，可读，没被访问过。
+    db 0b_1_00_1_1_0_1_0 
+    ; 4K，32位，不是64位，available，limit high
+    db 0b_1_1_0_0_0000 | (memory_limit >> 16) & 0xff
+    db (memory_base >> 24) & 0xff ; base high
+gdt_data:
+    dw memory_limit & 0xffff ; limit low
+    dw memory_base & 0xffff ; base low (0-15)
+    db (memory_base >> 16) & 0xff ; base low (16-23)
+ 
+    ; 存在，dlp 0，代码或数据，数据，向上扩展，可写，没被访问过。
+    db 0b_1_00_1_0_0_1_0 
+    ; 4K，32位，不是64位，available，limit high
+    db 0b_1_1_0_0_0000 | (memory_limit >> 16) & 0xff
+    db (memory_base >> 24) & 0xff ; base high
+gdt_end:
+
+; 规定内核大小。单位：扇区。
+kernel_size equ 798
+
 
 times 510 - ($ - $$) db 0 ; 填充
 
 ; 设置主引导扇区的最后2字节魔数内容。
 db 0x55, 0xaa ; bios 要求的。否则会认为硬盘有问题。
-

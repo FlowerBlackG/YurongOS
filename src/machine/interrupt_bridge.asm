@@ -2,7 +2,7 @@
 
 ; created on 2022.11.29
 
-[bits 32]
+[bits 64]
 
 extern interruptHandlers
 

@@ -4,7 +4,6 @@
  */
 
 #pragma once
-
 #include <sys/types.h>
 
 class CRT {
