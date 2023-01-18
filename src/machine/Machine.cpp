@@ -36,7 +36,7 @@ void Machine::initGdt() {
     GlobalDescriptorTable::storeGdt(this->gdtr);
 
     memcpy(&gdt, (void*) gdtr.baseAddress, gdtr.limit + 1);
-    this->gdtr.baseAddress = (uint32_t) &this->gdt;
+    this->gdtr.baseAddress = (uint64_t) &this->gdt;
     this->gdtr.limit = sizeof(gdt) - 1;
 
     GlobalDescriptorTable::loadGdt(this->gdtr);
@@ -75,31 +75,32 @@ void default_handler(int vector) {
 
 void Machine::initIdt() {
 
-    size_t descriptorCount = sizeof(idt) / sizeof(GateDescriptor);
 
-// 该装载方式以后要改。
-    for (size_t i = 0; i < 0x30; i++) {
-        auto& gate = idt.getDescriptor(i);
-        auto handlerBridge = interrupt_handler_bridges[i];
+    idt.setTrapGate(0, (long) InterruptHandlers::divideErrorExceptionEntrance);
+    idt.setTrapGate(1, (long) InterruptHandlers::debugExceptionEntrance);
+    idt.setTrapGate(2, (long) InterruptHandlers::nonMaskableInterruptExceptionEntrance);
+    idt.setTrapGate(3, (long) InterruptHandlers::breakpointExceptionEntrance);
+    idt.setTrapGate(4, (long) InterruptHandlers::overflowExceptionEntrance);
+    idt.setTrapGate(5, (long) InterruptHandlers::boundaryRangeExceededExceptionEntrance);
+    idt.setTrapGate(6, (long) InterruptHandlers::undefinedOpcodeExceptionEntrance);
+    idt.setTrapGate(7, (long) InterruptHandlers::deviceNotAvailableExceptionEntrance);
+    idt.setTrapGate(8, (long) InterruptHandlers::doubleFaultExceptionEntrance);
+    idt.setTrapGate(10, (long) InterruptHandlers::invalidTssExceptionEntrance);
+    idt.setTrapGate(11, (long) InterruptHandlers::notPresentExceptionEntrance);
+    idt.setTrapGate(12, (long) InterruptHandlers::stackSegmentExceptionEntrance);
+    idt.setTrapGate(13, (long) InterruptHandlers::generalProtectionExceptionEntrance);
+    idt.setTrapGate(14, (long) InterruptHandlers::pageFaultExceptionEntrance);
+    idt.setTrapGate(16, (long) InterruptHandlers::mathFaultExceptionEntrance);
+    idt.setTrapGate(17, (long) InterruptHandlers::alignmentCheckingExceptionEntrance);
+    idt.setTrapGate(18, (long) InterruptHandlers::machineCheckExceptionEntrance);
+    idt.setTrapGate(19, (long) InterruptHandlers::extendedMathFaultExceptionEntrance);
+    idt.setTrapGate(20, (long) InterruptHandlers::virtualizationExceptionExceptionEntrance);
+    idt.setTrapGate(21, (long) InterruptHandlers::controlProtectionExceptionExceptionEntrance);
 
-        gate.offsetLow = (uint32_t) handlerBridge & 0xffff;
-        gate.offsetHigh = ((uint32_t) handlerBridge >> 16) & 0xffff;
-        gate.segmentSelector = 1 << 3;
-        gate.reserved = 0;
-        gate.zero = 0;
-        gate.gateType = 0b1110; 
-        gate.descriptorPrivilegeLevel = 0;
-        gate.present = 1;
-    }
 
-    for (size_t i = 20; i < 0x30; i++) {
-        interruptHandlers[i] = (void*) default_handler;
-    }
+    idt.setInterruptGate(0x20, (uint64_t)InterruptHandlers::clockInterruptEntrance);
 
-
-    idt.setInterruptGate(0x20, (uint32_t)InterruptHandlers::clockInterruptEntrance);
-
-    idtr.baseAddress = (uint32_t) &idt;
+    idtr.baseAddress = (uint64_t) &idt;
     idtr.limit = sizeof(idt) - 1;
 
     InterruptDescriptorTable::loadIdt(idtr);

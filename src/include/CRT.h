@@ -11,6 +11,9 @@ protected:
     CRT();
 
 public:
+
+    void init();
+
     /**
      * 清空屏幕。
      */
@@ -41,7 +44,7 @@ protected:
     /**
      * CRT 显存位置开始地址。
      */
-    static const int MEMORY_BASE = 0xb8000;
+    static const long MEMORY_BASE = 0xb8000;
 
     /**
      * CRT 显存大小。32KB。

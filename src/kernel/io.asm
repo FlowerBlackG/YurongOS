@@ -12,7 +12,7 @@ __io_in_byte:
     mov rbp, rsp
 
     xor rax, rax
-    mov edx, [ebp + 8] ; 端口号只能是立即数或放在 dx 寄存器。
+    mov rdx, rdi ; 端口号只能是立即数或放在 dx 寄存器。
 
     in al, dx ; 将端口号 dx 的 8 bit 输入到 al。接收到的数据只能存入 ax。
 
@@ -27,9 +27,9 @@ __io_in_word:
     mov rbp, rsp
 
     xor rax, rax
-    mov edx, [ebp + 8] ; 端口号只能是立即数或放在 dx 寄存器。
+    mov rdx, rdi ; 端口号只能是立即数或放在 dx 寄存器。
 
-    in ax, dx ; 将端口号 dx 的 8 bit 输入到 ax。接收到的数据只能存入 ax。
+    in ax, dx ; 将端口号 dx 的 16 bit 输入到 ax。接收到的数据只能存入 ax。
 
     leave ; 恢复栈帧。
     ret
@@ -39,8 +39,8 @@ __io_out_byte:
     push rbp
     mov rbp, rsp
 
-    mov edx, [ebp + 8] ; port
-    mov eax, [ebp + 12] ; data
+    mov rdx, rdi ; port
+    mov rax, rsi ; data
     out dx, al
 
     leave
@@ -51,8 +51,8 @@ __io_out_word:
     push rbp
     mov rbp, rsp
 
-    mov edx, [ebp + 8] ; port
-    mov eax, [ebp + 12] ; data。发送的数据必须用ax寄存器存放。
+    mov rdx, rdi ; port
+    mov rax, rsi ; data
     out dx, ax
 
     leave

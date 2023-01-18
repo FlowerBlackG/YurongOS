@@ -13,6 +13,12 @@
 struct Ards {
     uint64_t base;
     uint64_t size;
+
+    /**
+     * 
+     * 1：可用。
+     * 其他：不可用。
+     */
     uint32_t type;
 } __packed;
 

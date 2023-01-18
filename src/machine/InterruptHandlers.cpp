@@ -18,7 +18,9 @@ void* interruptHandlers[InterruptDescriptorTable::DESCRIPTOR_COUNT];
 namespace InterruptHandlers {
 
     void clockInterruptEntrance() {
+        __asm ("pushq $0");
         x86asmSaveContext(); 
+
         
         x86asmDirectCall(clockInterruptHandler); 
         x86asmRestoreContext();
@@ -30,18 +32,18 @@ namespace InterruptHandlers {
     }
 
     void clockInterruptHandler(
-        CommonRegisters* commonRegs, 
-        ContextRegisters* contextRegs
+        SoftwareContextRegisters* softwareRegs, 
+        HardwareContextRegisters* hardwareRegs
     ) {
         
         char s[128];
-        sprintf(s, "clock interrupt: eax = %d\n", commonRegs->eax);
+        sprintf(s, "clock interrupt: rax = %d\n", softwareRegs->rax);
         CRT::getInstance().write(s);
     }
 
     void defaultHandler(
-        CommonRegisters* commonRegs, 
-        ContextRegisters* contextRegs
+        SoftwareContextRegisters* softwareRegs, 
+        HardwareContextRegisters* hardwareRegs
     ) {
         CRT::getInstance().write("bad exception handler!\n");
         while (1)
@@ -50,11 +52,13 @@ namespace InterruptHandlers {
 
 #define IMPLEMENT_EXCEPTION_ENTRANCE(entranceFunctionName, handlerName) \
     void entranceFunctionName() { \
+        __asm ("pushq $0"); /* 压入假的 errorcode。 */ \
         x86asmSaveContext(); \
         \
         x86asmDirectCall(handlerName); \
         x86asmRestoreContext(); \
         x86asmLeave(); \
+        __asm ("addq $8, %rsp"); \
         x86asmIret(); \
     }
 
@@ -65,12 +69,110 @@ namespace InterruptHandlers {
         x86asmDirectCall(handlerName); \
         x86asmRestoreContext(); \
         x86asmLeave(); \
-        __asm ("addl $4, %esp"); \
+        __asm ("addq $8, %rsp"); \
         x86asmIret(); \
     }
 
+#define IMPLEMENT_EXCEPTION_HANDLER(handlerName, errorMsg, signalValue) \
+    void handlerName( \
+        SoftwareContextRegisters* softwareRegs, \
+        HardwareContextRegisters* hardwareRegs \
+    ) { \
+        CRT::getInstance().write(errorMsg); \
+        CRT::getInstance().write("\n"); \
+        x86asmCli(); \
+        while (1) \
+            ; \
+    }
+
+#define IMPLEMENT_EXCEPTION_WITH_ERRCODE_HANDLER(handlerName, errorMsg, signalValue) \
+    void handlerName( \
+        SoftwareContextRegisters* softwareRegs, \
+        HardwareContextRegisters* hardwareRegs \
+    ) { \
+        CRT::getInstance().write(errorMsg); \
+        CRT::getInstance().write("\n"); \
+        x86asmCli(); \
+        while (1) \
+            ; \
+    }
+
+    IMPLEMENT_EXCEPTION_ENTRANCE(divideErrorExceptionEntrance, divideErrorExceptionHandler)
+    IMPLEMENT_EXCEPTION_HANDLER(divideErrorExceptionHandler, "divideError", 0)
+    IMPLEMENT_EXCEPTION_ENTRANCE(debugExceptionEntrance, debugExceptionHandler)
+    IMPLEMENT_EXCEPTION_HANDLER(debugExceptionHandler, "debug", 0)
+    IMPLEMENT_EXCEPTION_ENTRANCE(nonMaskableInterruptExceptionEntrance, nonMaskableInterruptExceptionHandler)
+    IMPLEMENT_EXCEPTION_HANDLER(nonMaskableInterruptExceptionHandler, "nonMaskableInterrupt", 0)
+    IMPLEMENT_EXCEPTION_ENTRANCE(breakpointExceptionEntrance, breakpointExceptionHandler)
+    IMPLEMENT_EXCEPTION_HANDLER(breakpointExceptionHandler, "breakpoint", 0)
+    IMPLEMENT_EXCEPTION_ENTRANCE(overflowExceptionEntrance, overflowExceptionHandler)
+    IMPLEMENT_EXCEPTION_HANDLER(overflowExceptionHandler, "overflow", 0)
+    IMPLEMENT_EXCEPTION_ENTRANCE(boundaryRangeExceededExceptionEntrance, boundaryRangeExceededExceptionHandler)
+    IMPLEMENT_EXCEPTION_HANDLER(boundaryRangeExceededExceptionHandler, "boundaryRangeExceeded", 0)
+    IMPLEMENT_EXCEPTION_ENTRANCE(undefinedOpcodeExceptionEntrance, undefinedOpcodeExceptionHandler)
+    IMPLEMENT_EXCEPTION_HANDLER(undefinedOpcodeExceptionHandler, "undefinedOpcode", 0)
+    IMPLEMENT_EXCEPTION_ENTRANCE(deviceNotAvailableExceptionEntrance, deviceNotAvailableExceptionHandler)
+    IMPLEMENT_EXCEPTION_HANDLER(deviceNotAvailableExceptionHandler, "deviceNotAvailable", 0)
+    IMPLEMENT_EXCEPTION_WITH_ERRCODE_ENTRANCE(doubleFaultExceptionEntrance, doubleFaultExceptionHandler)
+    IMPLEMENT_EXCEPTION_WITH_ERRCODE_HANDLER(doubleFaultExceptionHandler, "doubleFault", 0)
+    IMPLEMENT_EXCEPTION_WITH_ERRCODE_ENTRANCE(invalidTssExceptionEntrance, invalidTssExceptionHandler)
+    IMPLEMENT_EXCEPTION_WITH_ERRCODE_HANDLER(invalidTssExceptionHandler, "invalidTss", 0)
+    IMPLEMENT_EXCEPTION_WITH_ERRCODE_ENTRANCE(notPresentExceptionEntrance, notPresentExceptionHandler)
+    IMPLEMENT_EXCEPTION_WITH_ERRCODE_HANDLER(notPresentExceptionHandler, "notPresent", 0)
+    IMPLEMENT_EXCEPTION_WITH_ERRCODE_ENTRANCE(stackSegmentExceptionEntrance, stackSegmentExceptionHandler)
+    IMPLEMENT_EXCEPTION_WITH_ERRCODE_HANDLER(stackSegmentExceptionHandler, "stackSegment", 0)
+    IMPLEMENT_EXCEPTION_WITH_ERRCODE_ENTRANCE(generalProtectionExceptionEntrance, generalProtectionExceptionHandler)
+    IMPLEMENT_EXCEPTION_WITH_ERRCODE_HANDLER(generalProtectionExceptionHandler, "generalProtection", 0)
+    IMPLEMENT_EXCEPTION_WITH_ERRCODE_ENTRANCE(pageFaultExceptionEntrance, pageFaultExceptionHandler)
+    IMPLEMENT_EXCEPTION_WITH_ERRCODE_HANDLER(pageFaultExceptionHandler, "pageFault", 0)
+    IMPLEMENT_EXCEPTION_ENTRANCE(mathFaultExceptionEntrance, mathFaultExceptionHandler)
+    IMPLEMENT_EXCEPTION_HANDLER(mathFaultExceptionHandler, "mathFault", 0)
+    IMPLEMENT_EXCEPTION_WITH_ERRCODE_ENTRANCE(alignmentCheckingExceptionEntrance, alignmentCheckingExceptionHandler)
+    IMPLEMENT_EXCEPTION_WITH_ERRCODE_HANDLER(alignmentCheckingExceptionHandler, "alignmentChecking", 0)
+    IMPLEMENT_EXCEPTION_ENTRANCE(machineCheckExceptionEntrance, machineCheckExceptionHandler)
+    IMPLEMENT_EXCEPTION_HANDLER(machineCheckExceptionHandler, "machineCheck", 0)
+    IMPLEMENT_EXCEPTION_ENTRANCE(extendedMathFaultExceptionEntrance, extendedMathFaultExceptionHandler)
+    IMPLEMENT_EXCEPTION_HANDLER(extendedMathFaultExceptionHandler, "extendedMathFault", 0)
+    IMPLEMENT_EXCEPTION_ENTRANCE(virtualizationExceptionExceptionEntrance, virtualizationExceptionExceptionHandler)
+    IMPLEMENT_EXCEPTION_HANDLER(virtualizationExceptionExceptionHandler, "virtualizationException", 0)
+    IMPLEMENT_EXCEPTION_WITH_ERRCODE_ENTRANCE(controlProtectionExceptionExceptionEntrance, controlProtectionExceptionExceptionHandler)
+    IMPLEMENT_EXCEPTION_WITH_ERRCODE_HANDLER(controlProtectionExceptionExceptionHandler, "controlProtectionException", 0)
+
+    /*
+    
+        x86 异常列表：
+
+        divide error
+        debug
+        nonMaskable interrupt
+        breakpoint
+        overflow
+        boundary range exceeded
+        undefined opcode
+        device not available
+        double fault
+        --
+        invalid tss
+        not present
+        stack segment
+        general protection
+        page fault
+        --
+        math fault
+        alignment checking
+        machine check
+        extended math fault
+        virtualization exception
+        control protection exception
+
+    
+    */
+
+#undef IMPLEMENT_EXCEPTION_HANDLER
+#undef IMPLEMENT_EXCEPTION_WITH_ERRCODE_HANDLER
 #undef IMPLEMENT_EXCEPTION_ENTRANCE
 #undef IMPLEMENT_EXCEPTION_WITH_ERRCODE_ENTRANCE
 
 }
+
 

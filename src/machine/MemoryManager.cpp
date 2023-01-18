@@ -19,7 +19,7 @@ void MemoryManager::init() {
 
 void MemoryManager::processArds() {
 
-    char s[128];
+    char s[512];
 
     uint32_t ardsCount = getArdsCount();
     Ards* ardsBuffer = getArdsBuffer();
@@ -27,14 +27,15 @@ void MemoryManager::processArds() {
     sprintf(s, "ards count: %d\n", ardsCount);
     CRT::getInstance().write(s);
 
-    for (int i = 0; i < ardsCount; i++) {
+    for (uint32_t i = 0; i < ardsCount; i++) {
         auto&& ards = ardsBuffer[i];
 
         sprintf(s, 
-            "(base, size, type): (0x%x, 0x%x, %d)\n", 
-            (uint32_t) ards.base, 
-            (uint32_t) ards.size, 
-            ards.type
+            "(base, size, type): (0x%llx, 0x%llx, %d) %s\n", 
+            ards.base, 
+            ards.size, 
+            ards.type,
+            (ards.type == 1 ? "ok" : "denied")
         );
 
         CRT::getInstance().write(s);

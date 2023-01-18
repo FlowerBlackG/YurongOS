@@ -6,7 +6,7 @@ MAKE = make
 
 # CFLAGS 编译器参数。
 CFLAGS := -Wall -g -nostartfiles 
-# CFLAGS += -m32 # 32位程序。
+
 CFLAGS += -fno-builtin # 不需要 gcc 的内置函数。
 CFLAGS += -nostdinc # 不需要 c 标准库。
 CFLAGS += -fno-pic # 不需要位置无关的代码（position independent code）。
@@ -19,6 +19,8 @@ CFLAGS += -mno-red-zone
 CFLAGS += -mno-mmx  
 CFLAGS += -mno-sse  
 CFLAGS += -mno-sse2 
+
+CFLAGS += -mcmodel=large
 
 CFLAGS := $(strip $(CFLAGS))
 

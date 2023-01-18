@@ -10,6 +10,9 @@
 
 CRT::CRT() {
 
+}
+
+void CRT::init() {
     IO::outByte(CRT::ADDR_REG, CRT::Reg::SCREEN_POS_HIGH);
     this->currentScreenPos = IO::inByte(CRT::DATA_REG) << 8;
     IO::outByte(CRT::ADDR_REG, CRT::Reg::SCREEN_POS_LOW);
@@ -186,7 +189,7 @@ size_t CRT::write(const char* str, size_t len) {
     while ((len < 0 || p - str < len) && *p != AsciiChar::NUL) {
 
         // 对于 \n，如果前一个不是 \r，则补充输出 \r。
-        if (*p == AsciiChar::LF && p > str && *(p - 1) != AsciiChar::CR) {
+        if (*p == AsciiChar::LF && ((p > str && *(p - 1) != AsciiChar::CR) || p == str)) {
             CRT::putchar(AsciiChar::CR);
         }
 

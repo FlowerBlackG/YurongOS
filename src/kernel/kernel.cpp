@@ -69,14 +69,20 @@ extern "C" void kernel_bridge() {
     callKernelModuleDestructors();
 }
 
-
-
-
 void Kernel::main() {
+
+    CRT::getInstance().init();
+    CRT::getInstance().write("welcome to yros!\n");   
+
     Machine::getInstance().init();
 
     x86asmSti();
-    x86asmCli();
+    while (1) {
+        CRT::getInstance().write("zh yyds!\n");
+        for (int i = 0; i < 5000000; i++) {
+
+        }
+    }
 
 
     int x;

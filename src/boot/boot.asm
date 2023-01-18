@@ -157,7 +157,7 @@ start:
 
     cmp dword [0x7000], 0x644f6f47 ; 检查魔数：GoOd
     jnz error
-    mov si, msg_second_loader_copied
+    mov si, msg_second_loader_read
     call print
 
     ; 加载内核代码。要求用户内存不小于 10MB。
@@ -165,6 +165,10 @@ start:
     ; 每次读 128个扇区，即 64KB。总共读 96 轮。
     mov ecx, 0
     mov edx, 0x400000
+
+    mov si, msg_reading_kernel
+    call print
+
 .loop_read_kernel:
     push ecx
     push edx
@@ -178,10 +182,10 @@ start:
     pop ecx
     inc ecx
     add edx, (512 * 128)
-    cmp ecx, 8 ; 暂时只读取 512KB
+    cmp ecx, 96
     jne .loop_read_kernel 
 
-    mov si, msg_kernel_copied
+    mov si, msg_kernel_read
     call print
 
     ; 跳转到二级启动器。
@@ -226,6 +230,44 @@ check_long_mode_support:
 
 .no_long_mode:
     jmp error
+
+
+
+
+;
+; 内存检测过程：
+;
+; BIOS 系统调用 15h 的 e820h 号子程序可以提供一定的信息（ARDS，内存范围描述结构）：
+; 字节偏移  含义
+; 0        基地址的低 32 位
+; 4        基地址的高 32 位
+; 8        内存长度的低 32 位（字节为单位）
+; 12       内存长度的高 32 位
+; 16       本段内存类型
+; 
+; 内存类型
+; 1: 可用
+; 其他: 不可用
+;
+; 调用输入：
+;   eax 传入子程序号（e820h），ebx 传入0.
+;   ebx 传入要读取的 ARDS 编号。第1次为0，之后该值会被设置。直接重复传入直到被设为0.
+;   es:di 指向当前读到的 ARDS 缓冲区。
+;   ecx: ARDS 结构字节大小。设为 20 字节。
+;   edx: 固定为 0x534d4150 (SMAP 的 ASCII 码，是个校验签名)。
+;
+; 返回信息：
+;   cf: 0 -> 正常，1 -> 出错
+;   eax: 0x534d4150（SMAP 的 ASCII 码）
+;   es:di, ecx: 与传入时一致。
+;   ebx: 后续 ARDS 值。0表示检测结束。
+;
+; 参考文献：
+;   踌躇月光.操作系统实现 - 008 内存检测.哔哩哔哩, 2022
+;
+
+
+
 
 ; 检测内存。
 ; 结果存放位置：
@@ -290,13 +332,16 @@ error:
 
 
 msg_memory_detect_done:
-    db "info: memory detection done.", 0x0d, 0x0a, 0
+    db "i: mem detect done.", 0x0d, 0x0a, 0
     
-msg_second_loader_copied:
-    db "info: secondary loader copied.", 0x0d, 0x0a, 0
+msg_second_loader_read:
+    db "i: 2nd loader read.", 0x0d, 0x0a, 0
 
-msg_kernel_copied:
-    db "info: kernel copied.", 0x0d, 0x0a, 0
+msg_reading_kernel:
+    db "i: reading kernel...", 0x0d, 0x0a, 0
+
+msg_kernel_read:
+    db "i: kernel read.", 0x0d, 0x0a, 0
 
 ; 读硬盘。
 ; 参数：edi 读取的目标内存。
@@ -374,9 +419,6 @@ read_disk:
         loop .read_word
 
         ret
-
-
-db "b-end" ; 标记结尾，便于在 16 进制查看器内观察。
 
 times 510 - ($ - $$) db 0 ; 填充
 

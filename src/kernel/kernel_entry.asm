@@ -7,7 +7,10 @@ extern kernel_bridge
 
 global kernel_entry
 kernel_entry:
-    call kernel_bridge
+
+    mov qword rax, kernel_bridge
+    call rax
+
 .beg_hlt:
     hlt
     jmp .beg_hlt

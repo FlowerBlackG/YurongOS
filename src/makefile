@@ -28,7 +28,6 @@ KERNEL_OBJS = $(KERNEL_TARGET)/kernel_entry.o \
 			  $(TARGET)/machine/GlobalDescriptorTable.o \
 			  $(TARGET)/machine/InterruptDescriptorTable.o \
 			  $(TARGET)/machine/InterruptHandlers.o \
-			  $(TARGET)/machine/interrupt_bridge.o \
 			  $(TARGET)/machine/Cmos.o \
 			  $(TARGET)/machine/MemoryManager.o 
 
@@ -36,7 +35,7 @@ KERNEL_OBJS = $(KERNEL_TARGET)/kernel_entry.o \
 .PHONY: yros_kernel
 yros_kernel: $(DIRS)
 	$(shell mkdir -p $(dir $@))
-	ld -m elf_i386 -static $(KERNEL_OBJS) -o $(KERNEL_TARGET)/kernel.exe -T kernel.link.ld 
+	ld -m elf_x86_64 -static $(KERNEL_OBJS) -o $(KERNEL_TARGET)/kernel.exe -T kernel.link.ld 
 	objcopy -O binary $(KERNEL_TARGET)/kernel.exe $(KERNEL_TARGET)/kernel.bin
 	objdump -d $(KERNEL_TARGET)/kernel.exe > $(KERNEL_TARGET)/kernel.exe.dump.asm
 
@@ -67,7 +66,7 @@ bochs: deploy
 bochsg: deploy
 	cd $(YROSTARGET) && bochs-gdb -q -f ./bochsrc.gdb
 
-QEMU := qemu-system-x86_64 -m 2560M -audiodev pa,id=hda -machine pcspk-audiodev=hda -rtc base=localtime
+QEMU := qemu-system-x86_64 -m 8G -audiodev pa,id=hda -machine pcspk-audiodev=hda -rtc base=localtime -d cpu_reset -D ./qemu.log
 QEMU_DISK := -boot c -drive file=$(YROSTARGET)/disk.img,if=ide,index=0,media=disk,format=raw
 
 # qemu。

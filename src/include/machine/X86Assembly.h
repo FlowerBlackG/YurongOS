@@ -11,37 +11,52 @@
 #define x86asmSti() __asm ("sti")
 #define x86asmCli() __asm ("cli")
 #define x86asmLeave() __asm ("leave")
-#define x86asmIret() __asm ("iret")
+#define x86asmIret() __asm ("iretq")
 
 #define x86asmDirectCall(function) __asm ("call *%%rax" :: "a" (function))
 
 /**
  * 软件现场。
  */
-struct CommonRegisters {
-    uint32_t gs;
-    uint32_t fs;
-    uint32_t ds;
-    uint32_t es;
-    uint32_t ebx;
-    uint32_t ecx;
-    uint32_t edx;
-    uint32_t esi;
-    uint32_t edi;
-    uint32_t ebp;
-    uint32_t eax;
+struct SoftwareContextRegisters {
+    uint64_t gs;
+    uint64_t fs;
+    uint64_t ds;
+    uint64_t es;
+    uint64_t rbx;
+    uint64_t rcx;
+    uint64_t rdx;
+    uint64_t rsi;
+    uint64_t rdi;
+    uint64_t rbp;
+    uint64_t rax;
+    uint64_t r8;
+    uint64_t r9;
+    uint64_t r10;
+    uint64_t r11;
+    uint64_t r12;
+    uint64_t r13;
+    uint64_t r14;
+    uint64_t r15;
 };
 
 /**
  * 硬件现场。
  */
-struct ContextRegisters {
-    uint32_t eip;
-    uint32_t cs;
-    uint32_t eflags;
-    uint32_t esp;
-    uint32_t ss;
+struct HardwareContextRegisters {
+    /**
+     * 错误码。
+     * 该错误码在 8 和 10-14 号中断到来时自动被设置。
+     * 其他中断到来时，手动放入一个假的错误码。
+     */
+    uint64_t errorCode;
+    uint64_t rip;
+    uint64_t cs;
+    uint64_t rflags;
+    uint64_t rsp;
+    uint64_t ss;
 };
+
 
 /**
  * 保存软件现场。
@@ -49,39 +64,55 @@ struct ContextRegisters {
  * 保存后，栈顶值指向一个 CommonRegisters 保存结构。
  * 栈顶下的第一个元素指向保存的硬件现场。
  */
-#define x86asmSaveContext() 0
- /*   __asm ( \
-        "pushl %eax \n\t" \
-        "pushl %ebp \n\t" \
-        "pushl %edi \n\t" \
-        "pushl %esi \n\t" \
-        "pushl %edx \n\t" \
-        "pushl %ecx \n\t" \
-        "pushl %ebx \n\t" \
-        "pushl %es \n\t" \
-        "pushl %ds \n\t" \
-        "pushl %fs \n\t" \
-        "pushl %gs \n\t" \
-        "lea 0x4(%ebp), %edx \n\t" \
-        "pushl %edx \n\t" \
-        "lea 0x4(%esp), %edx \n\t" \
-        "pushl %edx \n\t" \
-    )
-*/
-#define x86asmRestoreContext() 0
-/*
+#define x86asmSaveContext() \
     __asm ( \
-        "addl $0x8, %esp \n\t" \
-        "popl %gs \n\t" \
-        "popl %fs \n\t" \
-        "popl %ds \n\t" \
-        "popl %es \n\t" \
-        "popl %ebx \n\t" \
-        "popl %ecx \n\t" \
-        "popl %edx \n\t" \
-        "popl %esi \n\t" \
-        "popl %edi \n\t" \
-        "popl %ebp \n\t" \
-        "popl %eax \n\t" \
+        "cld \n\t" \
+        "pushq %r15 \n\t" \
+        "pushq %r14 \n\t" \
+        "pushq %r13 \n\t" \
+        "pushq %r12 \n\t" \
+        "pushq %r11 \n\t" \
+        "pushq %r10 \n\t" \
+        "pushq %r9 \n\t" \
+        "pushq %r8 \n\t" \
+        "pushq %rax \n\t" \
+        "pushq %rbp \n\t" \
+        "pushq %rdi \n\t" \
+        "pushq %rsi \n\t" \
+        "pushq %rdx \n\t" \
+        "pushq %rcx \n\t" \
+        "pushq %rbx \n\t" \
+        "mov %es, %rax \n\t" \
+        "pushq %rax \n\t" \
+        "mov %ds, %rax \n\t" \
+        "pushq %rax \n\t" \
+        "pushq %fs \n\t" \
+        "pushq %gs \n\t" \
+        "mov %rsp, %rdi \n\t" \
+        "lea 0x8(%rbp), %rsi \n\t" \
     )
-*/
+
+#define x86asmRestoreContext() \
+    __asm ( \
+        "popq %gs \n\t" \
+        "popq %fs \n\t" \
+        "popq %rax \n\t" \
+        "mov %rax, %ds \n\t" \
+        "popq %rax \n\t" \
+        "mov %rax, %es \n\t" \
+        "popq %rbx \n\t" \
+        "popq %rcx \n\t" \
+        "popq %rdx \n\t" \
+        "popq %rsi \n\t" \
+        "popq %rdi \n\t" \
+        "popq %rbp \n\t" \
+        "popq %rax \n\t" \
+        "popq %r8 \n\t" \
+        "popq %r9 \n\t" \
+        "popq %r10 \n\t" \
+        "popq %r11 \n\t" \
+        "popq %r12 \n\t" \
+        "popq %r13 \n\t" \
+        "popq %r14 \n\t" \
+        "popq %r15 \n\t" \
+    )

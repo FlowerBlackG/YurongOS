@@ -1,0 +1,22 @@
+divide error
+debug
+nonMaskable interrupt
+breakpoint
+overflow
+boundary range exceeded
+undefined opcode
+device not available
+double fault
+--
+invalid tss
+not present
+stack segment
+general protection
+page fault
+--
+math fault
+alignment checking
+machine check
+extended math fault
+virtualization exception
+control protection exception

@@ -140,26 +140,26 @@ switch_to_long_mode:
     call .build_linear_page_tab_entry
     
     mov ecx, 0
-    mov eax, 0x100000
+    mov eax, 0x200000
     mov edi, (0xf000)
     mov ebx, 512
     call .build_linear_page_tab_entry
 
     ; 内核。
     mov ecx, 0
-    mov eax, 0x100000
+    mov eax, 0x400000
     mov edi, (0x12000)
     mov ebx, 512
     call .build_linear_page_tab_entry
     
     mov ecx, 0
-    mov eax, 0x100000
+    mov eax, 0x600000
     mov edi, (0x13000)
     mov ebx, 512
     call .build_linear_page_tab_entry
     
     mov ecx, 0
-    mov eax, 0x100000
+    mov eax, 0x800000
     mov edi, (0x14000)
     mov ebx, 512
     call .build_linear_page_tab_entry
@@ -287,25 +287,7 @@ kernel_loader:
     mov ss, ax 
 
     mov rsp, 0
-
+    
 
     mov rax, 0xFFFF_8000_0000_0000
-
-; Display "Hello World!"
-    mov edi, 0x00b8000              
- 
-    mov rax, 0x1F6C1F6C1F651F48    
-    mov [edi],rax
- 
-    mov rax, 0x1F6F1F571F201F6F
-    mov [edi + 8], rax
- 
-    mov rax, 0x1F211F641F6C1F72
-    mov [edi + 16], rax
-
-
-.ht:
-    hlt
-    jmp .ht
-
     jmp rax

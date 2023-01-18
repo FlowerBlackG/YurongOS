@@ -71,8 +71,9 @@ size_t strlen(const char* str) {
     while (true) {
         const long& longWords = *longPtr++;
         if (((longWords - lowMagic) & ~longWords & highMagic) != 0) {
-            const char* p = (const char*) longPtr;
-            while (p - (const char*) longPtr < sizeof(long)) {
+            auto prevLongPtr = longPtr - 1;
+            const char* p = (const char*) prevLongPtr;
+            while (p - (const char*) prevLongPtr < sizeof(long)) {
                 if (*p == '\0') {
                     return p - str;
                 } else {

@@ -130,7 +130,7 @@ int vsprintf(char* buffer, const char* format, va_list args) {
             width = __VPF_WIDTH_NULL;
         } else {
             *(pBuf++) = *(pFmt++);
-            continue;;
+            continue;
         }
 
 
@@ -202,12 +202,12 @@ int vsprintf(char* buffer, const char* format, va_list args) {
         } else if (*pFmt == 'h') {
             pFmt += 1;
             lengthSpecifier = __VPF_LENGTH_SHORT;
-        } else if (*pFmt == 'l') {
-            pFmt += 1;
-            lengthSpecifier = __VPF_LENGTH_LONG;
         } else if (*pFmt == 'l' && *(pFmt + 1) == 'l') {
             pFmt += 2;
             lengthSpecifier = __VPF_LENGTH_LONG_LONG;
+        } else if (*pFmt == 'l') {
+            pFmt += 1;
+            lengthSpecifier = __VPF_LENGTH_LONG;
         } else if (*pFmt == 'j') {
             pFmt += 1;
             lengthSpecifier = __VPF_LENGTH_INT_MAX;
@@ -241,10 +241,9 @@ int vsprintf(char* buffer, const char* format, va_list args) {
                 char tmp[64];
                 char* pTmp = tmp;
 
-                // todo: 无法处理 long long 等 64 位数据类型。
                 uint8_t base = (specifier == 'o' ? 8 : 10);
-                uint32_t mask;
-                uint32_t val;
+                uint64_t mask;
+                uint64_t val;
 
                 if (lengthSpecifier == __VPF_LENGTH_CHAR) {
                     mask = (1ULL << (sizeof(char) * 8)) - 1;
@@ -253,16 +252,30 @@ int vsprintf(char* buffer, const char* format, va_list args) {
                     mask = (1ULL << (sizeof(short) * 8)) - 1;
                     val = va_arg(args, int) & mask;
                 } else if (lengthSpecifier == __VPF_LENGTH_LONG) {
-                    mask = (1ULL << (sizeof(long) * 8)) - 1;
+                    mask = 1ULL;
+                    mask <<= sizeof(long) * 4ULL;
+                    mask <<= sizeof(long) * 4ULL;
+                    mask--;
                     val = va_arg(args, long) & mask;
                 } else if (lengthSpecifier == __VPF_LENGTH_LONG_LONG) {
-                    mask = (1ULL << (sizeof(long long) * 8)) - 1;
+                    mask = 1ULL;
+                    mask <<= sizeof(long long) * 4ULL;
+                    mask <<= sizeof(long long) * 4ULL;
+                    mask--;
+                    
                     val = va_arg(args, long long) & mask;
                 } else if (lengthSpecifier == __VPF_LENGTH_INT_MAX) {
-                    mask = (1ULL << (sizeof(intmax_t) * 8)) - 1;
+                    
+                    mask = 1ULL;
+                    mask <<= sizeof(intmax_t) * 4ULL;
+                    mask <<= sizeof(intmax_t) * 4ULL;
+                    mask--;
                     val = va_arg(args, intmax_t) & mask;
                 } else if (lengthSpecifier == __VPF_LENGTH_SIZE_T) {
-                    mask = (1ULL << (sizeof(size_t) * 8)) - 1;
+                    mask = 1ULL;
+                    mask <<= sizeof(size_t) * 4ULL;
+                    mask <<= sizeof(size_t) * 4ULL;
+                    mask--;
                     val = va_arg(args, size_t) & mask;
                 } else {
                     mask = (1ULL << (sizeof(int) * 8)) - 1;
