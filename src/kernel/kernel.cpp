@@ -77,27 +77,13 @@ void Kernel::main() {
     Machine::getInstance().init();
 
     x86asmSti();
+
+
+
     while (1) {
-        CRT::getInstance().write("zh yyds!\n");
-        for (int i = 0; i < 5000000; i++) {
+        CRT::getInstance().write("kernel::main\n");
+        for (int i = 0; i < 1000000; i++) {
 
         }
-    }
-
-
-    int x;
-    int y;
-
-
-
-
-    
-    char s[128];
-    sprintf(s, "x = %d, y = %d\n", x, y);
-    CRT::getInstance().write(s);
-
-
-    while (1) {
-        
     }
 }

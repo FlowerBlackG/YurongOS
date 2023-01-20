@@ -25,8 +25,8 @@ namespace InterruptHandlers {
         x86asmDirectCall(clockInterruptHandler); 
         x86asmRestoreContext();
 
-        IO::outByte(Machine::PIC_MASTER_CTRL, Machine::PIC_EOI);
-
+        __asm ("addq $8, %rsp"); \
+        
         x86asmLeave(); 
         x86asmIret(); 
     }
@@ -36,9 +36,8 @@ namespace InterruptHandlers {
         HardwareContextRegisters* hardwareRegs
     ) {
         
-        char s[128];
-        sprintf(s, "clock interrupt: rax = %d\n", softwareRegs->rax);
-        CRT::getInstance().write(s);
+        CRT::getInstance().write("clock interrupt\n");
+        IO::outByte(Machine::PIC_MASTER_CTRL, Machine::PIC_EOI);
     }
 
     void defaultHandler(

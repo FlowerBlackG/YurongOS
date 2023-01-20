@@ -16,22 +16,24 @@ extern "C" void __io_out_word(uint16_t port, uint16_t data);
 /**
  * IO 操作封装类。底层是汇编代码。
  */
-class IO {
-public:
-    static uint8_t inByte(uint16_t port) {
+namespace IO {
+
+    uint8_t inline inByte(uint16_t port) {
         return __io_in_byte(port);
     }
 
-    static uint16_t inWord(uint16_t port) {
+    uint16_t inline inWord(uint16_t port) {
         return __io_in_word(port);
     }
 
-    static void outByte(uint16_t port, uint8_t data) {
+    void inline outByte(uint16_t port, uint8_t data) {
         __io_out_byte(port, data);
     }
 
-    static void outWord(uint16_t port, uint16_t data) {
+    void inline outWord(uint16_t port, uint16_t data) {
         __io_out_word(port, data);
     }
 
-};
+
+}
+

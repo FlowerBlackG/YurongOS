@@ -50,28 +50,6 @@ void test() {
     ;
 }
 
-int counter = 0;
-/* 该函数以后需要删除。 */
-void default_handler(int vector) {
-
-    if (vector >= 0x20 && vector < 0x28) {
-    
-        IO::outByte(Machine::PIC_MASTER_CTRL, Machine::PIC_EOI);
-    
-    } else if (vector >= 0x28 && vector < 0x30) {
-    
-        IO::outByte(Machine::PIC_MASTER_CTRL, Machine::PIC_EOI);
-        IO::outByte(Machine::PIC_SLAVE_CTRL, Machine::PIC_EOI);
-    
-    }
-
-    counter++;
-    char s[128];
-    sprintf(s, "vec: %x, counter: %d\n", vector, counter);
-    CRT::getInstance().write(s);
-
-    
-}
 
 void Machine::initIdt() {
 
@@ -99,6 +77,7 @@ void Machine::initIdt() {
 
 
     idt.setInterruptGate(0x20, (uint64_t)InterruptHandlers::clockInterruptEntrance);
+    idt.setInterruptGate(0x21, (uint64_t)InterruptHandlers::clockInterruptEntrance);
 
     idtr.baseAddress = (uint64_t) &idt;
     idtr.limit = sizeof(idt) - 1;
@@ -121,12 +100,37 @@ void Machine::initPic() {
     IO::outByte(PIC_SLAVE_DATA, 0b00000001);
 
     IO::outByte(PIC_MASTER_DATA, 0b11111110);
-    IO::outByte(PIC_SLAVE_DATA, 0b11111110);
+    IO::outByte(PIC_SLAVE_DATA, 0b11111111);
 
 }
 
 void Machine::initPit() {
-    IO::outByte(0x43, 0b00110100);
+
+    /*
+    
+        0x43: 控制端口
+        0x40: 频道0数据端口
+
+        0x43 指令：
+          bits
+
+          [0, 0]: 0 = 16-bit binary, 1 = 4-digit BCD
+
+          [1, 3]: operating mode
+                  0 1 1 = square wave generator
+
+          [4, 5]: access mode
+                  1 1 = low byte then high byte
+
+          [6, 7]: select channel
+                  0 0 = channel 0
+                  0 1 = channel 1
+                  1 0 = channel 2    
+
+        ref: https://wiki.osdev.org/Programmable_Interval_Timer
+    */
+
+    IO::outByte(0x43, 0b00110110);
     IO::outByte(0x40, InterruptHandlers::CLOCK_COUNTER & 0xff);
     IO::outByte(0x40, (InterruptHandlers::CLOCK_COUNTER >> 8) & 0xff);
 }

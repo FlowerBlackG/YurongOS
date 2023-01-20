@@ -50,6 +50,7 @@ struct HardwareContextRegisters {
      * 其他中断到来时，手动放入一个假的错误码。
      */
     uint64_t errorCode;
+    uint64_t rbp; // 这个是我猜的。不确定。
     uint64_t rip;
     uint64_t cs;
     uint64_t rflags;
@@ -89,7 +90,7 @@ struct HardwareContextRegisters {
         "pushq %fs \n\t" \
         "pushq %gs \n\t" \
         "mov %rsp, %rdi \n\t" \
-        "lea 0x8(%rbp), %rsi \n\t" \
+        "lea -0x8(%rbp), %rsi \n\t" \
     )
 
 #define x86asmRestoreContext() \
