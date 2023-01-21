@@ -6,7 +6,7 @@
 #pragma once
 
 #include <machine/GlobalDescriptorTable.h>
-#include <machine/InterruptDescriptorTable.h>
+#include <interrupt/InterruptDescriptorTable.h>
 
 class Machine {
 public:

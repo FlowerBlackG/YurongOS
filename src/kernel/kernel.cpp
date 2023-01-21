@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <machine/Machine.h>
 #include <machine/X86Assembly.h>
-#include <machine/MemoryManager.h>
+#include <memory/MemoryManager.h>
 
 
 /*
@@ -81,7 +81,7 @@ void Kernel::main() {
 
 
     while (1) {
-        CRT::getInstance().write("kernel::main\n");
+        //CRT::getInstance().write("kernel::main\n");
         for (int i = 0; i < 1000000; i++) {
 
         }

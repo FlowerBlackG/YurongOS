@@ -7,36 +7,16 @@
 
 #pragma once
 
-#include <machine/InterruptDescriptorTable.h>
+#include <interrupt/InterruptDescriptorTable.h>
 #include <machine/X86Assembly.h>
 #include <sys/types.h>
 
-extern void* interruptHandlers[InterruptDescriptorTable::DESCRIPTOR_COUNT];
-
-extern void* interrupt_handler_bridges[];
-
 namespace InterruptHandlers {
-
-    const int OSCILLATOR_FREQUENCY = 1193182;
-    const int WANTED_CLOCK_INTERRUPT_HZ = 100;
-    const int CLOCK_COUNTER = OSCILLATOR_FREQUENCY / WANTED_CLOCK_INTERRUPT_HZ;
-    const int JIFFY = 1000 / WANTED_CLOCK_INTERRUPT_HZ;
-
-    void clockInterruptEntrance();
-
-    void clockInterruptHandler(
-        SoftwareContextRegisters* softwareRegs, 
-        HardwareContextRegisters* hardwareRegs
-    );
 
     void defaultHandler(
         SoftwareContextRegisters* softwareRegs, 
         HardwareContextRegisters* hardwareRegs
     );
-
-    
-    
-
 
 
     void divideErrorExceptionEntrance();

@@ -9,7 +9,7 @@ TARGET = ../build/objs
 YROSTARGET = ../build/YurongOS
 
 # 递归构建目录。
-DIRS = boot kernel lib crt machine
+DIRS = boot kernel lib crt machine memory interrupt
 .PHONY: $(DIRS)
 $(DIRS):
 	$(MAKE) --directory=$@
@@ -20,16 +20,18 @@ KERNEL_TARGET = $(TARGET)/kernel
 # 注意：必须将 kernel_entry 放在开头，不然地址无法正常跳转。
 KERNEL_OBJS = $(KERNEL_TARGET)/kernel_entry.o \
 			  $(KERNEL_TARGET)/io.o \
-			  $(KERNEL_TARGET)/kernel.o \
 			  $(TARGET)/crt/CRT.o \
+			  $(KERNEL_TARGET)/kernel.o \
 			  $(TARGET)/lib/string.o \
 			  $(TARGET)/lib/stdio.o \
 			  $(TARGET)/machine/Machine.o \
 			  $(TARGET)/machine/GlobalDescriptorTable.o \
-			  $(TARGET)/machine/InterruptDescriptorTable.o \
-			  $(TARGET)/machine/InterruptHandlers.o \
+			  $(TARGET)/interrupt/InterruptDescriptorTable.o \
+			  $(TARGET)/interrupt/InterruptHandlers.o \
+			  $(TARGET)/interrupt/KeyboardInterrupt.o \
+			  $(TARGET)/interrupt/ClockInterrupt.o \
 			  $(TARGET)/machine/Cmos.o \
-			  $(TARGET)/machine/MemoryManager.o 
+			  $(TARGET)/memory/MemoryManager.o 
 
 # 构建内核。
 .PHONY: yros_kernel

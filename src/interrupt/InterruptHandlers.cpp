@@ -5,7 +5,7 @@
 
 */
 
-#include <machine/InterruptHandlers.h>
+#include <interrupt/InterruptHandlers.h>
 
 #include <CRT.h>
 #include <yros/IO.h>
@@ -13,32 +13,7 @@
 #include <string.h>
 #include <stdio.h>
 
-void* interruptHandlers[InterruptDescriptorTable::DESCRIPTOR_COUNT];
-
 namespace InterruptHandlers {
-
-    void clockInterruptEntrance() {
-        __asm ("pushq $0");
-        x86asmSaveContext(); 
-
-        
-        x86asmDirectCall(clockInterruptHandler); 
-        x86asmRestoreContext();
-
-        __asm ("addq $8, %rsp"); \
-        
-        x86asmLeave(); 
-        x86asmIret(); 
-    }
-
-    void clockInterruptHandler(
-        SoftwareContextRegisters* softwareRegs, 
-        HardwareContextRegisters* hardwareRegs
-    ) {
-        
-        CRT::getInstance().write("clock interrupt\n");
-        IO::outByte(Machine::PIC_MASTER_CTRL, Machine::PIC_EOI);
-    }
 
     void defaultHandler(
         SoftwareContextRegisters* softwareRegs, 

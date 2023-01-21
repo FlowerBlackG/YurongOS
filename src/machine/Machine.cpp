@@ -10,8 +10,10 @@
 #include <yros/IO.h>
 #include <stdio.h>
 #include <machine/X86Assembly.h>
-#include <machine/InterruptHandlers.h>
-#include <machine/MemoryManager.h>
+#include <interrupt/InterruptHandlers.h>
+#include <interrupt/ClockInterrupt.h>
+#include <interrupt/KeyboardInterrupt.h>
+#include <memory/MemoryManager.h>
 
 Machine::Machine() {
 
@@ -19,8 +21,6 @@ Machine::Machine() {
 
 void Machine::init() {
 
-    this->initPic();
-    this->initPit();
     this->initGdt();
 
     // 需要在设置中断前初始化内存。
@@ -28,6 +28,8 @@ void Machine::init() {
     MemoryManager::getInstance().init();
 
     this->initIdt();
+    this->initPit();
+    this->initPic();
 
 }
 
@@ -76,8 +78,8 @@ void Machine::initIdt() {
     idt.setTrapGate(21, (long) InterruptHandlers::controlProtectionExceptionExceptionEntrance);
 
 
-    idt.setInterruptGate(0x20, (uint64_t)InterruptHandlers::clockInterruptEntrance);
-    idt.setInterruptGate(0x21, (uint64_t)InterruptHandlers::clockInterruptEntrance);
+    idt.setInterruptGate(0x20, (uint64_t) ClockInterrupt::entrance);
+    idt.setInterruptGate(0x21, (uint64_t) KeyboardInterrupt::entrance);
 
     idtr.baseAddress = (uint64_t) &idt;
     idtr.limit = sizeof(idt) - 1;
@@ -99,7 +101,7 @@ void Machine::initPic() {
     IO::outByte(PIC_SLAVE_DATA, 2);
     IO::outByte(PIC_SLAVE_DATA, 0b00000001);
 
-    IO::outByte(PIC_MASTER_DATA, 0b11111110);
+    IO::outByte(PIC_MASTER_DATA, 0b11111100);
     IO::outByte(PIC_SLAVE_DATA, 0b11111111);
 
 }
@@ -131,6 +133,6 @@ void Machine::initPit() {
     */
 
     IO::outByte(0x43, 0b00110110);
-    IO::outByte(0x40, InterruptHandlers::CLOCK_COUNTER & 0xff);
-    IO::outByte(0x40, (InterruptHandlers::CLOCK_COUNTER >> 8) & 0xff);
+    IO::outByte(0x40, ClockInterrupt::CLOCK_COUNTER & 0xff);
+    IO::outByte(0x40, (ClockInterrupt::CLOCK_COUNTER >> 8) & 0xff);
 }

@@ -6,7 +6,7 @@
 
 */
 
-#include <machine/MemoryManager.h>
+#include <memory/MemoryManager.h>
 #include <CRT.h>
 #include <stdio.h>
 
