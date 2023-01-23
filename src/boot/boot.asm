@@ -135,15 +135,13 @@ start:
     mov ds, ax
     mov es, ax
     mov ss, ax
-    mov sp, 0x7000
+    mov sp, 0x7800
 
     ; 打开 A20 线。
     ; 若不打开，会触发回绕，即第20位（从0开始计数）及以上值被丢弃（取模）。
     in al, 0x92
     or al, 2
     out 0x92, al
-
-    call check_long_mode_support ; 检查 cpu 是否支持 x86_64 模式。
 
     call detect_memory ; 执行内存检测。
     mov si, msg_memory_detect_done
@@ -152,19 +150,19 @@ start:
     ; 加载二级加载器。
     mov bl, 2
     mov ecx, 2
-    mov edi, 0x7000 ; 将二级启动器加载到内存 0x7000 的位置。
+    mov edi, 0x7800 ; 将二级启动器加载到内存 0x7000 的位置。
     call read_disk
 
-    cmp dword [0x7000], 0x644f6f47 ; 检查魔数：GoOd
+    cmp dword [0x7800], 0x644f6f47 ; 检查魔数：GoOd
     jnz error
     mov si, msg_second_loader_read
     call print
 
     ; 加载内核代码。要求用户内存不小于 10MB。
-    ; 内核代码共 6MB，从 4MB 位置开始存放（0x 40 0000）
-    ; 每次读 128个扇区，即 64KB。总共读 96 轮。
+    ; 内核代码共 7MB，从 1MB 位置开始存放（0x 10 0000）
+    ; 每次读 128个扇区，即 64KB。总共读 112 轮。
     mov ecx, 0
-    mov edx, 0x400000
+    mov edx, 0x100000
 
     mov si, msg_reading_kernel
     call print
@@ -182,56 +180,14 @@ start:
     pop ecx
     inc ecx
     add edx, (512 * 128)
-    cmp ecx, 96
+    cmp ecx, 16 ; 只读 16 轮。
     jne .loop_read_kernel 
 
     mov si, msg_kernel_read
     call print
 
     ; 跳转到二级启动器。
-    jmp 0:0x7004 ; 前 4 字节是魔数。
-
-check_long_mode_support:
-     
-    ;    原理见：
-    ;        https://wiki.osdev.org/CPUID
-    ;        https://en.wikipedia.org/wiki/CPUID 
-
-    pushfd
-    pop eax
-    mov ecx, eax
-    xor eax, 0x200000
-    push eax
-    popfd
-
-    pushfd
-    pop eax
-    xor eax, ecx
-    shr eax, 21
-    and eax, 1
-    push ecx
-    popfd
-
-    test eax, eax
-    jz .no_long_mode
-
-    mov eax, 0x80000000
-    cpuid
-
-    cmp eax, 0x80000001
-    jb .no_long_mode
-
-    mov eax, 0x80000001
-    cpuid
-    test edx, 1 << 29
-    jz .no_long_mode
-
-    ret
-
-.no_long_mode:
-    jmp error
-
-
+    jmp 0:0x7804 ; 前 4 字节是魔数。
 
 
 ;
@@ -253,7 +209,8 @@ check_long_mode_support:
 ;   eax 传入子程序号（e820h），ebx 传入0.
 ;   ebx 传入要读取的 ARDS 编号。第1次为0，之后该值会被设置。直接重复传入直到被设为0.
 ;   es:di 指向当前读到的 ARDS 缓冲区。
-;   ecx: ARDS 结构字节大小。设为 20 字节。
+;   ecx: ARDS 结构字节大小。
+;        该结构本为 20 字节，拓展填充至 24 字节。
 ;   edx: 固定为 0x534d4150 (SMAP 的 ASCII 码，是个校验签名)。
 ;
 ; 返回信息：
@@ -267,20 +224,18 @@ check_long_mode_support:
 ;
 
 
-
-
 ; 检测内存。
 ; 结果存放位置：
-;   count: 0x1000
-;   buffer: 0x2000
+;   count: 0x500
+;   buffer: 0x504
 detect_memory:
     ; 准备传入参数。
     xor ebx, ebx
     xor eax, eax
     mov es, ax
-    mov di, 0x2000
+    mov di, 0x508
     mov edx, 0x534d4150
-    mov dword eax, [0x1000]
+    mov dword eax, [0x500]
 
 .detect_one:
     mov eax, 0xe820 ; 子功能号。
@@ -293,8 +248,8 @@ detect_memory:
     cmp cl, 20
     jne error
 
-    add edi, ecx ; 移动指针位置。
-    inc word [0x1000] ; 计数。
+    add edi, 24 ; 移动指针位置。
+    inc word [0x500] ; 计数。
     cmp ebx, 0
     jnz .detect_one
 
@@ -328,7 +283,7 @@ error:
     jmp .begin_hlt
 
 .msg:
-    db "error: failed to boot kernel.", 0x0d, 0x0a, 0
+    db "error: failed to load kernel.", 0x0d, 0x0a, 0
 
 
 msg_memory_detect_done:

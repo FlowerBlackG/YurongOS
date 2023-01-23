@@ -27,6 +27,11 @@ void MemoryManager::processArds() {
     sprintf(s, "ards count: %d\n", ardsCount);
     CRT::getInstance().write(s);
 
+    if (ardsCount > 33) {
+        ardsCount = 33;
+        CRT::getInstance().write("too much ards! limit to 33.\n");
+    }
+
     for (uint32_t i = 0; i < ardsCount; i++) {
         auto&& ards = ardsBuffer[i];
 

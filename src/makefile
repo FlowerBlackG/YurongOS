@@ -68,7 +68,7 @@ bochs: deploy
 bochsg: deploy
 	cd $(YROSTARGET) && bochs-gdb -q -f ./bochsrc.gdb
 
-QEMU := qemu-system-x86_64 -m 8G -audiodev pa,id=hda -machine pcspk-audiodev=hda -rtc base=localtime -d cpu_reset -D ./qemu.log
+QEMU := qemu-system-x86_64 -m 8G -cpu Icelake-Server -audiodev pa,id=hda -machine pcspk-audiodev=hda -rtc base=localtime -d cpu_reset -D ./qemu.log
 QEMU_DISK := -boot c -drive file=$(YROSTARGET)/disk.img,if=ide,index=0,media=disk,format=raw
 
 # qemu。

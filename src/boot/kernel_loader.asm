@@ -2,13 +2,12 @@
 ;
 ;    内核加载器
 ;
-;    被加载到内存 0x7000 的位置
+;    被加载到内存 0x7800 的位置
 ;    最大尺寸为 1KB
 ;
 ;    创建于 2023年1月13日
 ;
 ;
-
 
 
 ;
@@ -28,11 +27,14 @@
 ;
 
 
-org 0x7000
+org 0x7800
 
 dd 0x644f6f47 ; 魔数：GoOd
 
 [bits 16] ; 提醒编译器后面是处于 16 位模式的代码。
+
+; 四级页表位于 0x1000 处。
+pml4_address equ 0x1000
 
 jmp switch_to_long_mode
 
@@ -41,148 +43,109 @@ empty_idt:
     .length dw 0
     .base dd 0
 
+
 switch_to_long_mode:
-    ; 从 0x8000 开始，放置一个暂用的四级页表。
-    ; [0x8000, 0x15000)，共 52KB。
 
-    ; 0x8000 值存储到 di 寄存器内。
+    call check_cpu
 
-    ; 先用 0 填充。
+    ; 先用 0 填充页表区域。
+    
+    mov edi, 0x1000
+    mov ecx, (0x5000 / 4)
+    call zero_fill_area
+
+    mov edi, 0x9d000
+    mov ecx, (0x2000 / 4)
+    call zero_fill_area
+
     mov edi, 0x8000
-    push edi
+    mov ecx, (64 * 0x1000 / 4)
+    call zero_fill_area
 
-    mov ecx, ((0x15000 - 0x8000) / 4)
-    xor eax, eax
+.make_page_tables:
 
-.zero_out_paging_area_loop:
-
-    mov dword [edi], eax
-    add edi, 4
-
-    dec ecx
-    cmp ecx, 0
-    jne .zero_out_paging_area_loop
-
-    pop edi
-    push edi
-
-    ; 构建全局页表（第四级）。
-    mov eax, 0x9000
+    ; 构建第4级页表（PML4）
+    mov eax, 0x9d000
     or eax, 0x3 ; write, present
-    mov [0x8000], eax
+    mov [pml4_address], eax
 
-    mov eax, 0xc000
+    mov eax, 0x2000
     or eax, 0x3
-    mov [0x8000 + 511 * 8], eax
-    
-    mov eax, 0x10000
-    or eax, 0x3
-    mov [0x8000 + 256 * 8], eax
+    mov [pml4_address + 256 * 8], eax
 
-    ; 构建第三级页表。
-    mov eax, 0xa000
+    mov eax, 0x4000
     or eax, 0x3
-    mov [0x9000], eax
+    mov [pml4_address + 383 * 8], eax
 
-    mov eax, 0xd000
+    mov eax, 0x8000
     or eax, 0x3
-    mov [0xc000 + 511 * 8], eax
+    mov edi, (pml4_address + 384 * 8)
+    mov ecx, 384
 
-    mov eax, 0x11000
-    or eax, 0x3
-    mov edi, 0x10000
-    mov dword [edi], eax
+.fill_pml4_physical_map_entries:
 
-    ; 构建第二级页表。
-    mov eax, 0xb000
-    or eax, 0x3
-    mov [0xa000], eax
-
-    mov eax, 0xe000
-    or eax, 0x3
-    mov [0xd000 + 510 * 8], eax
-
-    mov eax, 0xf000
-    or eax, 0x3
-    mov [0xd000 + 511 * 8], eax
-
-
-    mov eax, 0x12000
-    or eax, 0x3
-    mov edi, 0x11000
     mov [edi], eax
 
-    mov eax, 0x13000
-    or eax, 0x3
-    mov edi, (0x11000 + 8)
-    mov [edi], eax
-
-    mov eax, 0x14000
-    or eax, 0x3
-    mov edi, (0x11000 + 2 * 8)
-    mov [edi], eax
-
-
-    ; 构建一级页表。
-
-    ;   0 ~ 1M
-    mov ecx, 0
-    mov edi, 0xb000
-    mov ebx, 256
-    mov eax, 0
-    call .build_linear_page_tab_entry
-
-    ; 核心栈。
-    mov ecx, 256
-    mov eax, 0x100000
-    mov edi, (0xe000 + 8 * 256)
-    mov ebx, 512
-    call .build_linear_page_tab_entry
-    
-    mov ecx, 0
-    mov eax, 0x200000
-    mov edi, (0xf000)
-    mov ebx, 512
-    call .build_linear_page_tab_entry
-
-    ; 内核。
-    mov ecx, 0
-    mov eax, 0x400000
-    mov edi, (0x12000)
-    mov ebx, 512
-    call .build_linear_page_tab_entry
-    
-    mov ecx, 0
-    mov eax, 0x600000
-    mov edi, (0x13000)
-    mov ebx, 512
-    call .build_linear_page_tab_entry
-    
-    mov ecx, 0
-    mov eax, 0x800000
-    mov edi, (0x14000)
-    mov ebx, 512
-    call .build_linear_page_tab_entry
-
-    jmp .build_paging_end
-
-; edi: 页表所在位置
-; ebx: 终止条目号
-; ecx: 起始条目号
-; eax: 起始物理地址
-.build_linear_page_tab_entry:
-    or eax, 0x3
-    mov [edi], eax
-    inc ecx
-    add eax, 0x1000
     add edi, 8
-    cmp ecx, ebx
-    jne .build_linear_page_tab_entry
+    add eax, 0x1000
+    inc ecx
+    cmp ecx, 448
+    jne .fill_pml4_physical_map_entries
+
+    ; 构建第3级页表（PML3）
+    ; 不含物理映射区。
+    mov eax, 0x9e000
+    or eax, 0x3
+    mov edi, 0x9d000
+    mov [edi], eax
+
+    mov eax, 0x3000
+    or eax, 0x3
+    mov [0x2000], eax
+    
+    mov eax, 0x5000
+    or eax, 0x3
+    mov [0x4000 + 511 * 8], eax
+
+    ; 构建第2级页表（PML2）
+    ; 该表内的每条记录直接指向 2MB 内存。
+
+    ; 前2M
+    mov eax, 0x83 ; write, present, pageSize
+    mov edi, 0x9e000
+    mov [edi], eax
+
+    ; 内核静态
+    mov eax, 0x83
+    mov edi, 0x3000
+    mov ebx, (0x3000 + 4 * 8)
+    call build_pml2_linear_entries
+
+    ; 核心栈
+    mov eax, 0x80_0000
+    or eax, 0x83
+    mov edi, (0x5000 + 509 * 8)
+    mov ebx, (0x5000 + 512 * 8)
+    call build_pml2_linear_entries
+
+    ; 页表准备就绪，可以进入内核。
+    jmp enter_long_mode
+
+; 构建 2MB 页映射。
+; 参数：
+;   edi: 页表项起始位置
+;   ebx: 页表项最后一个位置的下一个位置
+;   eax: 起始物理地址。应设置好属性。
+build_pml2_linear_entries:
+
+    mov [edi], eax
+
+    add eax, 0x20_0000
+    add edi, 8
+    cmp edi, ebx
+    jne build_pml2_linear_entries
+
     ret
-
-.build_paging_end:
-
-    pop edi
 
 enter_long_mode:
 
@@ -194,7 +157,7 @@ enter_long_mode:
     mov cr4, eax
 
     ; 设置 PML4 页表入口地址。
-    mov edx, 0x8000
+    mov edx, pml4_address
     mov cr3, edx
 
     ; 开启 long mode enable 和 syscall
@@ -211,9 +174,107 @@ enter_long_mode:
 
     mov cr0, ebx
 
-
     jmp code_selector:kernel_loader
     
+
+; 用 0 填充一个页框。
+; 函数内不备份任何可能用到的寄存器。
+;
+; 传参：
+;   edi: 起始地址。
+;   ecx: 单元数。以 4 字节为 1 个单元。
+;        必须大于 0。函数内不做正确性校验。
+;
+zero_fill_area:
+
+    xor eax, eax
+
+.zero_fill_dword:
+
+    mov dword [edi], eax
+    add edi, 4
+    dec ecx
+
+    cmp ecx, 0
+    jne .zero_fill_dword
+
+    ret
+
+
+check_cpu:
+
+    ;    原理见：
+    ;        https://wiki.osdev.org/CPUID
+    ;        https://en.wikipedia.org/wiki/CPUID 
+
+    pushfd
+    pop eax
+    mov ecx, eax
+    xor eax, 0x200000
+    push eax
+    popfd
+
+    pushfd
+    pop eax
+    xor eax, ecx
+    shr eax, 21
+    and eax, 1
+    push ecx
+    popfd
+
+    test eax, eax
+    jz .bad_cpu
+
+    mov eax, 0x80000000
+    cpuid
+
+    cmp eax, 0x80000001
+    jb .bad_cpu
+
+    mov eax, 0x80000001
+    cpuid
+
+    ; 检查 cpu 是否支持 long mode
+    test edx, 1 << 29 
+    jz .bad_cpu
+    
+    ; 检查 cpu 是否支持 1GB 页。
+    test edx, 1 << 26
+    jz .bad_cpu
+
+    ret
+
+.bad_cpu:
+    jmp error
+
+
+error:
+    mov si, .msg
+    call print
+
+.begin_hlt:
+    hlt
+    jmp .begin_hlt
+
+.msg:
+    db "error: failed to boot kernel.", 0x0d, 0x0a, 0
+
+
+; 输出字符串。
+print:
+    ; int 10h 的 0x0e 号子程序：Teletype output
+    ; 传参：AL 传递字符，BL 传递颜色。
+    mov ah, 0x0e
+.then:
+    mov al, [si]
+    cmp al, 0
+    jz .done
+    int 0x10
+    inc si
+    jmp .then
+.done:
+    ret
+
 
 ; 选择子。
 code_selector equ (1 << 3)
@@ -286,8 +347,26 @@ kernel_loader:
     mov gs, ax
     mov ss, ax 
 
-    mov rsp, 0
+    mov rsp, 0xFFFF_C000_0000_0000
     
+    ; 构建物理映射区的 PML3。
+    ; 这些表的每一条记录都指向 1GB 内存。
 
-    mov rax, 0xFFFF_8000_0000_0000
+    mov rdi, 0x8000
+    mov rcx, 0x48000
+    mov rax, 0x83
+.fill_pml3_physical_map_entries:
+
+    mov qword [rdi], rax
+    add rax, 0x4000_0000
+    add rdi, 8
+    cmp rdi, rcx
+    jne .fill_pml3_physical_map_entries
+
+    ; 刷新页表缓存。
+    mov rax, pml4_address
+    mov cr3, rax 
+
+    ; 跳转进入内核代码。
+    mov rax, 0xFFFF_8000_0010_0000
     jmp rax

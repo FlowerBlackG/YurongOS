@@ -69,6 +69,15 @@ extern "C" void kernel_bridge() {
     callKernelModuleDestructors();
 }
 
+void Kernel::panic(const char* s) {
+    x86asmCli();
+
+    CRT::getInstance().write(s);
+
+    while (true)
+        ;
+}
+
 void Kernel::main() {
 
     CRT::getInstance().init();
@@ -78,12 +87,5 @@ void Kernel::main() {
 
     x86asmSti();
 
-
-
-    while (1) {
-        //CRT::getInstance().write("kernel::main\n");
-        for (int i = 0; i < 1000000; i++) {
-
-        }
-    }
+    Kernel::getInstance().panic("[panic]\n");
 }

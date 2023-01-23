@@ -9,17 +9,23 @@ int main() {
         unsigned long long x;
         
         cin >> hex >> x;
-        double f = x;
+        unsigned long long t = x;
         
-        if (x < 1024) {
-            cout << f << " byte" << endl;
-        } else if (x / 1024 < 1024) {
-            cout << f / 1024 << " KB" << endl;
-        } else if (x / 1024 / 1024 < 1024) {
-            cout << f / 1024 / 1024 << " MB" << endl;
-        } else if (true) {
-            cout << f / 1024 / 1024 / 1024 << " GB" << endl;
+        int xb[5];
+        const char* xbName[] = {
+            "B", "K", "M", "G", "T"
+        };
+
+        for (int i = 0; i < 5; i++) {
+            xb[i] = t % 1024;
+            t /= 1024;
         }
+
+        for (int i = 4; i >= 0; i--) {
+            cout << xb[i] << xbName[i] << " ";
+        }
+
+        cout << endl;
 
         cout << "lv4: " << ((x >> (12 + 27)) & 0x1ff) << endl;
         cout << "lv3: " << ((x >> (12 + 18)) & 0x1ff) << endl;

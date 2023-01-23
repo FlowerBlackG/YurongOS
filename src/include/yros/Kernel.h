@@ -14,6 +14,8 @@ public:
     }
 
     void main();
+
+    void panic(const char* s);
 private:
     static Kernel instance;
 };

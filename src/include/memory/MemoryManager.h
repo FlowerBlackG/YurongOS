@@ -20,6 +20,7 @@ struct Ards {
      * 其他：不可用。
      */
     uint32_t type;
+    uint32_t padding;
 } __packed;
 
 class MemoryManager {
@@ -33,11 +34,11 @@ public:
     void processArds();
 
     uint32_t getArdsCount() {
-        return * (uint32_t*) (0x1000);
+        return * (uint32_t*) (0x500);
     }
 
     Ards* getArdsBuffer() {
-        return (Ards*) (0x2000);
+        return (Ards*) (0x508);
     }
 
 private:
