@@ -58,10 +58,10 @@ size_t strlen(const char* str) {
         }
     }
 
-    const long* longPtr = (const long*) charPtr;
+    const unsigned long* longPtr = (const unsigned long*) charPtr;
 
-    long highMagic = 0x80808080L;
-    long lowMagic = 0x01010101L;
+    unsigned long highMagic = 0x80808080L;
+    unsigned long lowMagic = 0x01010101L;
     if (sizeof(long) > 4) {
         highMagic = ((highMagic << 16) << 16) | highMagic;
         lowMagic = ((lowMagic << 16) << 16) | lowMagic;

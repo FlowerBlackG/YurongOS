@@ -31,7 +31,8 @@ KERNEL_OBJS = $(KERNEL_TARGET)/kernel_entry.o \
 			  $(TARGET)/interrupt/KeyboardInterrupt.o \
 			  $(TARGET)/interrupt/ClockInterrupt.o \
 			  $(TARGET)/machine/Cmos.o \
-			  $(TARGET)/memory/MemoryManager.o 
+			  $(TARGET)/memory/MemoryManager.o \
+			  $(TARGET)/memory/FreeMemoryManager.o
 
 # 构建内核。
 .PHONY: yros_kernel

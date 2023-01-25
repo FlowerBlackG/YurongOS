@@ -12,6 +12,7 @@
 #define x86asmCli() __asm ("cli")
 #define x86asmLeave() __asm ("leave")
 #define x86asmIret() __asm ("iretq")
+#define x86asmHlt() __asm ("hlt")
 
 #define x86asmDirectCall(function) __asm ("call *%%rax" :: "a" (function))
 

@@ -16,20 +16,14 @@
 
 /*
  * 手动列出所有需要构造的对象的静态对象。
- * 注意：构造顺序是按照列出的顺序来的。
  */
 
-Kernel Kernel::instance;
+
 CRT CRT::instance;
 Machine Machine::instance;
 MemoryManager MemoryManager::instance;
 
-/**
- * 内核构造函数。不做任何事情。
- */
-Kernel::Kernel() {
 
-}
 
 /**
  * 调用内核所有模块的对象的构造函数。
@@ -65,7 +59,7 @@ inline static void callKernelModuleDestructors() {
  */
 extern "C" void kernel_bridge() {
     callKernelModuleConstructors();
-    Kernel::getInstance().main();
+    Kernel::main();
     callKernelModuleDestructors();
 }
 
@@ -74,8 +68,9 @@ void Kernel::panic(const char* s) {
 
     CRT::getInstance().write(s);
 
-    while (true)
-        ;
+    while (true) {
+        x86asmHlt();
+    }
 }
 
 void Kernel::main() {
@@ -87,5 +82,7 @@ void Kernel::main() {
 
     x86asmSti();
 
-    Kernel::getInstance().panic("[panic]\n");
+    while (true) {
+        x86asmHlt();
+    }
 }

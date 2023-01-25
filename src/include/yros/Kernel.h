@@ -5,17 +5,11 @@
 
 #pragma once
 
-class Kernel {
-private:
-    Kernel();
-public:
-    static Kernel& getInstance() {
-        return Kernel::instance;
-    }
+namespace Kernel {
 
-    void main();
 
     void panic(const char* s);
-private:
-    static Kernel instance;
+    void main();
+
+
 };
