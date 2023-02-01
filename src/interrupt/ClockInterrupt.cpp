@@ -8,25 +8,14 @@
 
 
 #include <interrupt/ClockInterrupt.h>
+#include <interrupt/ImplementHandlerMacros.h>
 #include <CRT.h>
 #include <yros/IO.h>
 #include <machine/Machine.h>
 
 namespace ClockInterrupt {
 
-
-    void entrance() {
-        __asm ("pushq $0");
-        x86asmSaveContext(); 
-
-        x86asmDirectCall(ClockInterrupt::handler); 
-        x86asmRestoreContext();
-
-        __asm ("addq $8, %rsp"); \
-        
-        x86asmLeave(); 
-        x86asmIret(); 
-    }
+    IMPLEMENT_EXCEPTION_ENTRANCE(entrance, ClockInterrupt::handler)
 
     void handler(
         SoftwareContextRegisters* softwareRegs, 

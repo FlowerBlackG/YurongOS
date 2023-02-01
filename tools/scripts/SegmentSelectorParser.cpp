@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 using namespace std;
 
 #define __packed __attribute__((packed))
@@ -76,15 +77,21 @@ unsigned char segs[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x92, 0x00, 0x00
 };
 
+long long qSegs[] = {
+ 0x00009a000000ffff, 0x00cf92000000ffff
+};
+
 int main() {
     
-    SegmentDescriptor* pS = reinterpret_cast<SegmentDescriptor*> (segs);
+    SegmentDescriptor* pS = reinterpret_cast<SegmentDescriptor*> (qSegs);
 
     for (int i = 0; i < 2; i++) {
         auto& it = pS[i];
         cout << endl;
         cout << "idx      : " << i + 1 << endl;
+        cout << hex;
         cout << "limit    : " << 0LL + (it.limitLow | (it.limitHigh << 16)) << endl;
+        cout << dec;
         cout << "base     : " << 0LL + (it.baseLow | (it.baseMid << 16) | (it.baseHigh << 24)) << endl;
         cout << "access   : " << !!it.access << endl;
         cout << "rw       : " << !!it.rw << endl;

@@ -45,13 +45,17 @@ struct SoftwareContextRegisters {
  * 硬件现场。
  */
 struct HardwareContextRegisters {
-    /**
-     * 错误码。
-     * 该错误码在 8 和 10-14 号中断到来时自动被设置。
-     * 其他中断到来时，手动放入一个假的错误码。
-     */
-    uint64_t errorCode;
-    uint64_t rbp; // 这个是我猜的。不确定。
+
+    union {
+        /**
+         * 错误码。
+         * 该错误码在 8 和 10-14 号中断到来时自动被设置。
+         * 其他中断到来时，手动放入一个假的错误码。
+         */
+        uint64_t errorCode;
+        uint64_t currentRbp;
+    };
+
     uint64_t rip;
     uint64_t cs;
     uint64_t rflags;
@@ -91,7 +95,7 @@ struct HardwareContextRegisters {
         "pushq %fs \n\t" \
         "pushq %gs \n\t" \
         "mov %rsp, %rdi \n\t" \
-        "lea -0x8(%rbp), %rsi \n\t" \
+        "lea 0x8(%rbp), %rsi \n\t" \
     )
 
 #define x86asmRestoreContext() \

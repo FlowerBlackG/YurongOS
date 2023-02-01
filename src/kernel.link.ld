@@ -5,7 +5,7 @@ ENTRY(kernel_entry)
 SECTIONS
 {
     
-    .text 0xffff800000100000:
+    .text 0xffffa00000100000:
     {
         
         *(.text)

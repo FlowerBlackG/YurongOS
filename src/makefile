@@ -54,6 +54,8 @@ deploy: yros_kernel
 		bs=512 count=2 seek=2 conv=notrunc
 	dd if=$(TARGET)/kernel/kernel.bin of=$(YROSTARGET)/disk.img \
 		bs=512 count=1996 seek=4 conv=notrunc
+	cp ../tools/bochsrc $(YROSTARGET)/
+
 
 # 清空构建内容。
 .PHONY: clean
@@ -63,13 +65,20 @@ clean:
 # 构建并启动 bochs
 .PHONY: bochs
 bochs: deploy
-	cd $(YROSTARGET) && bochs -q -f ./bochsrc
+	cd $(YROSTARGET) && rm -f ./disk.img.lock && bochs -q -f ./bochsrc
 
 .PHONY: bochsg
 bochsg: deploy
 	cd $(YROSTARGET) && bochs-gdb -q -f ./bochsrc.gdb
 
-QEMU := qemu-system-x86_64 -m 8G -cpu Icelake-Server -audiodev pa,id=hda -machine pcspk-audiodev=hda -rtc base=localtime -d cpu_reset -D ./qemu.log
+QEMU := qemu-system-x86_64 
+QEMU += -m 8G 
+QEMU += -cpu Icelake-Server 
+QEMU += -audiodev pa,id=hda 
+QEMU += -machine pcspk-audiodev=hda 
+QEMU += -rtc base=localtime 
+QEMU += -d cpu_reset -D ./qemu.log 
+
 QEMU_DISK := -boot c -drive file=$(YROSTARGET)/disk.img,if=ide,index=0,media=disk,format=raw
 
 # qemu。
@@ -82,8 +91,8 @@ qemug: deploy
 	$(QEMU) $(QEMU_DISK) -s -S
 
 # vmware 硬盘。
-$(YROSTARGET)/disk.vmdk: $(YROSTARGET)/disk.img
-	qemu-img convert -pO vmdk $< $@
+$(YROSTARGET)/disk.vmdk: deploy
+	qemu-img convert -O vmdk $(YROSTARGET)/disk.img $@
 
 # 将 bochs 格式硬盘转换成 vmdk 格式，以便在 VMware 启动。
 .PHONY: vmdk

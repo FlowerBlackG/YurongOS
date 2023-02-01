@@ -7,9 +7,6 @@
 *.log
 *.vmdk
 
-bochsrc
-bochsrc.gdb
-
 PKGBUILD
 
 bochs/

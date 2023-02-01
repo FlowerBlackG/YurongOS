@@ -7,6 +7,7 @@
 */
 
 #include <interrupt/KeyboardInterrupt.h>
+#include <interrupt/ImplementHandlerMacros.h>
 #include <CRT.h>
 #include <machine/Machine.h>
 #include <yros/IO.h>
@@ -24,18 +25,7 @@ namespace KeyboardInterrupt {
         'm', ',', '.', '/', KEY_RSHIFT, 0, 0, ' ', 0, 0 // [50, 59]
     };
 
-    void entrance() {
-        __asm ("pushq $0");
-        x86asmSaveContext(); 
-
-        x86asmDirectCall(KeyboardInterrupt::handler); 
-        x86asmRestoreContext();
-
-        __asm ("addq $8, %rsp"); \
-        
-        x86asmLeave(); 
-        x86asmIret(); 
-    }
+    IMPLEMENT_EXCEPTION_ENTRANCE(entrance, KeyboardInterrupt::handler)
 
     void handler(
         SoftwareContextRegisters* softwareRegs, 

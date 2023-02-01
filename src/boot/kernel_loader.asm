@@ -71,7 +71,7 @@ switch_to_long_mode:
 
     mov eax, 0x2000
     or eax, 0x3
-    mov [pml4_address + 256 * 8], eax
+    mov [pml4_address + 320 * 8], eax
 
     mov eax, 0x4000
     or eax, 0x3
@@ -368,5 +368,5 @@ kernel_loader:
     mov cr3, rax 
 
     ; 跳转进入内核代码。
-    mov rax, 0xFFFF_8000_0010_0000
+    mov rax, 0xFFFF_a000_0010_0000
     jmp rax

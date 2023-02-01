@@ -6,6 +6,7 @@
 */
 
 #include <interrupt/InterruptHandlers.h>
+#include <interrupt/ImplementHandlerMacros.h>
 
 #include <CRT.h>
 #include <yros/IO.h>
@@ -22,53 +23,6 @@ namespace InterruptHandlers {
         CRT::getInstance().write("bad exception handler!\n");
         while (1)
             ;
-    }
-
-#define IMPLEMENT_EXCEPTION_ENTRANCE(entranceFunctionName, handlerName) \
-    void entranceFunctionName() { \
-        __asm ("pushq $0"); /* 压入假的 errorcode。 */ \
-        x86asmSaveContext(); \
-        \
-        x86asmDirectCall(handlerName); \
-        x86asmRestoreContext(); \
-        x86asmLeave(); \
-        __asm ("addq $8, %rsp"); \
-        x86asmIret(); \
-    }
-
-#define IMPLEMENT_EXCEPTION_WITH_ERRCODE_ENTRANCE(entranceFunctionName, handlerName) \
-    void entranceFunctionName() { \
-        x86asmSaveContext(); \
-        \
-        x86asmDirectCall(handlerName); \
-        x86asmRestoreContext(); \
-        x86asmLeave(); \
-        __asm ("addq $8, %rsp"); \
-        x86asmIret(); \
-    }
-
-#define IMPLEMENT_EXCEPTION_HANDLER(handlerName, errorMsg, signalValue) \
-    void handlerName( \
-        SoftwareContextRegisters* softwareRegs, \
-        HardwareContextRegisters* hardwareRegs \
-    ) { \
-        CRT::getInstance().write(errorMsg); \
-        CRT::getInstance().write("\n"); \
-        x86asmCli(); \
-        while (1) \
-            ; \
-    }
-
-#define IMPLEMENT_EXCEPTION_WITH_ERRCODE_HANDLER(handlerName, errorMsg, signalValue) \
-    void handlerName( \
-        SoftwareContextRegisters* softwareRegs, \
-        HardwareContextRegisters* hardwareRegs \
-    ) { \
-        CRT::getInstance().write(errorMsg); \
-        CRT::getInstance().write("\n"); \
-        x86asmCli(); \
-        while (1) \
-            ; \
     }
 
     IMPLEMENT_EXCEPTION_ENTRANCE(divideErrorExceptionEntrance, divideErrorExceptionHandler)

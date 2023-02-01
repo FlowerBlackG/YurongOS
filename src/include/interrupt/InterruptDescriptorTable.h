@@ -63,12 +63,4 @@ private:
     GateDescriptor descriptors[DESCRIPTOR_COUNT];
 };
 
-#if 0
 
-inline static void __sizetest() {
-    int x = sizeof(InterruptDescriptorTable);
-    sizeof(GateDescriptor);
-    sizeof(IdtRegister);
-}
-
-#endif

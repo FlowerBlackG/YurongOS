@@ -105,8 +105,8 @@ void MemoryManager::processArds() {
     sprintf(
         s, 
         "[info] system total memory: %dG %dM %dK %dB\n"
-        "[info] system managed     : %dG %dM %dK %dB\n"
-        "[info] system mild memory : %dG %dM %dK %dB\n"
+        "[info] kernel managed     : %dG %dM %dK %dB\n"
+        "[info] kernel mild memory : %dG %dM %dK %dB\n"
         "[info] freeMemMgr managed : %dG %dM %dK %dB\n",
 
         systemTotalMemory >> 30, 

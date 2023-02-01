@@ -123,6 +123,9 @@ start:
     out 0xa1, al
     out 0x21, al
 
+    jmp 0:.flush_cs
+
+.flush_cs:
 
     ; 设置屏幕模式为文本模式，并清空屏幕。
     ; 中断指令号为 10H，当 AH=0H 时表示设置显示模式，模式具体为 AL。
@@ -135,7 +138,7 @@ start:
     mov ds, ax
     mov es, ax
     mov ss, ax
-    mov sp, 0x7800
+    mov esp, 0x7800
 
     ; 打开 A20 线。
     ; 若不打开，会触发回绕，即第20位（从0开始计数）及以上值被丢弃（取模）。
@@ -147,10 +150,31 @@ start:
     mov si, msg_memory_detect_done
     call print
 
+    ; 进入 unreal mode (big real mode)
+    push ds
+    lgdt [unreal_mode_gdt_pointer]
+
+    mov eax, cr0
+    or al, 1
+    mov cr0, eax
+    jmp 0x8:.temporary_protected_mode
+
+.temporary_protected_mode:
+    mov bx, 0x10
+    mov ds, bx
+
+    and al, 0xfe
+    mov cr0, eax
+    jmp 0:.unreal_mode
+
+.unreal_mode:
+    pop ds
+
+
     ; 加载二级加载器。
     mov bl, 2
     mov ecx, 2
-    mov edi, 0x7800 ; 将二级启动器加载到内存 0x7000 的位置。
+    mov edi, 0x7800 ; 将二级启动器加载到内存 0x7800 的位置。
     call read_disk
 
     cmp dword [0x7800], 0x644f6f47 ; 检查魔数：GoOd
@@ -374,6 +398,19 @@ read_disk:
         loop .read_word
 
         ret
+
+
+unreal_mode_gdt_pointer:
+    dw unreal_mode_gdt_end - unreal_mode_gdt_zero - 1
+    dd unreal_mode_gdt_zero
+unreal_mode_gdt_zero:
+    dq 0x0000000000000000
+unreal_mode_gdt_code:
+    dq 0x00009a000000ffff
+unreal_mode_gdt_data:
+    dq 0x00cf92000000ffff
+unreal_mode_gdt_end:
+
 
 times 510 - ($ - $$) db 0 ; 填充
 
