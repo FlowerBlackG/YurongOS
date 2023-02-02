@@ -33,6 +33,31 @@ void Machine::init() {
 
 }
 
+
+void Machine::setInterruptState(bool enabled) {
+    if (enabled) {
+        x86asmSti();
+    } else {
+        x86asmCli();
+    }
+}
+
+bool Machine::getInterruptState() {
+
+    uint64_t rax;
+
+    __asm (
+        "pushfq \n"
+        "popq %%rax \n"
+        "shrq $9, %%rax \n"
+        "andq $0x1, %%rax"
+        : "=a" (rax)
+        :
+    );
+
+    return rax;
+}
+
 void Machine::initGdt() {
     // 将原来的 gdt 换成内核代码里设置的 gdt。
     GlobalDescriptorTable::storeGdt(this->gdtr);

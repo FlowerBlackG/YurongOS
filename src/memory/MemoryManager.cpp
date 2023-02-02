@@ -7,6 +7,7 @@
 */
 
 #include <memory/MemoryManager.h>
+#include <memory/ArenaMemoryManager.h>
 #include <CRT.h>
 #include <stdio.h>
 
@@ -21,6 +22,8 @@ void MemoryManager::init() {
     this->systemManagedMildMemory = 0;
 
     this->processArds();
+
+    ArenaMemoryManager::init();
 }
 
 void MemoryManager::processArds() {
@@ -139,4 +142,12 @@ void MemoryManager::processArds() {
 
     }
 
+}
+
+uint64_t MemoryManager::allocPage(uint64_t count) {
+    return freeMemoryManager.alloc(4096 * count);
+}
+
+void MemoryManager::freePage(uint64_t addr, uint64_t count) {
+    freeMemoryManager.free(addr, 4096 * count);
 }

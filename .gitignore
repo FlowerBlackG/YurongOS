@@ -14,3 +14,5 @@ bochs/
 *.ini
 *.img.lock
 *.map
+
+build/

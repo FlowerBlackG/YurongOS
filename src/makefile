@@ -5,8 +5,10 @@
 # 普通文件构建目标路径。
 TARGET = ../build/objs
 
+ASM_DUMP_TARGET = ../build/asm-dump
+
 # 系统映像构建目标路径。
-YROSTARGET = ../build/YurongOS
+YROS_TARGET = ../build/YurongOS
 
 # 递归构建目录。
 DIRS = boot kernel lib crt machine memory interrupt
@@ -32,44 +34,49 @@ KERNEL_OBJS = $(KERNEL_TARGET)/kernel_entry.o \
 			  $(TARGET)/interrupt/ClockInterrupt.o \
 			  $(TARGET)/machine/Cmos.o \
 			  $(TARGET)/memory/MemoryManager.o \
-			  $(TARGET)/memory/FreeMemoryManager.o
+			  $(TARGET)/memory/FreeMemoryManager.o \
+			  $(TARGET)/memory/ArenaMemoryManager.o \
+			  $(TARGET)/memory/KernelMemoryAllocator.o 
 
 # 构建内核。
 .PHONY: yros_kernel
 yros_kernel: $(DIRS)
 	$(shell mkdir -p $(dir $@))
+	$(shell mkdir -p $(ASM_DUMP_TARGET))
 	ld -m elf_x86_64 -static $(KERNEL_OBJS) -o $(KERNEL_TARGET)/kernel.exe -T kernel.link.ld 
 	objcopy -O binary $(KERNEL_TARGET)/kernel.exe $(KERNEL_TARGET)/kernel.bin
-	objdump -d $(KERNEL_TARGET)/kernel.exe > $(KERNEL_TARGET)/kernel.exe.dump.asm
+	objdump -d $(KERNEL_TARGET)/kernel.exe > $(ASM_DUMP_TARGET)/kernel.exe.dump.asm
 
 # 部署文件。
 .PHONY: deploy
 deploy: yros_kernel
-	$(shell mkdir -p $(YROSTARGET))
+	$(shell mkdir -p $(YROS_TARGET))
 	yes | bximage -q -hd=256 -func=create -sectsize=512 -imgmode=flat \
-		$(YROSTARGET)/disk.img
-	dd if=$(TARGET)/boot/boot.bin of=$(YROSTARGET)/disk.img \
+		$(YROS_TARGET)/disk.img
+	dd if=$(TARGET)/boot/boot.bin of=$(YROS_TARGET)/disk.img \
 		bs=512 count=1 conv=notrunc
-	dd if=$(TARGET)/boot/kernel_loader.bin of=$(YROSTARGET)/disk.img \
+	dd if=$(TARGET)/boot/kernel_loader.bin of=$(YROS_TARGET)/disk.img \
 		bs=512 count=2 seek=2 conv=notrunc
-	dd if=$(TARGET)/kernel/kernel.bin of=$(YROSTARGET)/disk.img \
+	dd if=$(TARGET)/kernel/kernel.bin of=$(YROS_TARGET)/disk.img \
 		bs=512 count=1996 seek=4 conv=notrunc
-	cp ../tools/bochsrc $(YROSTARGET)/
+	cp ../tools/bochsrc $(YROS_TARGET)/
 
 
 # 清空构建内容。
 .PHONY: clean
 clean:
 	rm -rf $(TARGET)
+	rm -rf $(YROS_TARGET)
+	rm -rf $(ASM_DUMP_TARGET)
 
 # 构建并启动 bochs
 .PHONY: bochs
 bochs: deploy
-	cd $(YROSTARGET) && rm -f ./disk.img.lock && bochs -q -f ./bochsrc
+	cd $(YROS_TARGET) && rm -f ./disk.img.lock && bochs -q -f ./bochsrc
 
 .PHONY: bochsg
 bochsg: deploy
-	cd $(YROSTARGET) && bochs-gdb -q -f ./bochsrc.gdb
+	cd $(YROS_TARGET) && bochs-gdb -q -f ./bochsrc.gdb
 
 QEMU := qemu-system-x86_64 
 QEMU += -m 8G 
@@ -79,7 +86,7 @@ QEMU += -machine pcspk-audiodev=hda
 QEMU += -rtc base=localtime 
 QEMU += -d cpu_reset -D ./qemu.log 
 
-QEMU_DISK := -boot c -drive file=$(YROSTARGET)/disk.img,if=ide,index=0,media=disk,format=raw
+QEMU_DISK := -boot c -drive file=$(YROS_TARGET)/disk.img,if=ide,index=0,media=disk,format=raw
 
 # qemu。
 .PHONY: qemu
@@ -91,25 +98,13 @@ qemug: deploy
 	$(QEMU) $(QEMU_DISK) -s -S
 
 # vmware 硬盘。
-$(YROSTARGET)/disk.vmdk: deploy
-	qemu-img convert -O vmdk $(YROSTARGET)/disk.img $@
+$(YROS_TARGET)/disk.vmdk: deploy
+	qemu-img convert -O vmdk $(YROS_TARGET)/disk.img $@
 
 # 将 bochs 格式硬盘转换成 vmdk 格式，以便在 VMware 启动。
 .PHONY: vmdk
-vmdk: $(YROSTARGET)/disk.vmdk
+vmdk: $(YROS_TARGET)/disk.vmdk
 
 
 .PHONY: all
 all: deploy
-
-
-easyq: boot
-	$(shell mkdir -p $(YROSTARGET))
-	yes | bximage -q -hd=256 -func=create -sectsize=512 -imgmode=flat \
-		$(YROSTARGET)/disk.img
-	dd if=$(TARGET)/boot/boot.bin of=$(YROSTARGET)/disk.img \
-		bs=512 count=1 conv=notrunc
-	dd if=$(TARGET)/boot/kernel_loader.bin of=$(YROSTARGET)/disk.img \
-		bs=512 count=2 seek=2 conv=notrunc
-	$(QEMU) $(QEMU_DISK) -D ./qemu.log -monitor stdio -d cpu_reset
-	

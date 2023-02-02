@@ -17,6 +17,11 @@ public:
     void init();
 
 
+    void setInterruptState(bool enabled);
+
+    bool getInterruptState();
+
+
 private:
     void initGdt();
 

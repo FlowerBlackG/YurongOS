@@ -33,19 +33,22 @@ public:
 public:
 
     void init();
-    static MemoryManager& getInstance() {
+    static inline MemoryManager& getInstance() {
         return instance;
     }
 
     void processArds();
 
-    uint32_t getArdsCount() {
+    inline uint32_t getArdsCount() {
         return * (uint32_t*) (0x500);
     }
 
-    Ards* getArdsBuffer() {
+    inline Ards* getArdsBuffer() {
         return (Ards*) (0x508);
     }
+
+    uint64_t allocPage(uint64_t count = 1);
+    void freePage(uint64_t addr, uint64_t count = 1);
 
 protected:
 

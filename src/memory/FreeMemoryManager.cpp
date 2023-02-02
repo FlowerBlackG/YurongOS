@@ -8,6 +8,7 @@
 
 #include <memory/FreeMemoryManager.h>
 #include <memory/MemoryManager.h>
+#include <machine/Machine.h>
 
 /* ------------ Free Memory Manager ------------ */
 
@@ -38,9 +39,12 @@ int FreeMemoryManager::free(uint64_t address, uint64_t size, bool dontAdjustPage
 
     // 假设不存在覆盖问题。
 
-    auto addrIdx =DoubleLinkedTree::NODE_DATA_ADDRESS_IDX;
-    auto sizeIdx = DoubleLinkedTree::NODE_DATA_SIZE_IDX;
+    const auto addrIdx =DoubleLinkedTree::NODE_DATA_ADDRESS_IDX;
+    const auto sizeIdx = DoubleLinkedTree::NODE_DATA_SIZE_IDX;
     
+    bool prevInterruptState = Machine::getInstance().getInterruptState();
+    Machine::getInstance().setInterruptState(false);
+
     auto lessNode = addressIdxTree.findNode(
         address, addrIdx, 
         DoubleLinkedTree::FindNodeStrategy::MATCH_OR_LESS
@@ -55,6 +59,8 @@ int FreeMemoryManager::free(uint64_t address, uint64_t size, bool dontAdjustPage
     if (lessNode) {
         uint64_t lessNodeUpBound = lessNode->addressIdxData().value + lessNode->sizeIdxData().value;
         if (lessNodeUpBound >= address + size) {
+            
+            Machine::getInstance().setInterruptState(prevInterruptState);
             return 0;
         } else if (lessNodeUpBound > address) {
             size -= lessNodeUpBound - address;
@@ -67,8 +73,10 @@ int FreeMemoryManager::free(uint64_t address, uint64_t size, bool dontAdjustPage
         uint64_t moreNodeSize = moreNode->sizeIdxData().value;
 
         if (address == moreNodeAddr) {
+            
+            Machine::getInstance().setInterruptState(prevInterruptState);
             return 0;
-        } else {
+        } else if (address + size > moreNodeAddr) {
             size = moreNodeAddr - address;
         }
         
@@ -100,8 +108,8 @@ int FreeMemoryManager::free(uint64_t address, uint64_t size, bool dontAdjustPage
 
         sizeIdxTree.removeNode(moreNode, sizeIdx);
         sizeIdxTree.addNode(moreNode, sizeIdx);
-        addressIdxTree.removeNode(moreNode, sizeIdx);
-        addressIdxTree.addNode(moreNode, sizeIdx);
+        addressIdxTree.removeNode(moreNode, addrIdx);
+        addressIdxTree.addNode(moreNode, addrIdx);
 
         target = moreNode;
 
@@ -146,8 +154,8 @@ int FreeMemoryManager::free(uint64_t address, uint64_t size, bool dontAdjustPage
 
             sizeIdxTree.removeNode(moreNode, sizeIdx);
             sizeIdxTree.addNode(moreNode, sizeIdx);
-            addressIdxTree.removeNode(moreNode, sizeIdx);
-            addressIdxTree.addNode(moreNode, sizeIdx);
+            addressIdxTree.removeNode(moreNode, addrIdx);
+            addressIdxTree.addNode(moreNode, addrIdx);
 
             merged = true;
         }
@@ -184,6 +192,8 @@ int FreeMemoryManager::free(uint64_t address, uint64_t size, bool dontAdjustPage
     }
     
 
+    Machine::getInstance().setInterruptState(prevInterruptState);
+
     return 0;
 }
 
@@ -192,6 +202,10 @@ uint64_t FreeMemoryManager::alloc(uint64_t size, bool dontAdjustPage) {
     auto addrIdx =DoubleLinkedTree::NODE_DATA_ADDRESS_IDX;
     auto sizeIdx = DoubleLinkedTree::NODE_DATA_SIZE_IDX;
     
+    bool prevInterruptState = Machine::getInstance().getInterruptState();
+    Machine::getInstance().setInterruptState(false);
+
+
     DoubleLinkedTreeNode* node = this->sizeIdxTree.findNode(
         size, 
         sizeIdx, 
@@ -199,6 +213,8 @@ uint64_t FreeMemoryManager::alloc(uint64_t size, bool dontAdjustPage) {
     );
 
     if (node == nullptr) {
+        
+        Machine::getInstance().setInterruptState(prevInterruptState);
         return 0; // 找不到合适的节点。
     }
 
@@ -250,6 +266,8 @@ uint64_t FreeMemoryManager::alloc(uint64_t size, bool dontAdjustPage) {
         
     }
 
+
+    Machine::getInstance().setInterruptState(prevInterruptState);
     return result;
 
 }
@@ -452,7 +470,7 @@ int FreeMemoryManager::DoubleLinkedTree::addNode(
             
             break;
 
-        } else if (cmpResult < 0) {
+        } else if (cmpResult > 0) {
 
             auto lc = curr->nodeData[index].leftChild;
             if (lc) {
@@ -539,7 +557,7 @@ FreeMemoryManager::DoubleLinkedTree::findNode(
             candidate = curr;
             break;
 
-        } else if (currValue < value) {
+        } else if (currValue > value) {
 
             if (strategy == FindNodeStrategy::MATCH_OR_MORE) {
                 candidate = curr;
@@ -548,7 +566,7 @@ FreeMemoryManager::DoubleLinkedTree::findNode(
             curr = curr->nodeData[index].leftChild;
 
         } else {
-            // currValue > value
+            // currValue < value
 
             if (strategy == FindNodeStrategy::MATCH_OR_LESS) {
                 candidate = curr;
