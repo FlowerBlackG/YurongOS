@@ -365,7 +365,21 @@ kernel_loader:
     jne .fill_pml3_physical_map_entries
 
     ; 刷新页表缓存。
-    mov rax, pml4_address
+    mov qword rax, pml4_address
+    mov cr3, rax 
+
+    ; 进入高位地址空间。
+    mov rax, 0xFFFF_C000_0000_0000
+    add rax, .enter_kernel
+    jmp rax
+
+.enter_kernel:
+
+    ; 取消前 2M 直接映射。
+    mov word [pml4_address], 0
+
+    ; 刷新页表缓存。
+    mov qword rax, pml4_address
     mov cr3, rax 
 
     ; 跳转进入内核代码。

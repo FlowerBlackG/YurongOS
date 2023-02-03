@@ -542,6 +542,10 @@ FreeMemoryManager::DoubleLinkedTree::findNode(
     uint64_t value, int index, FindNodeStrategy strategy
 ) {
 
+    if (root == nullptr) {
+        return nullptr;
+    }
+
     auto curr = root;
     auto candidate = root;
 

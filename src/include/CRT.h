@@ -6,6 +6,8 @@
 #pragma once
 #include <sys/types.h>
 
+#include <memory/MemoryManager.h>
+
 class CRT {
 protected:
     CRT();
@@ -44,7 +46,7 @@ protected:
     /**
      * CRT 显存位置开始地址。
      */
-    static const long MEMORY_BASE = 0xb8000;
+    static const long MEMORY_BASE = 0xb8000 + MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
 
     /**
      * CRT 显存大小。32KB。

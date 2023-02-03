@@ -85,39 +85,7 @@ void Kernel::main() {
 
     x86asmCli();
 
-    s[0] = '\0';
-
-    while (true) {
-        void* mem = nullptr;
-
-
-        for (long long i = 0; i < 14LL * 1024 * 1024 * 1024; i+=1024000LL) {
-
-            int mega = (i / 1024 / 1024) % 1024;
-            int giga = (i / 1024 / 1024 / 1024) % 1024;
-            int kilo = (i / 1024) % 1024;
-
-            if (i == 4081) {
-                int x = 1;
-                mem = mem + 1;
-                mem = mem - 1;
-            }
-
-            mem = KernelMemoryAllocator::malloc(i);
-            sprintf(s, "mem alloc: %d G %d M %d K at 0x%llx ", giga, mega, kilo, mem);
-            CRT::getInstance().write(s);
-
-            if (giga == 3 && mega == 1023 && kilo == 1020) {
-                giga = 3;
-            }
-
-            KernelMemoryAllocator::free(mem);
-            CRT::getInstance().write("[freed]\n");
-        }
-
-    }
-
-    CRT::getInstance().write("mem alloc test done.\n");
+    CRT::getInstance().write("kernel init done.\n");
 
     while (true) {
         x86asmHlt();

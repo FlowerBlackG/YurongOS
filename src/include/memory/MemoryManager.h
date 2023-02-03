@@ -40,11 +40,11 @@ public:
     void processArds();
 
     inline uint32_t getArdsCount() {
-        return * (uint32_t*) (0x500);
+        return * (uint32_t*) (0x500 + ADDRESS_OF_PHYSICAL_MEMORY_MAP);
     }
 
     inline Ards* getArdsBuffer() {
-        return (Ards*) (0x508);
+        return (Ards*) (0x508 + ADDRESS_OF_PHYSICAL_MEMORY_MAP);
     }
 
     uint64_t allocPage(uint64_t count = 1);

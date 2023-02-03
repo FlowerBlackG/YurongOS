@@ -62,19 +62,16 @@ void Machine::initGdt() {
     // 将原来的 gdt 换成内核代码里设置的 gdt。
     GlobalDescriptorTable::storeGdt(this->gdtr);
 
-    memcpy(&gdt, (void*) gdtr.baseAddress, gdtr.limit + 1);
-    this->gdtr.baseAddress = (uint64_t) &this->gdt;
+    const auto MEM_MAP_ADDR = MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
+    uint64_t gdtBaseAddress = gdtr.baseAddress + MEM_MAP_ADDR;
+
+    memcpy(&gdt, (void*) gdtBaseAddress, gdtr.limit + 1);
+    this->gdtr.baseAddress = uint64_t(&this->gdt);
     this->gdtr.limit = sizeof(gdt) - 1;
 
     GlobalDescriptorTable::loadGdt(this->gdtr);
 
     CRT::getInstance().write("info: gdt reloaded.\n");
-}
-
-void test() {
-    CRT::getInstance().write("warning: int here!\n");
-    while (true)
-    ;
 }
 
 
@@ -106,7 +103,7 @@ void Machine::initIdt() {
     idt.setInterruptGate(0x20, (uint64_t) ClockInterrupt::entrance);
     idt.setInterruptGate(0x21, (uint64_t) KeyboardInterrupt::entrance);
 
-    idtr.baseAddress = (uint64_t) &idt;
+    idtr.baseAddress = uint64_t(&idt);
     idtr.limit = sizeof(idt) - 1;
 
     InterruptDescriptorTable::loadIdt(idtr);
