@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <machine/X86Assembly.h>
+#include <yros/machine/X86Assembly.h>
 
 #define IMPLEMENT_EXCEPTION_ENTRANCE(entranceFunctionName, handlerName) \
     void entranceFunctionName() { \

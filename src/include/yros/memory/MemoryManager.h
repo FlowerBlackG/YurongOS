@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <sys/types.h>
-#include <memory/FreeMemoryManager.h>
+#include <lib/sys/types.h>
+#include <yros/memory/FreeMemoryManager.h>
 
 struct Ards {
     uint64_t base;

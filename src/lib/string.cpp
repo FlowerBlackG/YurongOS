@@ -3,7 +3,7 @@
  * 创建于 2022年7月4日。
  */
 
-#include <string.h>
+#include <lib/string.h>
 
 char* strcpy(char* dest, const char* src) {
     char* pDest = dest;

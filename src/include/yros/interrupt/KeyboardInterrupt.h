@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include <machine/X86Assembly.h>
-#include <sys/types.h>
+#include <yros/machine/X86Assembly.h>
+#include <lib/sys/types.h>
 
 
 namespace KeyboardInterrupt {

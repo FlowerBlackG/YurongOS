@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <sys/types.h>
+#include <lib/sys/types.h>
 
 /**
  * 段选择子。

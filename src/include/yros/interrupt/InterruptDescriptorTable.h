@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <sys/types.h>
+#include <lib/sys/types.h>
 
 /**
  * IDT 寄存器。

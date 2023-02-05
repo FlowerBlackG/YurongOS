@@ -6,13 +6,13 @@
 
 */
 
-#include <interrupt/KeyboardInterrupt.h>
-#include <interrupt/ImplementHandlerMacros.h>
-#include <CRT.h>
-#include <machine/Machine.h>
+#include <yros/interrupt/KeyboardInterrupt.h>
+#include <yros/interrupt/ImplementHandlerMacros.h>
+#include <yros/CRT.h>
+#include <yros/machine/Machine.h>
 #include <yros/IO.h>
-#include <stdio.h>
-#include <AsciiChar.h>
+#include <lib/stdio.h>
+#include <yros/AsciiChar.h>
 
 namespace KeyboardInterrupt {
 

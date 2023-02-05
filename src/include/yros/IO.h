@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <sys/types.h>
+#include <lib/sys/types.h>
 
 extern "C" uint8_t __io_in_byte(uint16_t port);
 extern "C" uint16_t __io_in_word(uint16_t port);

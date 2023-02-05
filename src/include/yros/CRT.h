@@ -4,9 +4,9 @@
  */
 
 #pragma once
-#include <sys/types.h>
+#include <lib/sys/types.h>
 
-#include <memory/MemoryManager.h>
+#include <yros/memory/MemoryManager.h>
 
 class CRT {
 protected:

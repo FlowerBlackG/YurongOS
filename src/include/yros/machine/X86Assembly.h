@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <sys/types.h>
+#include <lib/sys/types.h>
 
 #define x86asmSti() __asm ("sti")
 #define x86asmCli() __asm ("cli")

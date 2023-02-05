@@ -6,7 +6,7 @@
 
 */
 
-#include <memory/ArenaMemoryManager.h>
+#include <yros/memory/ArenaMemoryManager.h>
 
 ArenaBlockNode* ArenaStage::getBlock(uint32_t index) {
     if (index >= descriptor->blocksPerPage) {

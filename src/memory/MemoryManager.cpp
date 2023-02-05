@@ -6,13 +6,13 @@
 
 */
 
-#include <memory/MemoryManager.h>
-#include <memory/ArenaMemoryManager.h>
-#include <CRT.h>
-#include <stdio.h>
+#include <yros/memory/MemoryManager.h>
+#include <yros/memory/ArenaMemoryManager.h>
+#include <yros/CRT.h>
+#include <lib/stdio.h>
 
-#include <sys/types.h>
-#include <machine/Cmos.h>
+#include <lib/sys/types.h>
+#include <yros/machine/Cmos.h>
 
 void MemoryManager::init() {
     this->freeMemoryManager.init();

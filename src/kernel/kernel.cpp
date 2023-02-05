@@ -3,16 +3,16 @@
  * 创建于 2022年7月1日
  */
 
-#include <sys/types.h>
+#include <lib/sys/types.h>
 #include <yros/IO.h>
 #include <yros/Kernel.h>
-#include <CRT.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <machine/Machine.h>
-#include <machine/X86Assembly.h>
-#include <memory/MemoryManager.h>
-#include <memory/KernelMemoryAllocator.h>
+#include <yros/CRT.h>
+#include <lib/stdarg.h>
+#include <lib/stdio.h>
+#include <yros/machine/Machine.h>
+#include <yros/machine/X86Assembly.h>
+#include <yros/memory/MemoryManager.h>
+#include <yros/memory/KernelMemoryAllocator.h>
 
 
 /*
@@ -83,7 +83,7 @@ void Kernel::main() {
 
     Machine::getInstance().init();
 
-    x86asmCli();
+    //x86asmSti();
 
     CRT::getInstance().write("kernel init done.\n");
 

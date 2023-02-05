@@ -3,10 +3,10 @@
  * 创建于 2022年7月6日。
  */
 
-#include <CRT.h>
+#include <yros/CRT.h>
 #include <yros/IO.h>
-#include <string.h>
-#include <AsciiChar.h>
+#include <lib/string.h>
+#include <yros/AsciiChar.h>
 
 CRT::CRT() {
 

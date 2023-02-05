@@ -3,17 +3,17 @@
  * 创建于 2022年7月15日。
  */
 
-#include <machine/Machine.h>
-#include <stdint.h>
-#include <string.h>
-#include <CRT.h>
+#include <yros/machine/Machine.h>
+#include <lib/stdint.h>
+#include <lib/string.h>
+#include <yros/CRT.h>
 #include <yros/IO.h>
-#include <stdio.h>
-#include <machine/X86Assembly.h>
-#include <interrupt/InterruptHandlers.h>
-#include <interrupt/ClockInterrupt.h>
-#include <interrupt/KeyboardInterrupt.h>
-#include <memory/MemoryManager.h>
+#include <lib/stdio.h>
+#include <yros/machine/X86Assembly.h>
+#include <yros/interrupt/InterruptHandlers.h>
+#include <yros/interrupt/ClockInterrupt.h>
+#include <yros/interrupt/KeyboardInterrupt.h>
+#include <yros/memory/MemoryManager.h>
 
 Machine::Machine() {
 

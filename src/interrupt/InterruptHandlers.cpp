@@ -5,14 +5,14 @@
 
 */
 
-#include <interrupt/InterruptHandlers.h>
-#include <interrupt/ImplementHandlerMacros.h>
+#include <yros/interrupt/InterruptHandlers.h>
+#include <yros/interrupt/ImplementHandlerMacros.h>
 
-#include <CRT.h>
+#include <yros/CRT.h>
 #include <yros/IO.h>
-#include <machine/Machine.h>
-#include <string.h>
-#include <stdio.h>
+#include <yros/machine/Machine.h>
+#include <lib/string.h>
+#include <lib/stdio.h>
 
 namespace InterruptHandlers {
 

@@ -9,8 +9,8 @@
  *   https://cplusplus.com/reference/cstdio/printf/
  */
 
-#include <stdio.h>
-#include <string.h>
+#include <lib/stdio.h>
+#include <lib/string.h>
 
 int sprintf(char* buffer, const char* format, ...) {
     va_list args;

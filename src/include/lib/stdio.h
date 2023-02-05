@@ -11,8 +11,8 @@
 
 #pragma once
 
-#include <sys/types.h>
-#include <stdarg.h>
+#include <lib/sys/types.h>
+#include <lib/stdarg.h>
 
 // 文件结尾标示值。
 #ifndef EOF

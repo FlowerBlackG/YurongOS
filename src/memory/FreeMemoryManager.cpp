@@ -6,9 +6,9 @@
 
 */
 
-#include <memory/FreeMemoryManager.h>
-#include <memory/MemoryManager.h>
-#include <machine/Machine.h>
+#include <yros/memory/FreeMemoryManager.h>
+#include <yros/memory/MemoryManager.h>
+#include <yros/machine/Machine.h>
 
 /* ------------ Free Memory Manager ------------ */
 

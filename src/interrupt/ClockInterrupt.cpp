@@ -7,11 +7,11 @@
 */
 
 
-#include <interrupt/ClockInterrupt.h>
-#include <interrupt/ImplementHandlerMacros.h>
-#include <CRT.h>
+#include <yros/interrupt/ClockInterrupt.h>
+#include <yros/interrupt/ImplementHandlerMacros.h>
+#include <yros/CRT.h>
 #include <yros/IO.h>
-#include <machine/Machine.h>
+#include <yros/machine/Machine.h>
 
 namespace ClockInterrupt {
 

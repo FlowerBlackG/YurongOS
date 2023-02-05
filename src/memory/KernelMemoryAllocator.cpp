@@ -6,9 +6,9 @@
 
 */
 
-#include <memory/MemoryManager.h>
-#include <memory/ArenaMemoryManager.h>
-#include <memory/KernelMemoryAllocator.h>
+#include <yros/memory/MemoryManager.h>
+#include <yros/memory/ArenaMemoryManager.h>
+#include <yros/memory/KernelMemoryAllocator.h>
 
 #include <yros/Kernel.h>
 

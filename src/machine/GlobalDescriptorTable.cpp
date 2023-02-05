@@ -4,7 +4,7 @@
  * 创建于 2022年7月15日。
  */
 
-#include <machine/GlobalDescriptorTable.h>
+#include <yros/machine/GlobalDescriptorTable.h>
 
 
 void GlobalDescriptorTable::storeGdt(GdtRegister& gdtr) {

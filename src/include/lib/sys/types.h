@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <lib/stdint.h>
 
 /** 文件结尾。 */
 #ifndef EOF
