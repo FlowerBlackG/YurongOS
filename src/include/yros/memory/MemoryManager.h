@@ -10,6 +10,7 @@
 
 #include <lib/sys/types.h>
 #include <yros/memory/FreeMemoryManager.h>
+#include <yros/memory/PageDirectories.h>
 
 struct Ards {
     uint64_t base;
@@ -29,12 +30,23 @@ class MemoryManager {
 public:
     static const unsigned long ADDRESS_OF_PHYSICAL_MEMORY_MAP = 0xFFFFC00000000000UL;
     static const unsigned long BEGIN_OF_USABLE_ADDRESS = 0xF00000;
+    static const int PAGE_SIZE = 4096;
+
+    static const unsigned long USER_STACK_BASE = 0x800000000000;
+
+    static const unsigned long KERNEL_PML4_ADDRESS = 0x1000;
 
 public:
 
     void init();
     static inline MemoryManager& getInstance() {
         return instance;
+    }
+
+    static PageMapLevel4 getKernelPml4() {
+        return reinterpret_cast<PageMapLevel4>(
+            KERNEL_PML4_ADDRESS + ADDRESS_OF_PHYSICAL_MEMORY_MAP
+        );
     }
 
     void processArds();
@@ -51,7 +63,6 @@ public:
     void freePage(uint64_t addr, uint64_t count = 1);
 
 protected:
-
 
     FreeMemoryManager freeMemoryManager;
 

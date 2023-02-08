@@ -42,8 +42,7 @@ int FreeMemoryManager::free(uint64_t address, uint64_t size, bool dontAdjustPage
     const auto addrIdx =DoubleLinkedTree::NODE_DATA_ADDRESS_IDX;
     const auto sizeIdx = DoubleLinkedTree::NODE_DATA_SIZE_IDX;
     
-    bool prevInterruptState = Machine::getInstance().getInterruptState();
-    Machine::getInstance().setInterruptState(false);
+    bool prevInterruptState = Machine::getInstance().getAndSetInterruptState(false);
 
     auto lessNode = addressIdxTree.findNode(
         address, addrIdx, 
@@ -202,8 +201,7 @@ uint64_t FreeMemoryManager::alloc(uint64_t size, bool dontAdjustPage) {
     auto addrIdx =DoubleLinkedTree::NODE_DATA_ADDRESS_IDX;
     auto sizeIdx = DoubleLinkedTree::NODE_DATA_SIZE_IDX;
     
-    bool prevInterruptState = Machine::getInstance().getInterruptState();
-    Machine::getInstance().setInterruptState(false);
+    bool prevInterruptState = Machine::getInstance().getAndSetInterruptState(false);
 
 
     DoubleLinkedTreeNode* node = this->sizeIdxTree.findNode(

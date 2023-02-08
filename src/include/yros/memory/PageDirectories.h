@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <sys/types.h>
+#include <lib/sys/types.h>
 
 /*
 
@@ -56,6 +56,8 @@ struct PageTableEntry {
 
 } __packed;
 
+typedef PageTableEntry PageMapLevel1Entry;
+
 struct PageDirectoryEntry {
     uint64_t present : 1;
     uint64_t rw : 1;
@@ -77,6 +79,9 @@ struct PageDirectoryEntry {
 } __packed;
 
 typedef PageDirectoryEntry PageDirectoryPointerEntry;
+
+typedef PageDirectoryEntry PageMapLevel2Entry;
+typedef PageDirectoryPointerEntry PageMapLevel3Entry;
 
 /**
  * Page Map Level 4 Entry.
@@ -101,13 +106,20 @@ struct PageMapGlobalEntry {
 
     uint64_t available1 : 4;
     uint64_t pageFrameNumber : 36;
-// 0x 00 00  00 00 0
+
     // byte 6, 7
 
     uint64_t reserved1 : 4;
     uint64_t available2 : 11;
     uint64_t executeDisable : 1;
 } __packed;
+
+typedef PageMapGlobalEntry PageMapLevel4Entry;
+
+typedef PageMapLevel1Entry* PageMapLevel1;
+typedef PageMapLevel2Entry* PageMapLevel2;
+typedef PageMapLevel3Entry* PageMapLevel3;
+typedef PageMapLevel4Entry* PageMapLevel4;
 
 #if 1
 static void __check_size() {

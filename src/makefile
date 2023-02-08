@@ -11,7 +11,7 @@ ASM_DUMP_TARGET = ../build/asm-dump
 YROS_TARGET = ../build/YurongOS
 
 # 递归构建目录。
-DIRS = boot kernel lib crt machine memory interrupt
+DIRS = boot kernel lib crt machine memory interrupt task
 .PHONY: $(DIRS)
 $(DIRS):
 	$(MAKE) --directory=$@
@@ -26,17 +26,22 @@ KERNEL_OBJS = $(KERNEL_TARGET)/kernel_entry.o \
 			  $(KERNEL_TARGET)/kernel.o \
 			  $(TARGET)/lib/string.o \
 			  $(TARGET)/lib/stdio.o \
+			  $(TARGET)/lib/syscall.o \
+			  $(TARGET)/lib/LinkedList.o \
 			  $(TARGET)/machine/Machine.o \
 			  $(TARGET)/machine/GlobalDescriptorTable.o \
 			  $(TARGET)/interrupt/InterruptDescriptorTable.o \
 			  $(TARGET)/interrupt/InterruptHandlers.o \
 			  $(TARGET)/interrupt/KeyboardInterrupt.o \
 			  $(TARGET)/interrupt/ClockInterrupt.o \
+			  $(TARGET)/interrupt/SystemCall.o \
 			  $(TARGET)/machine/Cmos.o \
 			  $(TARGET)/memory/MemoryManager.o \
 			  $(TARGET)/memory/FreeMemoryManager.o \
 			  $(TARGET)/memory/ArenaMemoryManager.o \
-			  $(TARGET)/memory/KernelMemoryAllocator.o 
+			  $(TARGET)/memory/KernelMemoryAllocator.o \
+			  $(TARGET)/task/TaskManager.o \
+			  $(TARGET)/task/TaskManagerSwitchTo.o \
 
 # 构建内核。
 .PHONY: yros_kernel

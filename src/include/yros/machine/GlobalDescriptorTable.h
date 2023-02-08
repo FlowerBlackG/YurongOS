@@ -24,10 +24,13 @@ struct SegmentSelector {
  * 段描述符。
  */
 struct SegmentDescriptor {
-    uint16_t limitLow : 16;
-    uint16_t baseLow : 16;
 
-    uint8_t baseMid : 8;
+    const static int SEGMENT_TYPE_CODE_DATA = 1;
+
+    uint16_t limitLow;
+    uint16_t baseLow;
+
+    uint8_t baseMid;
 
     // access byte
 
@@ -82,7 +85,52 @@ struct SegmentDescriptor {
     uint8_t granularity : 1;
 
 
-    uint8_t baseHigh : 8;
+    uint8_t baseHigh;
+
+} __packed;
+
+struct SystemSegmentDescriptor {
+
+    const static int SEGMENT_TYPE_SYSTEM = 0;
+
+    const static int SYSTEM_SEGMENT_TYPE_LDT = 0x2;
+    const static int SYSTEM_SEGMENT_TYPE_64_BIT_AVAILABLE = 0x9;
+    const static int SYSTEM_SEGMENT_TYPE_64_BIT_BUSY = 0xB;
+
+    uint16_t limitLow;
+    uint16_t baseLow;
+
+    uint8_t baseMid;
+
+    // access byte
+
+    uint8_t systemSegmentType : 4;
+
+    /** 0表示系统段，1表示代码/数据段。 */
+    uint8_t descriptorType : 1;
+    uint8_t privilegeLevel : 2;
+    uint8_t present : 1;
+
+    uint8_t limitHigh : 4;
+
+    // flags
+
+    uint8_t reserved0 : 1;
+
+    /** 表示是否使用64位模式。 */
+    uint8_t longMode : 1;
+
+    /** 0表示16位保护模式段。1表示32位保护模式段。 */
+    uint8_t sizeFlag : 1;
+
+    /** 粒度。0表示1byte，1表示4KB，用于描述 limit 的粒度。 */
+    uint8_t granularity : 1;
+
+
+    uint8_t baseHigh;
+
+    uint32_t baseUltraHigh;
+    uint32_t reserved1;
 
 } __packed;
 
@@ -91,19 +139,89 @@ struct GdtRegister {
     uint64_t baseAddress;
 } __packed;
 
+struct TaskStateSegment {
+    uint32_t reserved0;
+    
+    uint32_t rsp0Low;
+    uint32_t rsp0High;
+    uint32_t rsp1Low;
+    uint32_t rsp1High;
+    uint32_t rsp2Low;
+    uint32_t rsp2High;
+
+    uint32_t reserved1;
+    uint32_t reserved2;
+
+    uint32_t ist1Low;
+    uint32_t ist1High;
+    uint32_t ist2Low;
+    uint32_t ist2High;
+    uint32_t ist3Low;
+    uint32_t ist3High;
+    uint32_t ist4Low;
+    uint32_t ist4High;
+    uint32_t ist5Low;
+    uint32_t ist5High;
+    uint32_t ist6Low;
+    uint32_t ist6High;
+    uint32_t ist7Low;
+    uint32_t ist7High;
+
+    uint32_t reserved3;
+    uint32_t reserved4;
+
+    uint16_t reserved5;
+    uint16_t iopb;
+
+} __packed;
+
 /**
  * 全局描述符表（GDT）。
  */
-class GlobalDescriptorTable {
-public:
-    static void storeGdt(GdtRegister& gdtr);
-    static void loadGdt(const GdtRegister& gdtr);
-private:
-    SegmentDescriptor descriptors[8];
+namespace GlobalDescriptorTable {
+
+    const int KERNEL_CODE_DESCRIPTOR_IDX = 1;
+    const int KERNEL_DATA_DESCRIPTOR_IDX = 2;
+    const int USER_CODE_DESCRIPTOR_IDX = 3;
+    const int USER_DATA_DESCRIPTOR_IDX = 4;
+    const int TASK_STATE_SEGMENT_DESCRIPTOR_IDX = 5;
+
+    const int KERNEL_CODE_SELECTOR = KERNEL_CODE_DESCRIPTOR_IDX << 3;
+    const int KERNEL_DATA_SELECTOR = KERNEL_DATA_DESCRIPTOR_IDX << 3;
+
+    const int USER_CODE_SELECTOR = (USER_CODE_DESCRIPTOR_IDX << 3) | 0x3;
+    const int USER_DATA_SELECTOR = (USER_DATA_DESCRIPTOR_IDX << 3) | 0x3;
+
+    const int TASK_STATE_SEGMENT_SELECTOR = TASK_STATE_SEGMENT_DESCRIPTOR_IDX << 3;
+
+    void init();
+
+    void initTaskStateSegment();
+
+    void storeGdt(GdtRegister& gdtr);
+    void loadGdt(const GdtRegister& gdtr);
+
+    struct Descriptors {
+        SegmentDescriptor zero;
+        SegmentDescriptor kernelCode;
+        SegmentDescriptor kernelData;
+        SegmentDescriptor userCode;
+        SegmentDescriptor userData;
+        SystemSegmentDescriptor systemSegmentDescriptor;
+    } __packed;
+
+    extern Descriptors descriptors;
+    extern TaskStateSegment taskStateSegment;
 };
 
 #if 0
 static void __check_size() {
     sizeof(GdtRegister);
+    sizeof(SegmentDescriptor);
+    sizeof(SystemSegmentDescriptor);
+    static_assert(sizeof(SystemSegmentDescriptor) == 128 / 8);
+    static_assert(8 == sizeof(SegmentDescriptor));
+    sizeof(TaskStateSegment);
+    static_assert(sizeof(TaskStateSegment) == 0x68);
 }
 #endif

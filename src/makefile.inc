@@ -24,4 +24,4 @@ CFLAGS += -mcmodel=large
 
 CFLAGS := $(strip $(CFLAGS))
 
-# -Wall -g -nostartfiles -fno-builtin -nostdinc -fno-pic -fno-pie -nostdlib -fno-stack-protector -fno-threadsafe-statics
+# -Wall -g -nostartfiles -fno-builtin -fno-threadsafe-statics -nostdinc -fno-pic -fno-pie -nostdlib -fno-stack-protector -mno-sse2 -mno-sse -mno-mmx  -mno-red-zone  

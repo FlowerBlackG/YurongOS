@@ -22,9 +22,23 @@
     #define __packed __attribute__((packed))
 #endif
 
+#ifndef __no_return
+    #define __no_return __attribute__((__noreturn__))
+#endif
+
+#ifndef __omit_frame_pointer
+    #define __omit_frame_pointer __attribute__((optimize("omit-frame-pointer")))
+#endif
+
+#ifndef __force_inline
+    #define __force_inline __attribute__((always_inline)) inline
+#endif
+
 /** 内联汇编。 */
 #ifndef __asm
     #define __asm __asm__ __volatile__
 #endif
 
 typedef unsigned long size_t;
+
+typedef int32_t pid_t;

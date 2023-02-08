@@ -7,6 +7,12 @@
 #include <yros/IO.h>
 #include <lib/string.h>
 #include <yros/AsciiChar.h>
+#include <yros/machine/Machine.h>
+
+
+
+CRT CRT::instance;
+
 
 CRT::CRT() {
 
@@ -138,6 +144,9 @@ void CRT::setCurrentScreenPos(size_t pos) { // protected
 }
 
 void CRT::putchar(uint8_t ch) {
+
+    bool prevIf = Machine::getInstance().getAndSetInterruptState(false);
+
     // 光标所在位置的显示内存地址。
     char* cursorMemAddr = (char*) (
         MEMORY_BASE + (currentScreenPos + cursorY * COLS + cursorX) * 2
@@ -158,10 +167,9 @@ void CRT::putchar(uint8_t ch) {
             moveCursor(0, cursorY + 1);
         }
 
-        return;
-    }
-
-    switch(ch) {
+    } 
+    else switch(ch) 
+    {
         case AsciiChar::CR: // \r
             moveCursor(0, cursorY);
             break;
@@ -177,6 +185,8 @@ void CRT::putchar(uint8_t ch) {
         default:
             break;
     }
+
+    Machine::getInstance().setInterruptState(prevIf);
 }
 
 

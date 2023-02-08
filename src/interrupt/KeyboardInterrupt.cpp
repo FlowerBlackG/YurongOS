@@ -14,6 +14,8 @@
 #include <lib/stdio.h>
 #include <yros/AsciiChar.h>
 
+#include <yros/task/TaskManager.h>
+
 namespace KeyboardInterrupt {
 
     uint8_t keymap[KEYMAP_SIZE] = {
@@ -45,12 +47,14 @@ namespace KeyboardInterrupt {
 
         if (key >= AsciiChar::START_OF_VISIBLE_CHARS && key <= AsciiChar::END_OF_VISIBLE_CHARS) {
             CRT::getInstance().putchar(key);
-        } else if (!(scancode & 0x90)) {
+        } else {
             CRT::getInstance().write("------------\nkeyboard interrupt\n");
             CRT::getInstance().write(s);
         }
 
         /* 通知中断控制器，该中断处理完毕。 */
         IO::outByte(Machine::PIC_MASTER_CTRL, Machine::PIC_EOI);
+
+        TaskManager::schedule();
     }
 }

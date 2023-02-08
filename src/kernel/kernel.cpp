@@ -13,17 +13,8 @@
 #include <yros/machine/X86Assembly.h>
 #include <yros/memory/MemoryManager.h>
 #include <yros/memory/KernelMemoryAllocator.h>
-
-
-/*
- * 手动列出所有需要构造的对象的静态对象。
- */
-
-
-CRT CRT::instance;
-Machine Machine::instance;
-MemoryManager MemoryManager::instance;
-
+#include <yros/task/TaskManager.h>
+#include <yros/interrupt/SystemCall.h>
 
 
 /**
@@ -74,6 +65,45 @@ void Kernel::panic(const char* s) {
     }
 }
 
+void write_num(int x) {
+    x++;
+    x--;
+    while (true) {
+        for (int i = 0; i < 80000000; i++)
+            ;
+            
+        char s[128];
+        
+        sprintf(s, "%d cr3: 0x%llx\n",
+            x,
+            Machine::getCR3()
+        );
+
+        CRT::getInstance().write(s);
+    }
+}
+
+void t1() {
+    for (int i = 0; i < 20000000; i++)
+            ;
+    write_num(1);
+    
+}
+
+
+void t2() {                    
+    for (int i = 0; i < 50000000; i++)
+            ;
+    
+    write_num(2);
+}
+
+
+void t0() {
+    
+    write_num(0);
+}
+
 void Kernel::main() {
 
     char s[256];
@@ -83,7 +113,34 @@ void Kernel::main() {
 
     Machine::getInstance().init();
 
-    //x86asmSti();
+    SystemCall::init();
+
+    TaskManager::create(t0, "p0", true);
+   // TaskManager::create(t1, "p1", true);
+   // TaskManager::create(t2, "p2", true);
+
+            auto& tss = GlobalDescriptorTable::taskStateSegment;
+        unsigned long sp = (unsigned long) TaskManager::taskTable[0];
+        sp += MemoryManager::PAGE_SIZE;
+        tss.rsp0Low = sp & 0xFFFFFFFF;
+        tss.rsp0High = ((sp >> 16) >> 16) & 0xFFFFFFFF;
+
+        Machine::setCR3(TaskManager::taskTable[0]->pml4Address);
+
+//    TaskManager::switchTo(TaskManager::taskTable[0]);
+    __asm (
+        "movq %0, %%rsp"
+        :
+        : "m" (TaskManager::taskTable[0]->kernelStackPointer)
+    );
+    
+
+    x86asmRestoreContext();
+    x86asmBochsMagicBreakpoint();
+    //__asm ("addq $16, %rsp");
+    x86asmLeave();
+   // x86asmSti();
+    x86asmIret();
 
     CRT::getInstance().write("kernel init done.\n");
 

@@ -134,7 +134,7 @@ private:
     FreeMemoryManager(const FreeMemoryManager&) = delete;
     
 
-    static_assert(sizeof(FreeMemoryManager::PageLinkNode) == 4096);
+    // static_assert(sizeof(FreeMemoryManager::PageLinkNode) == MemoryManager::PAGE_SIZE);
     
 };
 

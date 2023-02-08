@@ -52,7 +52,25 @@ namespace InterruptHandlers {
     IMPLEMENT_EXCEPTION_WITH_ERRCODE_ENTRANCE(generalProtectionExceptionEntrance, generalProtectionExceptionHandler)
     IMPLEMENT_EXCEPTION_WITH_ERRCODE_HANDLER(generalProtectionExceptionHandler, "generalProtection", 0)
     IMPLEMENT_EXCEPTION_WITH_ERRCODE_ENTRANCE(pageFaultExceptionEntrance, pageFaultExceptionHandler)
-    IMPLEMENT_EXCEPTION_WITH_ERRCODE_HANDLER(pageFaultExceptionHandler, "pageFault", 0)
+    
+    
+    //IMPLEMENT_EXCEPTION_WITH_ERRCODE_HANDLER(pageFaultExceptionHandler, "pageFault", 0)
+    
+    void pageFaultExceptionHandler( 
+        SoftwareContextRegisters* softwareRegs, 
+        HardwareContextRegisters* hardwareRegs 
+    ) { 
+        char s[128];
+        sprintf(s, "rip: 0x%llx\nerr: %lld\n", hardwareRegs->rip, hardwareRegs->errorCode);
+        CRT::getInstance().write(s); 
+        CRT::getInstance().write("\n"); 
+        x86asmCli(); 
+        while (true) {
+            x86asmHlt();
+        }
+             
+    }
+    
     IMPLEMENT_EXCEPTION_ENTRANCE(mathFaultExceptionEntrance, mathFaultExceptionHandler)
     IMPLEMENT_EXCEPTION_HANDLER(mathFaultExceptionHandler, "mathFault", 0)
     IMPLEMENT_EXCEPTION_WITH_ERRCODE_ENTRANCE(alignmentCheckingExceptionEntrance, alignmentCheckingExceptionHandler)

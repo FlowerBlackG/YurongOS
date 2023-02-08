@@ -24,8 +24,8 @@ namespace KernelMemoryAllocator {
             uint64_t requiredSize = size + sizeof(ArenaStage);
 
             // 按照 4KB 向上取整。计算需要的页数。
-            requiredSize += (4096 - 1);
-            uint64_t requiredPages = requiredSize /= 4096;
+            requiredSize += (MemoryManager::PAGE_SIZE - 1);
+            uint64_t requiredPages = requiredSize /= MemoryManager::PAGE_SIZE;
             
             void* page = allocPage(requiredPages);
             if (page == nullptr) {

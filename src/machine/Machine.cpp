@@ -15,13 +15,15 @@
 #include <yros/interrupt/KeyboardInterrupt.h>
 #include <yros/memory/MemoryManager.h>
 
+Machine Machine::instance;
+
 Machine::Machine() {
 
 }
 
 void Machine::init() {
 
-    this->initGdt();
+    GlobalDescriptorTable::init();
 
     // 需要在设置中断前初始化内存。
     // 内存初始化过程中，会依赖 bios 提供的中断程序。
@@ -42,6 +44,28 @@ void Machine::setInterruptState(bool enabled) {
     }
 }
 
+
+bool Machine::getAndSetInterruptState(bool enabled) {
+    uint64_t rax;
+
+    __asm (
+        "pushfq \n"
+        "popq %%rax \n"
+        "shrq $9, %%rax \n"
+        "andq $0x1, %%rax"
+        : "=a" (rax)
+        :
+    );
+
+    if (enabled) {
+        x86asmSti();
+    } else {
+        x86asmCli();
+    }
+
+    return rax;
+}
+
 bool Machine::getInterruptState() {
 
     uint64_t rax;
@@ -58,22 +82,37 @@ bool Machine::getInterruptState() {
     return rax;
 }
 
-void Machine::initGdt() {
-    // 将原来的 gdt 换成内核代码里设置的 gdt。
-    GlobalDescriptorTable::storeGdt(this->gdtr);
-
-    const auto MEM_MAP_ADDR = MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
-    uint64_t gdtBaseAddress = gdtr.baseAddress + MEM_MAP_ADDR;
-
-    memcpy(&gdt, (void*) gdtBaseAddress, gdtr.limit + 1);
-    this->gdtr.baseAddress = uint64_t(&this->gdt);
-    this->gdtr.limit = sizeof(gdt) - 1;
-
-    GlobalDescriptorTable::loadGdt(this->gdtr);
-
-    CRT::getInstance().write("info: gdt reloaded.\n");
+void Machine::setCR3(uint64_t pml4Addr) {
+    __asm (
+        "movq %%rax, %%cr3"
+        :
+        : "a" (pml4Addr)
+    );
 }
 
+uint64_t Machine::getCR2() {
+    uint64_t res;
+
+    __asm (
+        "movq %%cr2, %%rax" 
+        : "=a" (res) 
+        :
+    );
+
+    return res;
+}
+
+uint64_t Machine::getCR3() {
+    uint64_t res;
+
+    __asm (
+        "movq %%cr3, %%rax" 
+        : "=a" (res) 
+        :
+    );
+
+    return res;
+}
 
 void Machine::initIdt() {
 
@@ -86,12 +125,12 @@ void Machine::initIdt() {
     idt.setTrapGate(5, (long) InterruptHandlers::boundaryRangeExceededExceptionEntrance);
     idt.setTrapGate(6, (long) InterruptHandlers::undefinedOpcodeExceptionEntrance);
     idt.setTrapGate(7, (long) InterruptHandlers::deviceNotAvailableExceptionEntrance);
-    idt.setTrapGate(8, (long) InterruptHandlers::doubleFaultExceptionEntrance);
+ //   idt.setTrapGate(8, (long) InterruptHandlers::doubleFaultExceptionEntrance);
     idt.setTrapGate(10, (long) InterruptHandlers::invalidTssExceptionEntrance);
     idt.setTrapGate(11, (long) InterruptHandlers::notPresentExceptionEntrance);
     idt.setTrapGate(12, (long) InterruptHandlers::stackSegmentExceptionEntrance);
     idt.setTrapGate(13, (long) InterruptHandlers::generalProtectionExceptionEntrance);
-    idt.setTrapGate(14, (long) InterruptHandlers::pageFaultExceptionEntrance);
+  //  idt.setTrapGate(14, (long) InterruptHandlers::pageFaultExceptionEntrance);
     idt.setTrapGate(16, (long) InterruptHandlers::mathFaultExceptionEntrance);
     idt.setTrapGate(17, (long) InterruptHandlers::alignmentCheckingExceptionEntrance);
     idt.setTrapGate(18, (long) InterruptHandlers::machineCheckExceptionEntrance);
@@ -103,11 +142,13 @@ void Machine::initIdt() {
     idt.setInterruptGate(0x20, (uint64_t) ClockInterrupt::entrance);
     idt.setInterruptGate(0x21, (uint64_t) KeyboardInterrupt::entrance);
 
+    IdtRegister idtr;
+
     idtr.baseAddress = uint64_t(&idt);
     idtr.limit = sizeof(idt) - 1;
 
     InterruptDescriptorTable::loadIdt(idtr);
-    CRT::getInstance().write("info: idt loaded.\n");
+    CRT::getInstance().write("[info] idt loaded.\n");
 }
 
 

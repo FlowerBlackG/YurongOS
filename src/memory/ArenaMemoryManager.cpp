@@ -7,6 +7,7 @@
 */
 
 #include <yros/memory/ArenaMemoryManager.h>
+#include <yros/memory/MemoryManager.h>
 
 ArenaBlockNode* ArenaStage::getBlock(uint32_t index) {
     if (index >= descriptor->blocksPerPage) {
@@ -31,7 +32,7 @@ namespace ArenaMemoryManager {
 
             descriptor.blockSize = blockSize;
             descriptor.firstFreeBlock = nullptr;
-            descriptor.blocksPerPage = (4096 - sizeof(ArenaStage)) / blockSize;
+            descriptor.blocksPerPage = (MemoryManager::PAGE_SIZE - sizeof(ArenaStage)) / blockSize;
 
             blockSize *= 2;
         }

@@ -17,13 +17,19 @@ public:
     void init();
 
 
-    void setInterruptState(bool enabled);
+    static void setInterruptState(bool enabled);
+    static bool getAndSetInterruptState(bool enabled);
 
-    bool getInterruptState();
+    static bool getInterruptState();
 
+    // 下面这几个读写寄存器的实现很低效。应该考虑 define 一行汇编直接取值。
+
+    static void setCR3(uint64_t pml4Addr);
+    static uint64_t getCR2();
+    static uint64_t getCR3();
 
 private:
-    void initGdt();
+
 
     /**
      * 初始化中断描述符表。
@@ -50,10 +56,7 @@ public:
     static const int PIC_EOI = 0x20;
 
 private:
-    GlobalDescriptorTable gdt;
-    GdtRegister gdtr;
 
-    IdtRegister idtr;
     InterruptDescriptorTable idt;
 
 private:

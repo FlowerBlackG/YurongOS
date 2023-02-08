@@ -41,8 +41,9 @@
         CRT::getInstance().write(errorMsg); \
         CRT::getInstance().write("\n"); \
         x86asmCli(); \
-        while (1) \
-            ; \
+        while (true) { \
+            x86asmHlt(); \
+        } \
     }
 
 #define IMPLEMENT_EXCEPTION_WITH_ERRCODE_HANDLER(handlerName, errorMsg, signalValue) \
@@ -53,6 +54,7 @@
         CRT::getInstance().write(errorMsg); \
         CRT::getInstance().write("\n"); \
         x86asmCli(); \
-        while (1) \
-            ; \
+        while (true) { \
+            x86asmHlt(); \
+        } \
     }

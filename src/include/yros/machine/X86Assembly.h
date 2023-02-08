@@ -16,6 +16,8 @@
 
 #define x86asmDirectCall(function) __asm ("call *%%rax" :: "a" (function))
 
+#define x86asmBochsMagicBreakpoint() __asm ("xchg %bx, %bx")
+
 /**
  * 软件现场。
  */
@@ -122,3 +124,10 @@ struct HardwareContextRegisters {
         "popq %r14 \n\t" \
         "popq %r15 \n\t" \
     )
+
+#if 1
+static void __x86asm_check_size() {
+    sizeof(HardwareContextRegisters);
+    sizeof(SoftwareContextRegisters);
+}
+#endif

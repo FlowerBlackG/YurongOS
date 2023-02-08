@@ -14,6 +14,9 @@
 #include <lib/sys/types.h>
 #include <yros/machine/Cmos.h>
 
+
+MemoryManager MemoryManager::instance;
+
 void MemoryManager::init() {
     this->freeMemoryManager.init();
 
@@ -145,9 +148,9 @@ void MemoryManager::processArds() {
 }
 
 uint64_t MemoryManager::allocPage(uint64_t count) {
-    return freeMemoryManager.alloc(4096 * count);
+    return freeMemoryManager.alloc(MemoryManager::PAGE_SIZE * count);
 }
 
 void MemoryManager::freePage(uint64_t addr, uint64_t count) {
-    freeMemoryManager.free(addr, 4096 * count);
+    freeMemoryManager.free(addr, MemoryManager::PAGE_SIZE * count);
 }

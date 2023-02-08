@@ -309,7 +309,7 @@ error:
     jmp .begin_hlt
 
 .msg:
-    db "error: failed to load kernel.", 0x0d, 0x0a, 0
+    db "e: failed to boot.", 0x0d, 0x0a, 0
 
 
 msg_memory_detect_done:
