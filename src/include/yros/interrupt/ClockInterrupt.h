@@ -27,8 +27,8 @@ namespace ClockInterrupt {
     void entrance();
 
     void handler(
-        SoftwareContextRegisters* softwareRegs, 
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs, 
+        InterruptHardwareFrame* hardwareRegs
     );
 
 }

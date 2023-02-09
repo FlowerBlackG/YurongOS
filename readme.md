@@ -87,6 +87,10 @@ YurongOS（雨融）是一个运行于 x86-64 平台的玩具级操作系统，�
 | [4, 1999] | 998KB |  kernel 二进制文件  |
 |          |       |        待定        |
 
+## 进程核心栈设计
+
+![img](doc/ProcessPcbDesign.drawio.svg)
+
 ## 物理内存布局
 
 使用平铺模型（flat model），即描述符内注明的内存基地址就是 0，不做奇怪的变换。

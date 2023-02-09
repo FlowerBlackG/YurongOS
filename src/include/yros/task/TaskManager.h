@@ -32,7 +32,12 @@ namespace TaskManager {
      */
     void switchTo(Task* next);
 
-    Task* create(void (* target) (), const char* name, bool __2u);
+    Task* create(
+        void (* target) (), 
+        const char* name, 
+        bool createTaskFrame = true,
+        bool kernelProcess = false
+    );
 }
 
 #if 0

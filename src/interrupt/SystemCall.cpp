@@ -30,8 +30,8 @@ namespace SystemCall {
     IMPLEMENT_EXCEPTION_ENTRANCE(entrance, SystemCall::welcomeMat)
 
     void welcomeMat(
-        SoftwareContextRegisters* softwareRegs, 
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs, 
+        InterruptHardwareFrame* hardwareRegs
     ) { // todo
         handlers[softwareRegs->rax].handler();
     }

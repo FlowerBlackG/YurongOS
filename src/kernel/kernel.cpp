@@ -15,6 +15,8 @@
 #include <yros/memory/KernelMemoryAllocator.h>
 #include <yros/task/TaskManager.h>
 #include <yros/interrupt/SystemCall.h>
+#include <yros/interrupt/InterruptExit.h>
+#include <yros/task/IdleTask.h>
 
 
 /**
@@ -76,6 +78,7 @@ void write_num(int x) {
         
         sprintf(s, "%d cr3: 0x%llx\n",
             x,
+            
             Machine::getCR3()
         );
 
@@ -100,7 +103,8 @@ void t2() {
 
 
 void t0() {
-    
+     for (int i = 0; i < 1000; i++)
+            ;
     write_num(0);
 }
 
@@ -112,39 +116,32 @@ void Kernel::main() {
     CRT::getInstance().write("welcome to yros!\n");   
 
     Machine::getInstance().init();
-
+    TaskManager::init();
     SystemCall::init();
+  
+  
+    Task* idleTask = TaskManager::create(
+        IdleTask::entrance, 
+        "kerneld", 
+        false, 
+        true
+    );
 
-    TaskManager::create(t0, "p0", true);
-   // TaskManager::create(t1, "p1", true);
+
+    TaskManager::create(t1, "p1");
    // TaskManager::create(t2, "p2", true);
 
-            auto& tss = GlobalDescriptorTable::taskStateSegment;
-        unsigned long sp = (unsigned long) TaskManager::taskTable[0];
-        sp += MemoryManager::PAGE_SIZE;
-        tss.rsp0Low = sp & 0xFFFFFFFF;
-        tss.rsp0High = ((sp >> 16) >> 16) & 0xFFFFFFFF;
 
-        Machine::setCR3(TaskManager::taskTable[0]->pml4Address);
+    // 启动 idle 进程。
 
-//    TaskManager::switchTo(TaskManager::taskTable[0]);
     __asm (
-        "movq %0, %%rsp"
+        "movq %%rax, %%rsp \n\t"
         :
-        : "m" (TaskManager::taskTable[0]->kernelStackPointer)
+        : "a" (idleTask->kernelStackPointer)
     );
     
+    x86asmSti();
+    x86asmNearJmp(interruptExit);
 
-    x86asmRestoreContext();
-    x86asmBochsMagicBreakpoint();
-    //__asm ("addq $16, %rsp");
-    x86asmLeave();
-   // x86asmSti();
-    x86asmIret();
-
-    CRT::getInstance().write("kernel init done.\n");
-
-    while (true) {
-        x86asmHlt();
-    }
+    x86asmUd2();
 }

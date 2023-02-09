@@ -14,6 +14,7 @@
 #include <yros/machine/X86Assembly.h>
 #include <yros/machine/GlobalDescriptorTable.h>
 #include <yros/memory/PageDirectories.h>
+#include <yros/interrupt/InterruptExit.h>
 
 #include <lib/string.h>
 
@@ -35,8 +36,9 @@ namespace TaskManager {
             :
         );
 
-        addr &= 0xFFFFFFFFFFFFF000ULL;
-        return (Task*) addr;
+        addr &= 0xFFFFFFFFFFFFF000;
+
+        return * (Task**) addr;
     }
 
     void schedule() {
@@ -44,28 +46,31 @@ namespace TaskManager {
         x86asmCli();
 
         static int prevId = 0;
+        Task* next = nullptr;
         
-        while (false) {
+        while (true) {
             prevId++;
             if (prevId >= TASK_TABLE_SIZE) {
                 prevId = 0;
             }
 
-            if (taskTable[prevId]) {
+            next = taskTable[prevId];
+
+            if (next && next->state == TaskState::READY) {
                 break;
             }
         }
 
-        Task* t = taskTable[prevId];
-        stage(t);
-        //x86asmSti();
-        switchTo(t);
+        stage(next);
+        x86asmSti();
+        switchTo(next);
 
     }
 
     void stage(Task* task) {
         auto& tss = GlobalDescriptorTable::taskStateSegment;
-        unsigned long sp = (unsigned long) task;
+        unsigned long sp = (unsigned long) task->kernelStackPointer;
+        sp &= 0xFFFFFFFFFFFFF000;
         sp += MemoryManager::PAGE_SIZE;
         tss.rsp0Low = sp & 0xFFFFFFFF;
         tss.rsp0High = ((sp >> 16) >> 16) & 0xFFFFFFFF;
@@ -74,86 +79,16 @@ namespace TaskManager {
     }
 
 
-    void __task_to_user_mode(Task* task, void (* target) ()) {
-
-
-        PageMapLevel4 pml4 = (PageMapLevel4) KernelMemoryAllocator::allocPage();
-
-        task->pml4Address = (uint64_t) pml4 - MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
-        
-        memcpy(pml4, MemoryManager::getKernelPml4(), MemoryManager::PAGE_SIZE);
-
-        PageMapLevel3 pml3 = (PageMapLevel3) KernelMemoryAllocator::allocPage();
-        memset(pml3, 0, MemoryManager::PAGE_SIZE);
-        pml4[255].pageFrameNumber = ((uint64_t) pml3 - MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP) >> 12;
-        pml4[255].us = 1;
-        pml4[255].present = 1;
-        pml4[255].rw = 1;
-
-        PageMapLevel2 pml2 = (PageMapLevel2) KernelMemoryAllocator::allocPage();
-        memset(pml2, 0, MemoryManager::PAGE_SIZE);
-        pml3[511].pageFrameNumber = ((uint64_t) pml2 - MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP) >> 12;
-        pml3[511].us = 1;
-        pml3[511].present = 1;
-        pml3[511].rw = 1;
-
-        PageMapLevel1 pml1 = (PageMapLevel1) KernelMemoryAllocator::allocPage();
-        memset(pml1, 0, MemoryManager::PAGE_SIZE);
-        pml2[511].pageFrameNumber = ((uint64_t) pml1 - MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP) >> 12;
-        pml2[511].us = 1;
-        pml2[511].present = 1;
-        pml2[511].rw = 1;
-
-        uint64_t stackPage = (uint64_t) KernelMemoryAllocator::allocPage();
-        pml1[511].us = 1;
-        pml1[511].present = 1;
-        pml1[511].rw = 1;
-        pml1[511].pageFrameNumber = (stackPage - MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP) >> 12;
-        
-
-        
-
-        uint64_t stackAddr = stackPage;
-        stackAddr += MemoryManager::PAGE_SIZE;
-        
-
-        uint64_t addr = (uint64_t) task + MemoryManager::PAGE_SIZE;
-        addr -= sizeof(HardwareContextRegisters);
-        HardwareContextRegisters* hw = (HardwareContextRegisters*) addr;
-        addr -= sizeof(SoftwareContextRegisters);
-        SoftwareContextRegisters* sw = (SoftwareContextRegisters*) addr;
-
-        task->kernelStackPointer = addr;
-
-
-        hw->rip = (uint64_t) target;
-        hw->rflags = (0 << 12 | 0b10 | 1 << 9);
-        hw->rsp = (uint64_t) task + MemoryManager::PAGE_SIZE;MemoryManager::USER_STACK_BASE;
-        sw->rbp = addr + sizeof(SoftwareContextRegisters);
-        sw->r12 = 0xfb;
-        /*
-        hw->cs = GlobalDescriptorTable::USER_CODE_SELECTOR;
-        hw->ss = GlobalDescriptorTable::USER_DATA_SELECTOR;
-        sw->ds = GlobalDescriptorTable::USER_DATA_SELECTOR;
-        sw->es = GlobalDescriptorTable::USER_DATA_SELECTOR;
-        sw->gs = GlobalDescriptorTable::USER_DATA_SELECTOR;
-        sw->fs = GlobalDescriptorTable::USER_DATA_SELECTOR;*/
-
-
-        hw->cs = GlobalDescriptorTable::KERNEL_CODE_SELECTOR;
-        hw->ss = GlobalDescriptorTable::KERNEL_DATA_SELECTOR;
-        sw->ds = GlobalDescriptorTable::KERNEL_DATA_SELECTOR;
-        sw->es = GlobalDescriptorTable::KERNEL_DATA_SELECTOR;
-        sw->gs = GlobalDescriptorTable::KERNEL_DATA_SELECTOR;
-        sw->fs = GlobalDescriptorTable::KERNEL_DATA_SELECTOR;
-    }
-
-    Task* create(void (* target) (), const char* name, bool __2u) {
+    Task* create(
+        void (* target) (), 
+        const char* name, 
+        bool createTaskFrame,
+        bool kernelProcess
+    ) {
 
         bool prevInterruptFlag = Machine::getInstance().getAndSetInterruptState(false);
 
         pid_t pid = -1;
-
 
         for (pid_t i = 0; i < TASK_TABLE_SIZE; i++) {
             if (!taskTable[i]) {
@@ -166,30 +101,81 @@ namespace TaskManager {
             Kernel::panic("[error] task table fulled.\n");
         }
 
+        if (pid && kernelProcess) {
+            Kernel::panic("[error] kernel process can only be process 0.\n");
+        }
+
         Task* task = (Task*) KernelMemoryAllocator::allocPage();
-        
+
         taskTable[pid] = task;
         task->processId = pid;
+        task->kernelProcess = kernelProcess;
         strcpy(task->name, name);
         
-        unsigned long kernelStackAddr = (unsigned long) task + MemoryManager::PAGE_SIZE;
+        unsigned long kernelStackAddr;
+        
+        if (kernelProcess) {
+            kernelStackAddr = MemoryManager::KERNEL_PROCESS_STACK_BASE - 1 * 1024 * 1024;
+            * (long*) (MemoryManager::KERNEL_PROCESS_STACK_TOP) = (long) task;
+        } else {
+            kernelStackAddr = (unsigned long) KernelMemoryAllocator::allocPage();    
+            * (long*) (kernelStackAddr) = (long) task;
+            kernelStackAddr += MemoryManager::PAGE_SIZE;
+        }
 
-        kernelStackAddr -= sizeof(TaskFrame);
-        TaskFrame* frame = (TaskFrame*) kernelStackAddr;
+
+        kernelStackAddr -= sizeof(InterruptHardwareFrame);
+        auto hwContext = (InterruptHardwareFrame*) kernelStackAddr;
+        kernelStackAddr -= sizeof(InterruptSoftwareFrame);
+        auto swContext = (InterruptSoftwareFrame*) kernelStackAddr;
+
+        int codeSelector;
+        int dataSelector;
+        if (kernelProcess) {
+            codeSelector = GlobalDescriptorTable::KERNEL_CODE_SELECTOR;
+            dataSelector = GlobalDescriptorTable::KERNEL_DATA_SELECTOR;
+        } else {
+            codeSelector = GlobalDescriptorTable::USER_CODE_SELECTOR;
+            dataSelector = GlobalDescriptorTable::USER_DATA_SELECTOR;
+        }
+
+        swContext->ds = dataSelector;
+        swContext->es = dataSelector;
+        swContext->fs = dataSelector;
+        swContext->gs = 0;
+        hwContext->ss = dataSelector;
+        hwContext->cs = codeSelector;
+
+        hwContext->rip = (unsigned long) target;
+        hwContext->rflags = 0x0202; // reserved + interrupt enabled
+
+        if (createTaskFrame) {
+            kernelStackAddr -= sizeof(TaskFrame);
+            TaskFrame* frame = (TaskFrame*) kernelStackAddr;
+            frame->rip = (unsigned long) interruptExit;
+        }
 
         task->kernelStackPointer = kernelStackAddr;
 
-        frame->rip = (unsigned long) target;
+        if (kernelProcess) {
+            task->pml4Address = MemoryManager::KERNEL_PML4_ADDRESS;
+            hwContext->rsp = MemoryManager::KERNEL_PROCESS_STACK_BASE;
 
-        if (__2u) {
-            __task_to_user_mode(task, target);
+        } else {
+            auto pml4 = (uint64_t) KernelMemoryAllocator::allocWhitePage();
+
+            uint64_t kernelPml4 = MemoryManager::KERNEL_PML4_ADDRESS;
+            kernelPml4 += MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
+
+            memcpy((void*) pml4, (void*) kernelPml4, MemoryManager::PAGE_SIZE);
+
+            pml4 -= MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
+            task->pml4Address = pml4;
+
+            hwContext->rsp = MemoryManager::USER_STACK_BASE;
         }
 
         Machine::getInstance().setInterruptState(prevInterruptFlag);
-
         return task;
     }
-
-
-
 }

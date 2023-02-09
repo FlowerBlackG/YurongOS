@@ -24,6 +24,23 @@ struct TaskFrame {
     uint64_t rip;
 };
 
+enum class TaskState {
+
+    /**
+     * 就绪。包含正在运行。
+     */
+    READY,
+
+    /**
+     * 阻塞。
+     */
+    BLOCKED,
+
+    /**
+     * 进程已死。准备被回收。
+     */
+    DIED
+};
 
 /**
  * 任务结构。
@@ -43,7 +60,7 @@ struct Task {
     char name[TASK_NAME_MAX_LENGTH];
 
     /**
-     * 四级页表入口。
+     * 四级页表入口。物理地址。
      */
     uint64_t pml4Address;
 
@@ -57,5 +74,8 @@ struct Task {
      */
     pid_t parentProcessId;
 
+    bool kernelProcess;
+
+    TaskState state;
 
 };

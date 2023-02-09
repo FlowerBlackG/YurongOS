@@ -37,6 +37,8 @@ int main() {
             continue;
         }
 
+        string fullname = line;
+
         for (int pos = 0; pos < line.length(); pos++) {
             if (line[pos] == ' ') {
                 line.erase(pos, 1);
@@ -68,7 +70,7 @@ int main() {
         makeHandler << "HANDLER(" 
             << line 
             << "ExceptionHandler, \""
-            << line
+            << fullname
             << "\", 0)"
             << endl;
         
@@ -88,13 +90,11 @@ int main() {
         def << "    void "
             << line
             << "ExceptionHandler(\n"
-            << "        SoftwareContextRegisters* softwareRegs,\n"
-            << "        HardwareContextRegisters* hardwareRegs\n"
+            << "        InterruptSoftwareFrame* softwareRegs,\n"
+            << "        InterruptHardwareFrame* hardwareRegs\n"
             << "    );"
             << endl
             << endl;
-
-        
 
     }
 

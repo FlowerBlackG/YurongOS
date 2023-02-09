@@ -1,8 +1,8 @@
 /*
 
-    系统调用
+    缺页异常处理器
 
-    创建于 2023年2月6日 江西省上饶市玉山县
+    创建于 2023年2月9日 江西省上饶市玉山县
 
 */
 
@@ -11,18 +11,13 @@
 #include <yros/machine/X86Assembly.h>
 #include <lib/sys/types.h>
 
-namespace SystemCall {
-
-    const int SYSCALL_NUM = 128;
-
-    void init();
+namespace PageFaultException {
 
     void entrance();
-    void welcomeMat(
+
+    void handler(
         InterruptSoftwareFrame* softwareRegs, 
         InterruptHardwareFrame* hardwareRegs
     );
-
-    int64_t test();
 
 }

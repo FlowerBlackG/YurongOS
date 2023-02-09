@@ -13,6 +13,7 @@
 #include <yros/interrupt/InterruptHandlers.h>
 #include <yros/interrupt/ClockInterrupt.h>
 #include <yros/interrupt/KeyboardInterrupt.h>
+#include <yros/interrupt/PageFaultException.h>
 #include <yros/memory/MemoryManager.h>
 
 Machine Machine::instance;
@@ -125,12 +126,12 @@ void Machine::initIdt() {
     idt.setTrapGate(5, (long) InterruptHandlers::boundaryRangeExceededExceptionEntrance);
     idt.setTrapGate(6, (long) InterruptHandlers::undefinedOpcodeExceptionEntrance);
     idt.setTrapGate(7, (long) InterruptHandlers::deviceNotAvailableExceptionEntrance);
- //   idt.setTrapGate(8, (long) InterruptHandlers::doubleFaultExceptionEntrance);
+    idt.setTrapGate(8, (long) InterruptHandlers::doubleFaultExceptionEntrance);
     idt.setTrapGate(10, (long) InterruptHandlers::invalidTssExceptionEntrance);
     idt.setTrapGate(11, (long) InterruptHandlers::notPresentExceptionEntrance);
     idt.setTrapGate(12, (long) InterruptHandlers::stackSegmentExceptionEntrance);
     idt.setTrapGate(13, (long) InterruptHandlers::generalProtectionExceptionEntrance);
-  //  idt.setTrapGate(14, (long) InterruptHandlers::pageFaultExceptionEntrance);
+    idt.setTrapGate(14, (long) PageFaultException::entrance);
     idt.setTrapGate(16, (long) InterruptHandlers::mathFaultExceptionEntrance);
     idt.setTrapGate(17, (long) InterruptHandlers::alignmentCheckingExceptionEntrance);
     idt.setTrapGate(18, (long) InterruptHandlers::machineCheckExceptionEntrance);
@@ -139,8 +140,8 @@ void Machine::initIdt() {
     idt.setTrapGate(21, (long) InterruptHandlers::controlProtectionExceptionExceptionEntrance);
 
 
-    idt.setInterruptGate(0x20, (uint64_t) ClockInterrupt::entrance);
-    idt.setInterruptGate(0x21, (uint64_t) KeyboardInterrupt::entrance);
+    idt.setInterruptGate(0x20, (long) ClockInterrupt::entrance);
+    idt.setInterruptGate(0x21, (long) KeyboardInterrupt::entrance);
 
     IdtRegister idtr;
 

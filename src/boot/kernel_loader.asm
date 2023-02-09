@@ -75,11 +75,11 @@ switch_to_long_mode:
     mov [pml4_address + 320 * 8], eax
 
     mov eax, 0x4000
-    or eax, (0x3 | 0x4)  ; todo: 测试后删除 0x4
+    or eax, 0x3
     mov [pml4_address + 383 * 8], eax
 
     mov eax, 0x8000
-    or eax, (0x3 | 0x4)  ; todo: 测试后删除 0x4
+    or eax, 0x3
     mov edi, (pml4_address + 384 * 8)
     mov ecx, 384
 
@@ -105,7 +105,7 @@ switch_to_long_mode:
     mov [0x2000], eax
     
     mov eax, 0x5000
-    or eax, (0x3 | 0x4)  ; todo: 测试后删除 0x4
+    or eax, 0x3
     mov [0x4000 + 511 * 8], eax
 
     ; 构建第2级页表（PML2）
@@ -117,14 +117,15 @@ switch_to_long_mode:
     mov [edi], eax
 
     ; 内核静态
-    mov eax, (0x83 | 0x4)  ; todo: 测试后删除 0x4
+    ; write, present, pageSize, global
+    mov eax, (0x183 | 0x4)  ; todo: 测试后删除 0x4
     mov edi, 0x3000
     mov ebx, (0x3000 + 4 * 8)
     call build_pml2_linear_entries
 
     ; 核心栈
     mov eax, 0x80_0000
-    or eax, (0x83 | 0x4)  ; todo: 测试后删除 0x4
+    or eax, 0x183
     mov edi, (0x5000 + 509 * 8)
     mov ebx, (0x5000 + 512 * 8)
     call build_pml2_linear_entries
@@ -355,7 +356,7 @@ kernel_loader:
 
     mov rdi, 0x8000
     mov rcx, 0x48000
-    mov rax, (0x83 | 0x4) ; todo 测试完毕后删除 0x4
+    mov rax, 0x183
 .fill_pml3_physical_map_entries:
 
     mov qword [rdi], rax

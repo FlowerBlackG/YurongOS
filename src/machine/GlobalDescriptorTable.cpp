@@ -71,8 +71,8 @@ namespace GlobalDescriptorTable {
         sysSegmentDesc.baseHigh = (tssAddr >> 24) & 0xff;
         sysSegmentDesc.baseUltraHigh = ((tssAddr >> 16) >> 16) & 0xffffffffULL;
 
-        sysSegmentDesc.limitLow = 0;
-        sysSegmentDesc.limitHigh = 0;
+        sysSegmentDesc.limitLow = tssLimit & 0xffff;
+        sysSegmentDesc.limitHigh = (tssLimit >> 16) & 0xf;
 
         sysSegmentDesc.systemSegmentType = SystemSegmentDescriptor::SYSTEM_SEGMENT_TYPE_64_BIT_AVAILABLE;
         sysSegmentDesc.descriptorType = SystemSegmentDescriptor::SEGMENT_TYPE_SYSTEM;

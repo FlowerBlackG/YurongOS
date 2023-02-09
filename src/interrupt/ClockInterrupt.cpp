@@ -22,14 +22,15 @@ namespace ClockInterrupt {
     IMPLEMENT_EXCEPTION_ENTRANCE(entrance, ClockInterrupt::handler)
 
     void handler(
-        SoftwareContextRegisters* softwareRegs, 
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs, 
+        InterruptHardwareFrame* hardwareRegs
     ) {
 
         jiffyCounter++;
         
         IO::outByte(Machine::PIC_MASTER_CTRL, Machine::PIC_EOI);
 
+        
         TaskManager::schedule();
     }
 

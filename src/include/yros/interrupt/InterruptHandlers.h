@@ -14,129 +14,125 @@
 namespace InterruptHandlers {
 
     void defaultHandler(
-        SoftwareContextRegisters* softwareRegs, 
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 
 
     void divideErrorExceptionEntrance();
     void divideErrorExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 
     void debugExceptionEntrance();
     void debugExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 
     void nonMaskableInterruptExceptionEntrance();
     void nonMaskableInterruptExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 
     void breakpointExceptionEntrance();
     void breakpointExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 
     void overflowExceptionEntrance();
     void overflowExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 
     void boundaryRangeExceededExceptionEntrance();
     void boundaryRangeExceededExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 
     void undefinedOpcodeExceptionEntrance();
     void undefinedOpcodeExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 
     void deviceNotAvailableExceptionEntrance();
     void deviceNotAvailableExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 
     void doubleFaultExceptionEntrance();
     void doubleFaultExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 
     void invalidTssExceptionEntrance();
     void invalidTssExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 
     void notPresentExceptionEntrance();
     void notPresentExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 
     void stackSegmentExceptionEntrance();
     void stackSegmentExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 
     void generalProtectionExceptionEntrance();
     void generalProtectionExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 
-    void pageFaultExceptionEntrance();
-    void pageFaultExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
-    );
+    // page fault 处理方式见 interrupt/PageFaultException.h
 
     void mathFaultExceptionEntrance();
     void mathFaultExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 
     void alignmentCheckingExceptionEntrance();
     void alignmentCheckingExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 
     void machineCheckExceptionEntrance();
     void machineCheckExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 
     void extendedMathFaultExceptionEntrance();
     void extendedMathFaultExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 
     void virtualizationExceptionExceptionEntrance();
     void virtualizationExceptionExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 
     void controlProtectionExceptionExceptionEntrance();
     void controlProtectionExceptionExceptionHandler(
-        SoftwareContextRegisters* softwareRegs,
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs,
+        InterruptHardwareFrame* hardwareRegs
     );
 }
 

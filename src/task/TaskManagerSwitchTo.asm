@@ -23,10 +23,21 @@ _ZN11TaskManager8switchToEP4Task:
     push r15
 
     mov rax, rsp
-    and rax, 0xFFFFFFFFFFFFF000
-    mov qword [rax], rsp
 
-    mov qword rsp, [rdi]
+    mov rbx, 0xFFFFC00000000000
+    cmp rax, rbx
+    jg .save_rsp
+
+    mov rax, 0xFFFFBFFFFFA00000
+
+.save_rsp:
+
+    and rax, 0xFFFFFFFFFFFFF000 ; 得到指向 Task 的指针。
+    mov rax, [rax] ; 得到存储内核栈 rsp 的地址。
+    
+    mov [rax], rsp
+    
+    mov rsp, [rdi]
 
     pop r15
     pop r14

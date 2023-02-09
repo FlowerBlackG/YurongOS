@@ -14,14 +14,25 @@
 #define x86asmIret() __asm ("iretq")
 #define x86asmHlt() __asm ("hlt")
 
+#define x86asmUd2() __asm ("ud2")
+
 #define x86asmDirectCall(function) __asm ("call *%%rax" :: "a" (function))
+#define x86asmNearJmp(target) __asm ("jmp *%%rax" :: "a" (target))
 
 #define x86asmBochsMagicBreakpoint() __asm ("xchg %bx, %bx")
+
+#define x86asmLoadKernelDataSegments() \
+    __asm ( \
+        "mov $0x10, %edx \n\t" \
+        "mov %edx, %ds \n\t" \
+        "mov %edx, %es \n\t" \
+    )
+
 
 /**
  * 软件现场。
  */
-struct SoftwareContextRegisters {
+struct InterruptSoftwareFrame {
     uint64_t gs;
     uint64_t fs;
     uint64_t ds;
@@ -45,18 +56,15 @@ struct SoftwareContextRegisters {
 
 /**
  * 硬件现场。
- */
-struct HardwareContextRegisters {
+ */    
+struct InterruptHardwareFrame {
 
-    union {
-        /**
-         * 错误码。
-         * 该错误码在 8 和 10-14 号中断到来时自动被设置。
-         * 其他中断到来时，手动放入一个假的错误码。
-         */
-        uint64_t errorCode;
-        uint64_t currentRbp;
-    };
+    /**
+     * 错误码。
+     * 该错误码在 8 和 10-14 号中断到来时自动被设置。
+     * 其他中断到来时，手动放入一个假的错误码。
+     */
+    uint64_t errorCode;
 
     uint64_t rip;
     uint64_t cs;
@@ -97,7 +105,7 @@ struct HardwareContextRegisters {
         "pushq %fs \n\t" \
         "pushq %gs \n\t" \
         "mov %rsp, %rdi \n\t" \
-        "lea 0x8(%rbp), %rsi \n\t" \
+        "lea 0x98(%rsp), %rsi \n\t" \
     )
 
 #define x86asmRestoreContext() \
@@ -127,7 +135,7 @@ struct HardwareContextRegisters {
 
 #if 1
 static void __x86asm_check_size() {
-    sizeof(HardwareContextRegisters);
-    sizeof(SoftwareContextRegisters);
+    sizeof(InterruptHardwareFrame);
+    sizeof(InterruptSoftwareFrame);
 }
 #endif

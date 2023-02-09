@@ -20,6 +20,26 @@ struct LinkedList {
     int length = 0;
 
     LinkedList& append(LinkedListNode* node);
+    LinkedList& insert(LinkedListNode* node, int index);
+    LinkedList& pushBack(LinkedListNode* node);
+
+    LinkedList& remove(LinkedListNode* node);
+    
+    LinkedListNode* removeAt(int index);
+    LinkedListNode* removeFirst();
+    LinkedListNode* removeLast();
+    LinkedListNode* popBack();
+
+    bool contains(LinkedListNode* node);
+
+    LinkedListNode* getFirst();
+    LinkedListNode* getLast();
+    LinkedListNode* get(int index);
+
+    int indexOf(LinkedListNode* node);
+
+    bool isEmpty();
+    bool isNotEmpty();
 
     // todo.
 };

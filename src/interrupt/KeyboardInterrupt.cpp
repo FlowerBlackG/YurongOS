@@ -30,12 +30,11 @@ namespace KeyboardInterrupt {
     IMPLEMENT_EXCEPTION_ENTRANCE(entrance, KeyboardInterrupt::handler)
 
     void handler(
-        SoftwareContextRegisters* softwareRegs, 
-        HardwareContextRegisters* hardwareRegs
+        InterruptSoftwareFrame* softwareRegs, 
+        InterruptHardwareFrame* hardwareRegs
     ) {
 
         
-
         auto&& status = IO::inByte(KeyboardInterrupt::STATUS_PORT);
         auto&& scancode = IO::inByte(KeyboardInterrupt::DATA_PORT);
 

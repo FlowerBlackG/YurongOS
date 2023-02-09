@@ -34,7 +34,9 @@ KERNEL_OBJS = $(KERNEL_TARGET)/kernel_entry.o \
 			  $(TARGET)/interrupt/InterruptHandlers.o \
 			  $(TARGET)/interrupt/KeyboardInterrupt.o \
 			  $(TARGET)/interrupt/ClockInterrupt.o \
+			  $(TARGET)/interrupt/PageFaultException.o \
 			  $(TARGET)/interrupt/SystemCall.o \
+			  $(TARGET)/interrupt/InterruptExit.o \
 			  $(TARGET)/machine/Cmos.o \
 			  $(TARGET)/memory/MemoryManager.o \
 			  $(TARGET)/memory/FreeMemoryManager.o \
@@ -42,6 +44,7 @@ KERNEL_OBJS = $(KERNEL_TARGET)/kernel_entry.o \
 			  $(TARGET)/memory/KernelMemoryAllocator.o \
 			  $(TARGET)/task/TaskManager.o \
 			  $(TARGET)/task/TaskManagerSwitchTo.o \
+			  $(TARGET)/task/IdleTask.o \
 
 # 构建内核。
 .PHONY: yros_kernel

@@ -9,52 +9,142 @@
 #pragma once
 
 #include <yros/machine/X86Assembly.h>
+#include <yros/interrupt/InterruptExit.h>
+#include <yros/Kernel.h>
 
-#define IMPLEMENT_EXCEPTION_ENTRANCE(entranceFunctionName, handlerName) \
-    void entranceFunctionName() { \
+/*
+
+    曾经的写法。为防止新的出错，旧的先留着：todo
+
+    #define IMPLEMENT_EXCEPTION_ENTRANCE(entranceFunctionName, handlerName) \
+    void __omit_frame_pointer entranceFunctionName()  { \
+        __asm ("pushq $0x656e6f6e");  \
         x86asmSaveContext(); \
-        __asm ("lea -0x8(%rsi), %rsi"); \
         \
         x86asmDirectCall(handlerName); \
         x86asmRestoreContext(); \
-        \
-        x86asmLeave(); \
+        __asm("addq $8, %rsp"); \
         x86asmIret(); \
     }
 
 #define IMPLEMENT_EXCEPTION_WITH_ERRCODE_ENTRANCE(entranceFunctionName, handlerName) \
-    void entranceFunctionName() { \
+    void __omit_frame_pointer entranceFunctionName()  { \
         x86asmSaveContext(); \
         \
         x86asmDirectCall(handlerName); \
         x86asmRestoreContext(); \
-        x86asmLeave(); \
         __asm ("addq $8, %rsp"); \
         x86asmIret(); \
     }
 
+
+*/
+
+#define IMPLEMENT_EXCEPTION_ENTRANCE(entranceFunctionName, handlerName) \
+    void __omit_frame_pointer entranceFunctionName()  { \
+        __asm ("pushq $0x656e6f6e"); /* ascii: none */ \
+        x86asmSaveContext(); \
+        x86asmLoadKernelDataSegments(); \
+        \
+        x86asmDirectCall(handlerName); \
+        \
+        x86asmNearJmp(interruptExit); \
+    }
+
+#define IMPLEMENT_EXCEPTION_WITH_ERRCODE_ENTRANCE(entranceFunctionName, handlerName) \
+    void __omit_frame_pointer entranceFunctionName()  { \
+        x86asmSaveContext(); \
+        x86asmLoadKernelDataSegments(); \
+        \
+        x86asmDirectCall(handlerName); \
+        \
+        x86asmNearJmp(interruptExit); \
+    }
+
 #define IMPLEMENT_EXCEPTION_HANDLER(handlerName, errorMsg, signalValue) \
     void handlerName( \
-        SoftwareContextRegisters* softwareRegs, \
-        HardwareContextRegisters* hardwareRegs \
+        InterruptSoftwareFrame* softwareRegs, \
+        InterruptHardwareFrame* hardwareRegs \
     ) { \
+        x86asmCli(); \
+        char s[256]; \
+        \
+        CRT::getInstance().write(" ------------\n  "); \
         CRT::getInstance().write(errorMsg); \
         CRT::getInstance().write("\n"); \
-        x86asmCli(); \
-        while (true) { \
-            x86asmHlt(); \
-        } \
+        \
+        uint64_t cr2, cr3; \
+        __asm( \
+            "movq %%cr2, %%rax \n\t" \
+            "movq %%cr3, %%rbx \n\t" \
+            : "=a" (cr2), "=b" (cr3) \
+            : \
+        ); \
+        \
+        sprintf( \
+            s, \
+            "    rax: 0x%llx\n" \
+            "    rbp: 0x%llx, rsp: 0x%llx\n" \
+            "    cs: 0x%x, ds: 0x%x, es: 0x%x\n" \
+            "    ss: 0x%x, fs: 0x%x, gs: 0x%x\n" \
+            "    cr2: 0x%llx, cr3: 0x%llx\n" \
+            "    rip: 0x%llx\n", \
+            softwareRegs->rax, \
+            softwareRegs->rbp, \
+            hardwareRegs->rsp, \
+            hardwareRegs->cs, softwareRegs->ds, softwareRegs->es, \
+            hardwareRegs->ss, softwareRegs->fs, softwareRegs->gs, \
+            cr2, cr3, \
+            hardwareRegs->rip \
+        ); \
+        \
+        CRT::getInstance().write(s); \
+        CRT::getInstance().write(" ------------\n"); \
+        \
+        Kernel::panic("[critical] kernel panic.\n"); \
     }
 
 #define IMPLEMENT_EXCEPTION_WITH_ERRCODE_HANDLER(handlerName, errorMsg, signalValue) \
     void handlerName( \
-        SoftwareContextRegisters* softwareRegs, \
-        HardwareContextRegisters* hardwareRegs \
+        InterruptSoftwareFrame* softwareRegs, \
+        InterruptHardwareFrame* hardwareRegs \
     ) { \
-        CRT::getInstance().write(errorMsg); \
-        CRT::getInstance().write("\n"); \
         x86asmCli(); \
-        while (true) { \
-            x86asmHlt(); \
-        } \
+        char s[256]; \
+        \
+        CRT::getInstance().write(" ------------\n  "); \
+        CRT::getInstance().write(errorMsg); \
+        CRT::getInstance().write(" (with errcode)\n"); \
+        \
+        uint64_t cr2, cr3; \
+        __asm( \
+            "movq %%cr2, %%rax \n\t" \
+            "movq %%cr3, %%rbx \n\t" \
+            : "=a" (cr2), "=b" (cr3) \
+            : \
+        ); \
+        \
+        sprintf( \
+            s, \
+            "    errcode: 0x%llx\n" \
+            "    rax: 0x%llx\n" \
+            "    rbp: 0x%llx, rsp: 0x%llx\n" \
+            "    cs: 0x%x, ds: 0x%x, es: 0x%x\n" \
+            "    ss: 0x%x, fs: 0x%x, gs: 0x%x\n" \
+            "    cr2: 0x%llx, cr3: 0x%llx\n" \
+            "    rip: 0x%llx\n", \
+            hardwareRegs->errorCode, \
+            softwareRegs->rax, \
+            softwareRegs->rbp, \
+            hardwareRegs->rsp, \
+            hardwareRegs->cs, softwareRegs->ds, softwareRegs->es, \
+            hardwareRegs->ss, softwareRegs->fs, softwareRegs->gs, \
+            cr2, cr3, \
+            hardwareRegs->rip \
+        ); \
+        \
+        CRT::getInstance().write(s); \
+        CRT::getInstance().write(" ------------\n"); \
+        \
+        Kernel::panic("[critical] kernel panic.\n"); \
     }

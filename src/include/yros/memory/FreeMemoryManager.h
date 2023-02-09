@@ -10,6 +10,9 @@
 
 #include <lib/sys/types.h>
 
+/**
+ * 空闲内存管理器。负责分配和释放物理内存。
+ */
 class FreeMemoryManager {
 
 public:
@@ -132,9 +135,6 @@ protected:
 
 private: 
     FreeMemoryManager(const FreeMemoryManager&) = delete;
-    
-
-    // static_assert(sizeof(FreeMemoryManager::PageLinkNode) == MemoryManager::PAGE_SIZE);
     
 };
 

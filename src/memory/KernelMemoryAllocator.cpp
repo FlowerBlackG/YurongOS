@@ -9,7 +9,7 @@
 #include <yros/memory/MemoryManager.h>
 #include <yros/memory/ArenaMemoryManager.h>
 #include <yros/memory/KernelMemoryAllocator.h>
-
+#include <lib/string.h>
 #include <yros/Kernel.h>
 
 namespace KernelMemoryAllocator {
@@ -120,6 +120,21 @@ namespace KernelMemoryAllocator {
 
         // 暂不考虑释放 arena 页。
 
+    }
+
+    
+    void* allocWhitePage(uint64_t count, uint8_t fill) {
+        uint64_t addr = MemoryManager::getInstance().allocPage(count);
+
+        if (addr) {
+
+            addr += MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
+            memset((void*) addr, fill, MemoryManager::PAGE_SIZE * count);
+            return (void*) addr;
+
+        } else {
+            return nullptr;
+        }
     }
 
     void* allocPage(uint64_t count) {

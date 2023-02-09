@@ -23,6 +23,9 @@ struct ArenaDescriptor {
     ArenaBlockNode* firstFreeBlock;
 };
 
+/**
+ * arena 舞台。该结构位于内存页的头部，负责管理该页内的小内存。
+ */
 struct ArenaStage {
     ArenaDescriptor* descriptor;
      
@@ -32,6 +35,9 @@ struct ArenaStage {
     ArenaBlockNode* getBlock(uint32_t index);
 };
 
+/**
+ * arena 内存管理器。
+ */
 namespace ArenaMemoryManager {
     const int MINIMUM_BLOCK_SIZE = 16;
     const int MAXIMUM_LINKABLE_BLOCK_SIZE = 1024;
