@@ -8,6 +8,8 @@
 
 #include <lib/sys/types.h>
 
+#include <yros/machine/GlobalDescriptorTable.h>
+
 #define x86asmSti() __asm ("sti")
 #define x86asmCli() __asm ("cli")
 #define x86asmLeave() __asm ("leave")
@@ -16,16 +18,27 @@
 
 #define x86asmUd2() __asm ("ud2")
 
+#define x86asmSysretl() __asm ("sysretl")
+#define x86asmSysretq() __asm ("sysretq")
+#define x86asmSyscall() __asm ("syscall")
+
+#define x86asmSwapgs() __asm ("swapgs")
+
 #define x86asmDirectCall(function) __asm ("call *%%rax" :: "a" (function))
 #define x86asmNearJmp(target) __asm ("jmp *%%rax" :: "a" (target))
+
+#define x86asmInvlpg(addr) __asm ("invlpg (%0)" :: "r" (addr))
+#define x86asmInvalidatePage(addr) x86asmInvlpg(addr)
 
 #define x86asmBochsMagicBreakpoint() __asm ("xchg %bx, %bx")
 
 #define x86asmLoadKernelDataSegments() \
     __asm ( \
-        "mov $0x10, %edx \n\t" \
-        "mov %edx, %ds \n\t" \
-        "mov %edx, %es \n\t" \
+        "mov %0, %%edx \n\t" \
+        "mov %%edx, %%ds \n\t" \
+        "mov %%edx, %%es \n\t" \
+        : \
+        : "i" (GlobalDescriptorTable::KERNEL_DATA_SELECTOR) \
     )
 
 

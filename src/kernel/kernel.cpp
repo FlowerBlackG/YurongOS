@@ -17,12 +17,13 @@
 #include <yros/interrupt/SystemCall.h>
 #include <yros/interrupt/InterruptExit.h>
 #include <yros/task/IdleTask.h>
-
+#include <yros/machine/Msr.h>
+#include <yros/PerCpuCargo.h>
 
 /**
  * 调用内核所有模块的对象的构造函数。
  */
-inline static void callKernelModuleConstructors() {
+inline static void __callKernelModuleConstructors() {
     extern void (* __CTOR_LIST__)();
     extern void (* __CTOR_END__)();
     
@@ -35,7 +36,7 @@ inline static void callKernelModuleConstructors() {
 }
 
 
-inline static void callKernelModuleDestructors() {
+inline static void __callKernelModuleDestructors() {
     extern void (* __DTOR_LIST__)();
     extern void (* __DTOR_END__)();
 
@@ -47,14 +48,42 @@ inline static void callKernelModuleDestructors() {
     }
 }
 
+inline static void __initPerCpuCargos(uint32_t cpuCount) {
+    extern uint64_t __PER_CPU_CARGO_START__;
+    uint64_t perCpuCargoStart = (uint64_t) &__PER_CPU_CARGO_START__;
+
+    char* pCargo = (char*) perCpuCargoStart;
+
+    for (uint32_t i = 0; i < cpuCount * sizeof(PerCpuCargo); i++) {
+        *pCargo = 0;
+        pCargo++;
+    }
+}
+
+inline static void __zeroFillBssArea() {
+    extern uint64_t __BSS_START__;
+    extern uint64_t __BSS_END__;
+
+
+    uint64_t bssStart = (uint64_t) &__BSS_START__;
+    uint64_t bssEnd = (uint64_t) &__BSS_END__;
+
+    for (uint64_t pos = bssStart; pos < bssEnd; pos++) {
+        * ((char*) pos) = 0;
+    }
+
+}
+
 /**
  * 内核进入桥。用于连接汇编与C++对象。
  * 加入 extern "C" 以防止 C++ 编译器将函数重命名，导致链接失败。
  */
 extern "C" void kernel_bridge() {
-    callKernelModuleConstructors();
+    __initPerCpuCargos(1);
+    __zeroFillBssArea();
+    __callKernelModuleConstructors();
     Kernel::main();
-    callKernelModuleDestructors();
+    __callKernelModuleDestructors();
 }
 
 void Kernel::panic(const char* s) {
@@ -71,18 +100,10 @@ void write_num(int x) {
     x++;
     x--;
     while (true) {
-        for (int i = 0; i < 80000000; i++)
-            ;
+    //    x86asmSyscall();
             
         char s[128];
         
-        sprintf(s, "%d cr3: 0x%llx\n",
-            x,
-            
-            Machine::getCR3()
-        );
-
-        CRT::getInstance().write(s);
     }
 }
 
@@ -118,8 +139,9 @@ void Kernel::main() {
     Machine::getInstance().init();
     TaskManager::init();
     SystemCall::init();
-  
-  
+
+    Msr::write(Msr::KERNEL_GS_BASE, (uint64_t) perCpuCargo);
+
     Task* idleTask = TaskManager::create(
         IdleTask::entrance, 
         "kerneld", 
@@ -140,6 +162,7 @@ void Kernel::main() {
         : "a" (idleTask->kernelStackPointer)
     );
     
+    x86asmSwapgs();
     x86asmSti();
     x86asmNearJmp(interruptExit);
 

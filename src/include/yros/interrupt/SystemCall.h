@@ -11,6 +11,8 @@
 #include <yros/machine/X86Assembly.h>
 #include <lib/sys/types.h>
 
+struct Task;
+
 namespace SystemCall {
 
     const int SYSCALL_NUM = 128;
@@ -18,11 +20,6 @@ namespace SystemCall {
     void init();
 
     void entrance();
-    void welcomeMat(
-        InterruptSoftwareFrame* softwareRegs, 
-        InterruptHardwareFrame* hardwareRegs
-    );
 
     int64_t test();
-
 }

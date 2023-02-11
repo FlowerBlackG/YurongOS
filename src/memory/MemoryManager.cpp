@@ -10,21 +10,27 @@
 #include <yros/memory/ArenaMemoryManager.h>
 #include <yros/CRT.h>
 #include <lib/stdio.h>
+#include <lib/string.h>
 
 #include <lib/sys/types.h>
 #include <yros/machine/Cmos.h>
 
+namespace MemoryManager {
 
-MemoryManager MemoryManager::instance;
+    uint64_t systemTotalMemory;
+    uint64_t systemManagedMemory;
+    uint64_t systemManagedMildMemory;
+}
 
 void MemoryManager::init() {
-    this->freeMemoryManager.init();
+    
+    FreeMemoryManager::init();
 
-    this->systemTotalMemory = 0;
-    this->systemManagedMemory = 0;
-    this->systemManagedMildMemory = 0;
+    systemTotalMemory = 0;
+    systemManagedMemory = 0;
+    systemManagedMildMemory = 0;
 
-    this->processArds();
+    processArds();
 
     ArenaMemoryManager::init();
 }
@@ -61,13 +67,13 @@ void MemoryManager::processArds() {
 
         CRT::getInstance().write(s);
 
-        this->systemTotalMemory += size;
+        systemTotalMemory += size;
 
         if (ards.type != 1) {
             continue; // 该段内存不允许使用。
         }
 
-        this->systemManagedMemory += size;
+        systemManagedMemory += size;
 
         if (base + size < BEGIN_OF_USABLE_ADDRESS) {
             continue; // 内存位于不好用的区域。
@@ -102,10 +108,10 @@ void MemoryManager::processArds() {
             continue; // 无法使用这段空间。
         }
 
-        this->systemManagedMildMemory += size;
+        systemManagedMildMemory += size;
 
         // 登记到管理器。
-        freeMemoryManager.free(base, size);
+        FreeMemoryManager::free(base, size);
     }
 
     sprintf(
@@ -130,15 +136,15 @@ void MemoryManager::processArds() {
         (systemManagedMildMemory >> 10) % 1024,
         systemManagedMildMemory % 1024,
 
-        freeMemoryManager.getTotalFreeMemory() >> 30, 
-        (freeMemoryManager.getTotalFreeMemory() >> 20) % 1024,
-        (freeMemoryManager.getTotalFreeMemory() >> 10) % 1024,
-        freeMemoryManager.getTotalFreeMemory() % 1024
+        FreeMemoryManager::getTotalFreeMemory() >> 30, 
+        (FreeMemoryManager::getTotalFreeMemory() >> 20) % 1024,
+        (FreeMemoryManager::getTotalFreeMemory() >> 10) % 1024,
+        FreeMemoryManager::getTotalFreeMemory() % 1024
     );
 
     CRT::getInstance().write(s);
 
-    if (this->systemManagedMildMemory != freeMemoryManager.getTotalFreeMemory()) {
+    if (systemManagedMildMemory != FreeMemoryManager::getTotalFreeMemory()) {
         CRT::getInstance().write(
             "[warning] mild memory doesn't match free memory manager managed memory.\n"
         );
@@ -148,9 +154,104 @@ void MemoryManager::processArds() {
 }
 
 uint64_t MemoryManager::allocPage(uint64_t count) {
-    return freeMemoryManager.alloc(MemoryManager::PAGE_SIZE * count);
+    return FreeMemoryManager::alloc(MemoryManager::PAGE_SIZE * count);
+}
+
+uint64_t MemoryManager::allocWhitePage(uint64_t count, uint8_t fill) {
+    uintptr_t resAddr = FreeMemoryManager::alloc(MemoryManager::PAGE_SIZE * count);
+
+    if (resAddr) {
+        memset((void*) (resAddr + ADDRESS_OF_PHYSICAL_MEMORY_MAP), fill, PAGE_SIZE);
+    }
+
+    return resAddr;
 }
 
 void MemoryManager::freePage(uint64_t addr, uint64_t count) {
-    freeMemoryManager.free(addr, MemoryManager::PAGE_SIZE * count);
+    FreeMemoryManager::free(addr, MemoryManager::PAGE_SIZE * count);
+}
+
+int MemoryManager::mapPage(
+    PageMapLevel4 pml4, 
+    uintptr_t linearAddress, 
+    uintptr_t pagePhysicalAddress,
+    bool rw,
+    bool us
+) {
+
+    int pml1idx = (linearAddress >> 12) % 512;
+    int pml2idx = (linearAddress >> 21) % 512;
+    int pml3idx = (linearAddress >> 30) % 512;
+    int pml4idx = (linearAddress >> 39) % 512;
+
+    PageMapLevel4Entry& pml4e = pml4[pml4idx];
+
+    uintptr_t pml3addr = pml4e.pageFrameNumber * PAGE_SIZE;
+    PageMapLevel3 pml3;
+
+    if ( !pml3addr ) {
+        pml3addr = allocWhitePage();
+        
+        if (!pml3addr) {
+            return 1;
+        }
+
+        pml4e.pageFrameNumber = pml3addr / PAGE_SIZE;
+        pml4e.rw = !!rw;
+        pml4e.us = !!us;
+        pml4e.present = 1;
+    }
+
+    pml3 = (PageMapLevel3) (pml3addr + ADDRESS_OF_PHYSICAL_MEMORY_MAP);
+    PageMapLevel3Entry& pml3e = pml3[pml3idx];
+
+    uintptr_t pml2addr = pml3e.pageFrameNumber * PAGE_SIZE;
+    PageMapLevel2 pml2;
+
+    if ( !pml2addr ) {
+        pml2addr = allocWhitePage();
+
+        if (!pml2addr) {
+            freePage(pml3addr);
+            pml4e.pageFrameNumber = 0;
+            return 2;
+        }
+
+        pml3e.pageFrameNumber = pml2addr / PAGE_SIZE;
+        pml3e.rw = !!rw;
+        pml3e.us = !!us;
+        pml3e.present = 1;
+    }
+
+    pml2 = (PageMapLevel2) (pml2addr + ADDRESS_OF_PHYSICAL_MEMORY_MAP);
+    PageMapLevel2Entry& pml2e = pml2[pml2idx];
+
+    uintptr_t pml1addr = pml2e.pageFrameNumber * PAGE_SIZE;
+    PageMapLevel1 pml1;
+
+    if ( !pml1addr ) {
+        pml1addr = allocWhitePage();
+
+        if (!pml1addr) {
+            freePage(pml3addr);
+            freePage(pml2addr);
+            pml4e.pageFrameNumber = 0;
+            return 2;
+        }
+
+        pml2e.pageFrameNumber = pml1addr / PAGE_SIZE;
+        pml2e.rw = !!rw;
+        pml2e.us = !!us;
+        pml2e.present = 1;
+    }
+
+    pml1 = (PageMapLevel1) (pml1addr + ADDRESS_OF_PHYSICAL_MEMORY_MAP);
+    PageMapLevel1Entry& pml1e = pml1[pml1idx];
+
+    pml1e.rw = !!rw;
+    pml1e.us = !!us;
+    pml1e.present = 1;
+    pml1e.pageFrameNumber = pagePhysicalAddress / PAGE_SIZE;
+
+    return 0;
 }

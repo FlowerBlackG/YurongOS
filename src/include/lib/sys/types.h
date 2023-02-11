@@ -39,6 +39,10 @@
     #define __asm __asm__ __volatile__
 #endif
 
+#ifndef __section
+    #define __section(name) __attribute__((section(name)))
+#endif
+
 typedef unsigned long size_t;
 
 typedef int32_t pid_t;

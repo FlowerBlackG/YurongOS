@@ -187,8 +187,8 @@ start:
     ; 加载内核代码。要求用户内存不小于 10MB。
     ; 内核代码共 7MB，从 1MB 位置开始存放（0x 10 0000）
     ; 每次读 128个扇区，即 64KB。总共读 112 轮。
-    mov ecx, 0
-    mov edx, 0x100000
+    mov ecx, 4 ; 读取目标扇区号。从第4个扇区开始读。
+    mov edx, 0x100000 ; 存放内存位置。
 
     mov si, msg_reading_kernel
     call print
@@ -199,14 +199,14 @@ start:
 
     mov bl, 128
     mov edi, edx
-    add ecx, 4
     call read_disk
 
     pop edx
     pop ecx
-    inc ecx
+
+    add ecx, 128 ; 每次读到128个扇区。
     add edx, (512 * 128)
-    cmp ecx, 16 ; 只读 16 轮。
+    cmp ecx, (16 * 128 + 4) ; 只读 16 轮。
     jne .loop_read_kernel 
 
     mov si, msg_kernel_read

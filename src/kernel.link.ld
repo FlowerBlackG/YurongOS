@@ -38,9 +38,22 @@ SECTIONS
 
     .bss : 
     {
+        __BSS_START__ = .;
      
         *(.bss)
         . = ALIGN(4096);
+
+        __BSS_END__ = .;
+    }
+
+    .per_cpu_cargo :
+    {
+        __PER_CPU_CARGO_START__ = .;
+
+        *(.per_cpu_cargo)
+        . = ALIGN(4096);
+
+        __PER_CPU_CARGO_END__ = .;
     }
 
 }

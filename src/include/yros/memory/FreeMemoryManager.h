@@ -13,28 +13,21 @@
 /**
  * 空闲内存管理器。负责分配和释放物理内存。
  */
-class FreeMemoryManager {
+namespace FreeMemoryManager {
 
-public:
-    static const int ALLOC_PAGE_NODE_THREHOLD = 50 - 6;
-    static const int FREE_PAGE_NODE_THREHOLD = 6;
+    const int ALLOC_PAGE_NODE_THREHOLD = 50 - 6;
+    const int FREE_PAGE_NODE_THREHOLD = 6;
 
-public:
-    FreeMemoryManager() = default;
 
     void init();
 
     int free(uint64_t address, uint64_t size, bool dontAdjustPage = false);
     uint64_t alloc(uint64_t size, bool dontAdjustPage = false);
     
-    inline uint64_t getTotalFreeMemory() {
-        return this->totalFreeMemory;
-    }
+    uint64_t getTotalFreeMemory();
 
     uint64_t getMaxAllocatableMemorySize();
 
-
-protected:
 
     struct DoubleLinkedTreeNode {
         
@@ -120,21 +113,6 @@ protected:
         int popNode(int count = 1);
 
     };
-
-protected:
-    void adjustPageLinkNodes();
-    
-protected:
-    PageLinkNode* currentPage;
-    PageLinkNode* nextPage;
-
-    DoubleLinkedTree addressIdxTree;
-    DoubleLinkedTree sizeIdxTree;
-    
-    uint64_t totalFreeMemory;
-
-private: 
-    FreeMemoryManager(const FreeMemoryManager&) = delete;
     
 };
 

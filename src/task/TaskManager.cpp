@@ -15,6 +15,7 @@
 #include <yros/machine/GlobalDescriptorTable.h>
 #include <yros/memory/PageDirectories.h>
 #include <yros/interrupt/InterruptExit.h>
+#include <yros/interrupt/SystemCall.h>
 
 #include <lib/string.h>
 
@@ -46,6 +47,7 @@ namespace TaskManager {
         x86asmCli();
 
         static int prevId = 0;
+
         Task* next = nullptr;
         
         while (true) {
@@ -55,6 +57,7 @@ namespace TaskManager {
             }
 
             next = taskTable[prevId];
+            x86asmBochsMagicBreakpoint();
 
             if (next && next->state == TaskState::READY) {
                 break;
@@ -74,6 +77,11 @@ namespace TaskManager {
         sp += MemoryManager::PAGE_SIZE;
         tss.rsp0Low = sp & 0xFFFFFFFF;
         tss.rsp0High = ((sp >> 16) >> 16) & 0xFFFFFFFF;
+
+        const auto kernelPml4Addr = MemoryManager::KERNEL_PML4_ADDRESS 
+            + MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
+        
+        auto kernelPml4 = (PageMapLevel4) kernelPml4Addr;
 
         Machine::setCR3(task->pml4Address);
     }
@@ -135,14 +143,14 @@ namespace TaskManager {
             codeSelector = GlobalDescriptorTable::KERNEL_CODE_SELECTOR;
             dataSelector = GlobalDescriptorTable::KERNEL_DATA_SELECTOR;
         } else {
-            codeSelector = GlobalDescriptorTable::USER_CODE_SELECTOR;
+            codeSelector = GlobalDescriptorTable::USER_CODE_64_SELECTOR;
             dataSelector = GlobalDescriptorTable::USER_DATA_SELECTOR;
         }
 
         swContext->ds = dataSelector;
         swContext->es = dataSelector;
         swContext->fs = dataSelector;
-        swContext->gs = 0;
+        swContext->gs = dataSelector;
         hwContext->ss = dataSelector;
         hwContext->cs = codeSelector;
 

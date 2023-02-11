@@ -16,6 +16,10 @@ namespace Msr {
     const int SYSCALL_CSTAR = 0xC0000083;
     const int SYSCALL_SFMASK = 0xC0000084;
 
+    const int FS_BASE = 0xC0000100;
+    const int GS_BASE = 0xC0000101;
+    const int KERNEL_GS_BASE = 0xC0000102;
+
     inline uint64_t read(uint32_t msr) {
         uint32_t low, high;
 

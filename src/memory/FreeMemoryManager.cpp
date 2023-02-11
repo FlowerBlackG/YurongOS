@@ -10,6 +10,16 @@
 #include <yros/memory/MemoryManager.h>
 #include <yros/machine/Machine.h>
 
+namespace FreeMemoryManager {
+    PageLinkNode* currentPage;
+    PageLinkNode* nextPage;
+
+    DoubleLinkedTree addressIdxTree;
+    DoubleLinkedTree sizeIdxTree;
+    
+    uint64_t totalFreeMemory;
+}
+
 /* ------------ Free Memory Manager ------------ */
 
 void FreeMemoryManager::init() {
@@ -28,6 +38,40 @@ void FreeMemoryManager::init() {
 
     sizeIdxTree.root = nullptr;
     addressIdxTree.root = nullptr;
+}
+
+namespace FreeMemoryManager {
+
+    void adjustPageLinkNodes() {
+        if (currentPage->nodeUsed < FREE_PAGE_NODE_THREHOLD 
+            && nextPage
+            && currentPage->prevNode
+        ) {
+            free(
+                ((uint64_t) nextPage) - MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP, 
+                sizeof(PageLinkNode),
+                true
+            );
+
+            currentPage = currentPage->prevNode;
+            nextPage = currentPage->nextNode;
+            nextPage->nextNode = nullptr;
+
+        } else if (nextPage->nodeUsed > ALLOC_PAGE_NODE_THREHOLD) {
+
+            uint64_t allocRes = alloc(sizeof(PageLinkNode), true);
+            allocRes += MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
+            
+            nextPage = (PageLinkNode*) allocRes;
+            nextPage->nextNode = nullptr;
+            nextPage->nodeUsed = 0;
+            nextPage->prevNode = currentPage->nextNode;
+            currentPage = currentPage->nextNode;
+            currentPage->nextNode = nextPage; 
+
+        }
+    }
+
 }
 
 
@@ -187,7 +231,7 @@ int FreeMemoryManager::free(uint64_t address, uint64_t size, bool dontAdjustPage
     }
 
     if (!dontAdjustPage) {
-        this->adjustPageLinkNodes();
+        adjustPageLinkNodes();
     }
     
 
@@ -204,7 +248,7 @@ uint64_t FreeMemoryManager::alloc(uint64_t size, bool dontAdjustPage) {
     bool prevInterruptState = Machine::getInstance().getAndSetInterruptState(false);
 
 
-    DoubleLinkedTreeNode* node = this->sizeIdxTree.findNode(
+    DoubleLinkedTreeNode* node = sizeIdxTree.findNode(
         size, 
         sizeIdx, 
         DoubleLinkedTree::FindNodeStrategy::MATCH_OR_MORE
@@ -222,8 +266,8 @@ uint64_t FreeMemoryManager::alloc(uint64_t size, bool dontAdjustPage) {
     if (node->sizeIdxData().value == size) {
         // 容量刚好匹配。
         result = node->addressIdxData().value;
-        this->sizeIdxTree.removeNode(node, sizeIdx);
-        this->addressIdxTree.removeNode(node, addrIdx);
+        sizeIdxTree.removeNode(node, sizeIdx);
+        addressIdxTree.removeNode(node, addrIdx);
 
         nodeRemoved = true;
 
@@ -256,11 +300,11 @@ uint64_t FreeMemoryManager::alloc(uint64_t size, bool dontAdjustPage) {
         sizeIdxTree.addNode(node, sizeIdx);
     }
 
-    this->totalFreeMemory -= size;
+    totalFreeMemory -= size;
 
     // 调整节点页。
     if (nodeRemoved && !dontAdjustPage) {
-        this->adjustPageLinkNodes();
+        adjustPageLinkNodes();
         
     }
 
@@ -268,6 +312,10 @@ uint64_t FreeMemoryManager::alloc(uint64_t size, bool dontAdjustPage) {
     Machine::getInstance().setInterruptState(prevInterruptState);
     return result;
 
+}
+
+uint64_t FreeMemoryManager::getTotalFreeMemory() {
+    return totalFreeMemory;
 }
 
 uint64_t FreeMemoryManager::getMaxAllocatableMemorySize() {
@@ -282,36 +330,6 @@ uint64_t FreeMemoryManager::getMaxAllocatableMemorySize() {
     }
 
     return curr->sizeIdxData().value;
-}
-
-void FreeMemoryManager::adjustPageLinkNodes() {
-    if (currentPage->nodeUsed < FREE_PAGE_NODE_THREHOLD 
-        && nextPage
-        && currentPage->prevNode
-    ) {
-        this->free(
-            ((uint64_t) nextPage) - MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP, 
-            sizeof(PageLinkNode),
-            true
-        );
-
-        currentPage = currentPage->prevNode;
-        nextPage = currentPage->nextNode;
-        nextPage->nextNode = nullptr;
-
-    } else if (nextPage->nodeUsed > ALLOC_PAGE_NODE_THREHOLD) {
-
-        uint64_t allocRes = this->alloc(sizeof(PageLinkNode), true);
-        allocRes += MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
-        
-        nextPage = (PageLinkNode*) allocRes;
-        nextPage->nextNode = nullptr;
-        nextPage->nodeUsed = 0;
-        nextPage->prevNode = currentPage->nextNode;
-        currentPage = currentPage->nextNode;
-        currentPage->nextNode = nextPage; 
-
-    }
 }
 
 /* ------------ Double Linked Tree Node ------------ */

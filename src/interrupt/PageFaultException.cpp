@@ -87,6 +87,80 @@ namespace PageFaultException {
         CRT::getInstance().write("\n");
     }
 
+    static void __solvePageFaultInKernelProcess(
+        InterruptSoftwareFrame* softwareRegs, 
+        InterruptHardwareFrame* hardwareRegs,
+        uint64_t cr2, uint64_t cr3
+    ) {
+        // 缺页发生在内核态。这是不可饶恕的。
+
+        char s[256]; 
+        
+        CRT::getInstance().write(" ------------\n  "); 
+        CRT::getInstance().write("page fault in kernel process"); 
+        CRT::getInstance().write(" (with errcode)\n"); 
+        
+        __decodeErrCode(hardwareRegs->errorCode);
+
+        sprintf( 
+            s, 
+            "    errcode: 0x%llx\n" 
+            "    rax: 0x%llx\n" 
+            "    rbp: 0x%llx, rsp: 0x%llx\n" 
+            "    cs: 0x%x, ds: 0x%x, es: 0x%x\n" 
+            "    ss: 0x%x, fs: 0x%x, gs: 0x%x\n" 
+            "    rip: 0x%llx\n"
+            "    cr2: 0x%llx, cr3: 0x%llx\n", 
+            hardwareRegs->errorCode, 
+            softwareRegs->rax, 
+            softwareRegs->rbp, 
+            hardwareRegs->rsp, 
+            hardwareRegs->cs, softwareRegs->ds, softwareRegs->es, 
+            hardwareRegs->ss, softwareRegs->fs, softwareRegs->gs, 
+            hardwareRegs->rip,
+            cr2, cr3 
+        ); 
+        
+        CRT::getInstance().write(s); 
+        CRT::getInstance().write(" ------------\n"); 
+        
+        Kernel::panic("[critical] kernel panic.\n"); 
+    }
+
+    static void __solvePageFaultInUserProcess(
+        InterruptSoftwareFrame* softwareRegs, 
+        InterruptHardwareFrame* hardwareRegs,
+        uint64_t cr2, uint64_t cr3
+    ) {
+        
+        char s[64]; 
+        
+        CRT::getInstance().write(s); 
+        
+        if (cr2 >> 16 >> 16 >> 16 >> 15) {
+            
+            Kernel::panic("[error] page fault: bad access.\n");
+        }
+
+        // 缺页发生在用户态。
+
+        unsigned long pml4addr = cr3;
+        auto pml4 = (PageMapLevel4) (pml4addr + MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP);
+
+        uintptr_t newPageAddr = MemoryManager::allocPage();
+        if (!newPageAddr) {
+            Kernel::panic("[error] memory ran out (d91a).\n");
+        }
+
+        int resCode = MemoryManager::mapPage(pml4, cr2, newPageAddr, true, true);
+        
+        if (resCode) {
+            sprintf(s, "[error] user memory allocation failed (%d).\n", resCode);
+            Kernel::panic(s);
+        }
+
+    }
+
     void handler(
         InterruptSoftwareFrame* softwareRegs, 
         InterruptHardwareFrame* hardwareRegs
@@ -94,60 +168,17 @@ namespace PageFaultException {
         x86asmCli(); 
         uint64_t cr2, cr3; 
 
-        if (hardwareRegs->cs & 0x3 == 0) {
+        __asm( 
+            "movq %%cr2, %%rax \n\t" 
+            "movq %%cr3, %%rbx \n\t" 
+            : "=a" (cr2), "=b" (cr3) 
+            : 
+        ); 
 
-            // 缺页发生在内核态。这是不可饶恕的。
-
-            char s[256]; 
-            
-            CRT::getInstance().write(" ------------\n  "); 
-            CRT::getInstance().write("page fault in kernel process"); 
-            CRT::getInstance().write(" (with errcode)\n"); 
-            
-            __asm( 
-                "movq %%cr2, %%rax \n\t" 
-                "movq %%cr3, %%rbx \n\t" 
-                : "=a" (cr2), "=b" (cr3) 
-                : 
-            ); 
-            
-            __decodeErrCode(hardwareRegs->errorCode);
-
-            sprintf( 
-                s, 
-                "    errcode: 0x%llx\n" 
-                "    rax: 0x%llx\n" 
-                "    rbp: 0x%llx, rsp: 0x%llx\n" 
-                "    cs: 0x%x, ds: 0x%x, es: 0x%x\n" 
-                "    ss: 0x%x, fs: 0x%x, gs: 0x%x\n" 
-                "    cr2: 0x%llx, cr3: 0x%llx\n", 
-                hardwareRegs->errorCode, 
-                softwareRegs->rax, 
-                softwareRegs->rbp, 
-                hardwareRegs->rsp, 
-                hardwareRegs->cs, softwareRegs->ds, softwareRegs->es, 
-                hardwareRegs->ss, softwareRegs->fs, softwareRegs->gs, 
-                cr2, cr3 
-            ); 
-            
-            CRT::getInstance().write(s); 
-            CRT::getInstance().write(" ------------\n"); 
-            
-            Kernel::panic("[critical] kernel panic.\n"); 
+        if ( hardwareRegs->cs & 0x3 ) {
+            __solvePageFaultInUserProcess(softwareRegs, hardwareRegs, cr2, cr3);
         } else {
-
-            // 缺页发生在用户态。
-
-            int pml1idx = (cr2 >> 12) % 512;
-            int pml2idx = (cr2 >> 21) % 512;
-            int pml3idx = (cr2 >> 30) % 512;
-            int pml4idx = (cr2 >> 39) % 512;
-
-            unsigned long pml4addr = cr3;
-            pml4addr += MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
-
-            auto pml4 = (PageMapLevel4) pml4addr;
-
+            __solvePageFaultInKernelProcess(softwareRegs, hardwareRegs, cr2, cr3);
         }
 
         x86asmSti();

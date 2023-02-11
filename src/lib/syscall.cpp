@@ -7,3 +7,53 @@
 */
 
 #include <lib/syscall.h>
+#include <lib/sys/types.h>
+
+__force_inline __omit_frame_pointer static void __syscall0(...) {
+    __asm (
+        "syscall"
+    );
+}
+
+__force_inline __omit_frame_pointer static void __syscall1(...) {
+    __asm (
+        "syscall"
+    );
+}
+
+
+__force_inline __omit_frame_pointer static void __syscall2(...) {
+    __asm (
+        "syscall"
+    );
+}
+
+
+__force_inline __omit_frame_pointer static void __syscall3(...) {
+    __asm (
+        "syscall"
+    );
+}
+
+__force_inline __omit_frame_pointer static void __syscall4(...) {
+    __asm (
+        "movq %rcx, %r10 \n\t"
+        "syscall"
+    );
+}
+
+__force_inline __omit_frame_pointer static void __syscall5(...) {
+    __asm (
+        "movq %rcx, %r10 \n\t"
+        "syscall"
+    );
+}
+
+__force_inline __omit_frame_pointer static void __syscall6(...) {
+    __asm (
+        "movq %rcx, %r10 \n\t"
+        "syscall"
+    );
+}
+
+

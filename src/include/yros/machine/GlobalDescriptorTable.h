@@ -182,15 +182,17 @@ namespace GlobalDescriptorTable {
 
     const int KERNEL_CODE_DESCRIPTOR_IDX = 1;
     const int KERNEL_DATA_DESCRIPTOR_IDX = 2;
-    const int USER_CODE_DESCRIPTOR_IDX = 3;
+    const int USER_CODE_32_DESCRIPTOR_IDX = 3;
     const int USER_DATA_DESCRIPTOR_IDX = 4;
-    const int TASK_STATE_SEGMENT_DESCRIPTOR_IDX = 5;
+    const int USER_CODE_64_DESCRIPTOR_IDX = 5;
+    const int TASK_STATE_SEGMENT_DESCRIPTOR_IDX = 6;
 
     const int KERNEL_CODE_SELECTOR = KERNEL_CODE_DESCRIPTOR_IDX << 3;
     const int KERNEL_DATA_SELECTOR = KERNEL_DATA_DESCRIPTOR_IDX << 3;
 
-    const int USER_CODE_SELECTOR = (USER_CODE_DESCRIPTOR_IDX << 3) | 0x3;
+    const int USER_CODE_32_SELECTOR = (USER_CODE_32_DESCRIPTOR_IDX << 3) | 0x3;
     const int USER_DATA_SELECTOR = (USER_DATA_DESCRIPTOR_IDX << 3) | 0x3;
+    const int USER_CODE_64_SELECTOR = (USER_CODE_64_DESCRIPTOR_IDX << 3) | 0x3;
 
     const int TASK_STATE_SEGMENT_SELECTOR = TASK_STATE_SEGMENT_DESCRIPTOR_IDX << 3;
 
@@ -205,8 +207,9 @@ namespace GlobalDescriptorTable {
         SegmentDescriptor zero;
         SegmentDescriptor kernelCode;
         SegmentDescriptor kernelData;
-        SegmentDescriptor userCode;
+        SegmentDescriptor userCode32;
         SegmentDescriptor userData;
+        SegmentDescriptor userCode64;
         SystemSegmentDescriptor systemSegmentDescriptor;
     } __packed;
 

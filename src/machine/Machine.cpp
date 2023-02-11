@@ -28,7 +28,7 @@ void Machine::init() {
 
     // 需要在设置中断前初始化内存。
     // 内存初始化过程中，会依赖 bios 提供的中断程序。
-    MemoryManager::getInstance().init();
+    MemoryManager::init();
 
     this->initIdt();
     this->initPit();
@@ -131,7 +131,9 @@ void Machine::initIdt() {
     idt.setTrapGate(11, (long) InterruptHandlers::notPresentExceptionEntrance);
     idt.setTrapGate(12, (long) InterruptHandlers::stackSegmentExceptionEntrance);
     idt.setTrapGate(13, (long) InterruptHandlers::generalProtectionExceptionEntrance);
+
     idt.setTrapGate(14, (long) PageFaultException::entrance);
+    
     idt.setTrapGate(16, (long) InterruptHandlers::mathFaultExceptionEntrance);
     idt.setTrapGate(17, (long) InterruptHandlers::alignmentCheckingExceptionEntrance);
     idt.setTrapGate(18, (long) InterruptHandlers::machineCheckExceptionEntrance);

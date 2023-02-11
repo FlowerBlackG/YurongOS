@@ -35,6 +35,7 @@ namespace IdleTask {
     int main() {
 
         while (true) {
+            x86asmSti();
             x86asmHlt();
         }
 

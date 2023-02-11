@@ -10,6 +10,7 @@
 
 #include <yros/machine/X86Assembly.h>
 #include <yros/interrupt/InterruptExit.h>
+#include <yros/machine/GlobalDescriptorTable.h>
 #include <yros/Kernel.h>
 
 /*
@@ -40,9 +41,23 @@
 
 */
 
+#define __implHandlerMacros_x86asmSwapgsIfNecessary(functionName) \
+    __asm ( \
+        "cli \n\t" \
+        "cmpw %0, 0x10(%%rsp) \n\t" \
+        "je ." #functionName ".end \n\t" \
+        "swapgs \n\t" \
+        "." #functionName ".end: \n\t" \
+        "sti \n\t" \
+        \
+        : \
+        : "i" (GlobalDescriptorTable::KERNEL_CODE_SELECTOR) \
+    )
+
 #define IMPLEMENT_EXCEPTION_ENTRANCE(entranceFunctionName, handlerName) \
     void __omit_frame_pointer entranceFunctionName()  { \
         __asm ("pushq $0x656e6f6e"); /* ascii: none */ \
+        __implHandlerMacros_x86asmSwapgsIfNecessary(entranceFunctionName); \
         x86asmSaveContext(); \
         x86asmLoadKernelDataSegments(); \
         \
@@ -53,6 +68,7 @@
 
 #define IMPLEMENT_EXCEPTION_WITH_ERRCODE_ENTRANCE(entranceFunctionName, handlerName) \
     void __omit_frame_pointer entranceFunctionName()  { \
+        __implHandlerMacros_x86asmSwapgsIfNecessary(entranceFunctionName); \
         x86asmSaveContext(); \
         x86asmLoadKernelDataSegments(); \
         \
@@ -148,3 +164,5 @@
         \
         Kernel::panic("[critical] kernel panic.\n"); \
     }
+
+#undef __x86asmSwapgsIfNecessary

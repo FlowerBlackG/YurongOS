@@ -31,4 +31,13 @@ _Z13interruptExitv:
 
     add rsp, 8  ; 跳过 errcode
 
+    cli
+    cmp word [rsp + 0x8], 0x8
+    je .end
+
+    swapgs
+
+.end:
+    sti
+
     iretq

@@ -22,6 +22,7 @@ KERNEL_TARGET = $(TARGET)/kernel
 # 注意：必须将 kernel_entry 放在开头，不然地址无法正常跳转。
 KERNEL_OBJS = $(KERNEL_TARGET)/kernel_entry.o \
 			  $(KERNEL_TARGET)/io.o \
+			  $(KERNEL_TARGET)/PerCpuCargo.o \
 			  $(TARGET)/crt/CRT.o \
 			  $(KERNEL_TARGET)/kernel.o \
 			  $(TARGET)/lib/string.o \
@@ -53,7 +54,8 @@ yros_kernel: $(DIRS)
 	$(shell mkdir -p $(ASM_DUMP_TARGET))
 	ld -m elf_x86_64 -static $(KERNEL_OBJS) -o $(KERNEL_TARGET)/kernel.exe -T kernel.link.ld 
 	objcopy -O binary $(KERNEL_TARGET)/kernel.exe $(KERNEL_TARGET)/kernel.bin
-	objdump -d $(KERNEL_TARGET)/kernel.exe > $(ASM_DUMP_TARGET)/kernel.exe.dump.asm
+	objdump -d $(KERNEL_TARGET)/kernel.exe > $(ASM_DUMP_TARGET)/kernel.exe.dump.text.asm
+	objdump -D $(KERNEL_TARGET)/kernel.exe > $(ASM_DUMP_TARGET)/kernel.exe.dump.full.asm
 
 # 部署文件。
 .PHONY: deploy
@@ -87,7 +89,7 @@ bochsg: deploy
 	cd $(YROS_TARGET) && bochs-gdb -q -f ./bochsrc.gdb
 
 QEMU := qemu-system-x86_64 
-QEMU += -m 8G 
+QEMU += -m 8G
 QEMU += -cpu Icelake-Server 
 QEMU += -audiodev pa,id=hda 
 QEMU += -machine pcspk-audiodev=hda 

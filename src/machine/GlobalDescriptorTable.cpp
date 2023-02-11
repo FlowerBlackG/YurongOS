@@ -15,7 +15,7 @@ namespace GlobalDescriptorTable {
     Descriptors descriptors;
     TaskStateSegment taskStateSegment;
 
-    void __initSegmentDescriptors(
+    void __initLongModeSegmentDescriptors(
         SegmentDescriptor& codeDesc,
         SegmentDescriptor& dataDesc,
         int privilegeLevel
@@ -55,12 +55,36 @@ namespace GlobalDescriptorTable {
         dataDesc.reserved = 0;
     }
 
+    void __initProtectedModeUserCodeSegmentDescriptor(
+        SegmentDescriptor& desc
+    ) {
+        desc.limitHigh = 0xF;
+        desc.limitLow = 0xFFFF;
+
+        desc.baseHigh = 0;
+        desc.baseMid = 0;
+        desc.baseLow = 0;
+
+        desc.executable = 1;
+        desc.descriptorType = SegmentDescriptor::SEGMENT_TYPE_CODE_DATA;
+        desc.rw = 1;
+        desc.access = 0;
+        desc.sizeFlag = 1;
+        desc.privilegeLevel = 3;
+        desc.present = 1;
+        desc.dc = 0;
+        desc.granularity = 1;
+        desc.longMode = 0;
+        desc.reserved = 0;
+    }
+
     void init() {
 
         memset(&descriptors.zero, 0, sizeof(descriptors.zero));
 
-        __initSegmentDescriptors(descriptors.kernelCode, descriptors.kernelData, 0);
-        __initSegmentDescriptors(descriptors.userCode, descriptors.userData, 3);
+        __initLongModeSegmentDescriptors(descriptors.kernelCode, descriptors.kernelData, 0);
+        __initLongModeSegmentDescriptors(descriptors.userCode64, descriptors.userData, 3);
+        __initProtectedModeUserCodeSegmentDescriptor(descriptors.userCode32);
 
         auto& sysSegmentDesc = descriptors.systemSegmentDescriptor;
         unsigned long tssAddr = (unsigned long) &taskStateSegment;

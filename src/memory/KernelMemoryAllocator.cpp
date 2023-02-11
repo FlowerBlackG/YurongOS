@@ -124,12 +124,11 @@ namespace KernelMemoryAllocator {
 
     
     void* allocWhitePage(uint64_t count, uint8_t fill) {
-        uint64_t addr = MemoryManager::getInstance().allocPage(count);
+        uint64_t addr = MemoryManager::allocWhitePage(count, fill);
 
         if (addr) {
 
             addr += MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
-            memset((void*) addr, fill, MemoryManager::PAGE_SIZE * count);
             return (void*) addr;
 
         } else {
@@ -138,7 +137,7 @@ namespace KernelMemoryAllocator {
     }
 
     void* allocPage(uint64_t count) {
-        uint64_t addr = MemoryManager::getInstance().allocPage(count);
+        uint64_t addr = MemoryManager::allocPage(count);
         if (addr) {
         
             addr += MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
@@ -154,6 +153,6 @@ namespace KernelMemoryAllocator {
     void freePage(void* addr, uint64_t count) {
         uint64_t realAddr = (uint64_t) addr;
         realAddr -= MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
-        MemoryManager::getInstance().freePage(realAddr, count);
+        MemoryManager::freePage(realAddr, count);
     }
 };
