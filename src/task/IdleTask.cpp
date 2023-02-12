@@ -35,6 +35,12 @@ namespace IdleTask {
     int main() {
 
         while (true) {
+
+            int x = 3;
+            x++;
+            x--;
+        CRT::getInstance().write("kerneld tick...\n");
+
             x86asmSti();
             x86asmHlt();
         }

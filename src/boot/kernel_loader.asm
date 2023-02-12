@@ -345,9 +345,11 @@ kernel_loader:
 
     mov ds, ax
     mov es, ax
+    mov ss, ax
+
+    mov ax, 0
     mov fs, ax
     mov gs, ax
-    mov ss, ax 
 
     mov rsp, 0xFFFF_C000_0000_0000
     

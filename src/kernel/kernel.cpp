@@ -19,7 +19,7 @@
 #include <yros/task/IdleTask.h>
 #include <yros/machine/Msr.h>
 #include <yros/PerCpuCargo.h>
-
+#include <lib/stddef.h>
 /**
  * 调用内核所有模块的对象的构造函数。
  */
@@ -57,6 +57,12 @@ inline static void __initPerCpuCargos(uint32_t cpuCount) {
     for (uint32_t i = 0; i < cpuCount * sizeof(PerCpuCargo); i++) {
         *pCargo = 0;
         pCargo++;
+    }
+
+    PerCpuCargo* p = (PerCpuCargo*) perCpuCargoStart;
+    for (uint32_t i = 0; i < cpuCount; i++) {
+        p->self = p;
+        p++;
     }
 }
 
@@ -97,11 +103,17 @@ void Kernel::panic(const char* s) {
 }
 
 void write_num(int x) {
-    x++;
-    x--;
+
     while (true) {
-    //    x86asmSyscall();
-            
+        __asm (
+            "movq %0, %%rsi \n\t"
+            "movq %0, %%rdi \n\t"
+            "movq $1, %%rax \n\t"
+            ::"m"(x)
+        );
+        x86asmSyscall();
+                x++;
+    x--;
         char s[128];
         
     }
@@ -151,18 +163,23 @@ void Kernel::main() {
 
 
     TaskManager::create(t1, "p1");
+    TaskManager::create(t2, "p1");
+    TaskManager::create(t0, "p1");
    // TaskManager::create(t2, "p2", true);
 
 
     // 启动 idle 进程。
 
+    x86asmSwapgs();
+
+    TaskManager::loadTaskToCargo(idleTask);
+
     __asm (
-        "movq %%rax, %%rsp \n\t"
+        "movq %0, %%rsp \n\t"
         :
-        : "a" (idleTask->kernelStackPointer)
+        : "r" (idleTask->kernelStackPointer)
     );
     
-    x86asmSwapgs();
     x86asmSti();
     x86asmNearJmp(interruptExit);
 

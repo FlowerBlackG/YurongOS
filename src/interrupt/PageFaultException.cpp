@@ -108,7 +108,7 @@ namespace PageFaultException {
             "    rax: 0x%llx\n" 
             "    rbp: 0x%llx, rsp: 0x%llx\n" 
             "    cs: 0x%x, ds: 0x%x, es: 0x%x\n" 
-            "    ss: 0x%x, fs: 0x%x, gs: 0x%x\n" 
+            "    ss: 0x%x, fs: 0x%x \n" 
             "    rip: 0x%llx\n"
             "    cr2: 0x%llx, cr3: 0x%llx\n", 
             hardwareRegs->errorCode, 
@@ -116,7 +116,7 @@ namespace PageFaultException {
             softwareRegs->rbp, 
             hardwareRegs->rsp, 
             hardwareRegs->cs, softwareRegs->ds, softwareRegs->es, 
-            hardwareRegs->ss, softwareRegs->fs, softwareRegs->gs, 
+            hardwareRegs->ss, softwareRegs->fs, 
             hardwareRegs->rip,
             cr2, cr3 
         ); 

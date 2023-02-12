@@ -16,8 +16,10 @@
 #include <yros/memory/PageDirectories.h>
 #include <yros/interrupt/InterruptExit.h>
 #include <yros/interrupt/SystemCall.h>
+#include <yros/PerCpuCargo.h>
 
 #include <lib/string.h>
+#include <lib/stddef.h>
 
 namespace TaskManager {
 
@@ -70,6 +72,21 @@ namespace TaskManager {
 
     }
 
+    void loadTaskToCargo(Task* task) {
+        __asm (
+            "movq %%gs:0, %%r8 \n\t" // cargo.self => r8
+            "addq %0, %%r8 \n\t" // ptr currentTask => r8
+            "movq %1, (%%r8) \n\t"
+
+            :
+            : 
+                "i" (offsetof(PerCpuCargo, currentTask)),
+                "r" (task)
+            : 
+                "%r8"
+        );
+    }
+
     void stage(Task* task) {
         auto& tss = GlobalDescriptorTable::taskStateSegment;
         unsigned long sp = (unsigned long) task->kernelStackPointer;
@@ -77,6 +94,16 @@ namespace TaskManager {
         sp += MemoryManager::PAGE_SIZE;
         tss.rsp0Low = sp & 0xFFFFFFFF;
         tss.rsp0High = ((sp >> 16) >> 16) & 0xFFFFFFFF;
+
+        uint64_t rsp;
+        __asm ("movq %%rsp, %0" :"=m"(rsp):);
+        if (rsp < MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP - 1024ULL*1024*1024) {
+            int x=  1;
+            x++;
+            x--;
+        }
+
+        loadTaskToCargo(task);
 
         const auto kernelPml4Addr = MemoryManager::KERNEL_PML4_ADDRESS 
             + MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
@@ -149,8 +176,7 @@ namespace TaskManager {
 
         swContext->ds = dataSelector;
         swContext->es = dataSelector;
-        swContext->fs = dataSelector;
-        swContext->gs = dataSelector;
+        swContext->fs = 0;
         hwContext->ss = dataSelector;
         hwContext->cs = codeSelector;
 

@@ -15,11 +15,14 @@ struct Task;
 
 namespace SystemCall {
 
-    const int SYSCALL_NUM = 128;
+    const int SYSCALL_COUNT = 128;
+
+    extern void* handlers[SYSCALL_COUNT];
 
     void init();
 
     void entrance();
 
     int64_t test();
+    int64_t test2(int);
 }

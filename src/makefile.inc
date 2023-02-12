@@ -15,10 +15,12 @@ CFLAGS += -nostdlib # 不需要标准库。
 CFLAGS += -fno-stack-protector # 不需要栈保护。
 CFLAGS += -fno-threadsafe-statics
 
+CFLAGS += -O1 # 适当启用优化。
+
 CFLAGS += -mno-red-zone 
 CFLAGS += -mno-mmx  
 CFLAGS += -mno-sse  
-CFLAGS += -mno-sse2 
+CFLAGS += -mno-sse2
 
 CFLAGS += -mcmodel=large
 

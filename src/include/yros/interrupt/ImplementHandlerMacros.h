@@ -102,14 +102,14 @@
             "    rax: 0x%llx\n" \
             "    rbp: 0x%llx, rsp: 0x%llx\n" \
             "    cs: 0x%x, ds: 0x%x, es: 0x%x\n" \
-            "    ss: 0x%x, fs: 0x%x, gs: 0x%x\n" \
+            "    ss: 0x%x, fs: 0x%x \n" \
             "    cr2: 0x%llx, cr3: 0x%llx\n" \
             "    rip: 0x%llx\n", \
             softwareRegs->rax, \
             softwareRegs->rbp, \
             hardwareRegs->rsp, \
             hardwareRegs->cs, softwareRegs->ds, softwareRegs->es, \
-            hardwareRegs->ss, softwareRegs->fs, softwareRegs->gs, \
+            hardwareRegs->ss, softwareRegs->fs, \
             cr2, cr3, \
             hardwareRegs->rip \
         ); \
@@ -146,7 +146,7 @@
             "    rax: 0x%llx\n" \
             "    rbp: 0x%llx, rsp: 0x%llx\n" \
             "    cs: 0x%x, ds: 0x%x, es: 0x%x\n" \
-            "    ss: 0x%x, fs: 0x%x, gs: 0x%x\n" \
+            "    ss: 0x%x, fs: 0x%x \n" \
             "    cr2: 0x%llx, cr3: 0x%llx\n" \
             "    rip: 0x%llx\n", \
             hardwareRegs->errorCode, \
@@ -154,7 +154,7 @@
             softwareRegs->rbp, \
             hardwareRegs->rsp, \
             hardwareRegs->cs, softwareRegs->ds, softwareRegs->es, \
-            hardwareRegs->ss, softwareRegs->fs, softwareRegs->gs, \
+            hardwareRegs->ss, softwareRegs->fs, \
             cr2, cr3, \
             hardwareRegs->rip \
         ); \

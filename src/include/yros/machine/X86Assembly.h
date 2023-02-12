@@ -27,6 +27,8 @@
 #define x86asmDirectCall(function) __asm ("call *%%rax" :: "a" (function))
 #define x86asmNearJmp(target) __asm ("jmp *%%rax" :: "a" (target))
 
+#define x86asmJmp(target) x86asmNearJmp(target)
+
 #define x86asmInvlpg(addr) __asm ("invlpg (%0)" :: "r" (addr))
 #define x86asmInvalidatePage(addr) x86asmInvlpg(addr)
 
@@ -46,7 +48,6 @@
  * 软件现场。
  */
 struct InterruptSoftwareFrame {
-    uint64_t gs;
     uint64_t fs;
     uint64_t ds;
     uint64_t es;
@@ -116,14 +117,12 @@ struct InterruptHardwareFrame {
         "mov %ds, %rax \n\t" \
         "pushq %rax \n\t" \
         "pushq %fs \n\t" \
-        "pushq %gs \n\t" \
         "mov %rsp, %rdi \n\t" \
-        "lea 0x98(%rsp), %rsi \n\t" \
+        "lea 0x90(%rsp), %rsi \n\t" \
     )
 
 #define x86asmRestoreContext() \
     __asm ( \
-        "popq %gs \n\t" \
         "popq %fs \n\t" \
         "popq %rax \n\t" \
         "mov %rax, %ds \n\t" \

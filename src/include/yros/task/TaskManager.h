@@ -22,6 +22,8 @@ namespace TaskManager {
     
     void schedule();
 
+    void loadTaskToCargo(Task* task);
+
     void stage(Task* task);
 
     /**

@@ -51,8 +51,6 @@ namespace MemoryManager {
     const unsigned long KERNEL_PROCESS_STACK_SIZE = KERNEL_PROCESS_STACK_BASE - KERNEL_PROCESS_STACK_TOP;
     const uintptr_t KERNEL_PML4_ADDRESS = 0x1000;
 
-    const uintptr_t ADDRESS_OF_TASK_POINTERS = 0xFFFFA00200000000;
-
 
     void init();
 

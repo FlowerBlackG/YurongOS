@@ -7,7 +7,6 @@ section .text ; 代码段。
 
 global _Z13interruptExitv
 _Z13interruptExitv:
-    pop gs
     pop fs
     pop rax
     mov ds, rax

@@ -11,6 +11,13 @@
 #include <lib/sys/types.h>
 
 struct PerCpuCargo {
+
+    PerCpuCargo* self;
+
+    /**
+     * "卸货甲板"。用于暂存一些物品，如寄存器值。
+     */
+    char deck[64];
     struct Task* currentTask;
 };
 
