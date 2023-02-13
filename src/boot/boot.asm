@@ -140,7 +140,7 @@ start:
     mov ds, ax
     mov es, ax
     mov ss, ax
-    mov esp, 0x7800
+    mov esp, 0x7800 ; 暂用的栈。
 
     ; 打开 A20 线。
     ; 若不打开，会触发回绕，即第20位（从0开始计数）及以上值被丢弃（取模）。
@@ -153,13 +153,15 @@ start:
     call print
 
     ; 进入 unreal mode (big real mode)
+    ; 这样才能访问 1M 以上内存。
+
     push ds
     lgdt [unreal_mode_gdt_pointer]
 
     mov eax, cr0
     or al, 1
     mov cr0, eax
-    jmp 0x8:.temporary_protected_mode
+    jmp 0x8:.temporary_protected_mode ; 先进一下保护模式
 
 .temporary_protected_mode:
     mov bx, 0x10
@@ -167,11 +169,11 @@ start:
 
     and al, 0xfe
     mov cr0, eax
-    jmp 0:.unreal_mode
+    jmp 0:.unreal_mode ; 欸嘿，离开保护模式
 
 .unreal_mode:
-    pop ds
 
+    pop ds
 
     ; 加载二级加载器。
     mov bl, 2
@@ -206,7 +208,7 @@ start:
 
     add ecx, 128 ; 每次读到128个扇区。
     add edx, (512 * 128)
-    cmp ecx, (16 * 128 + 4) ; 只读 16 轮。
+    cmp ecx, (32 * 128 + 4) ; 只读 32 轮。
     jne .loop_read_kernel 
 
     mov si, msg_kernel_read

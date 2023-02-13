@@ -27,7 +27,7 @@ KERNEL_OBJS = $(KERNEL_TARGET)/kernel_entry.o \
 			  $(KERNEL_TARGET)/kernel.o \
 			  $(TARGET)/lib/string.o \
 			  $(TARGET)/lib/stdio.o \
-			  $(TARGET)/lib/syscall.o \
+			  $(TARGET)/lib/syscalls.o \
 			  $(TARGET)/lib/LinkedList.o \
 			  $(TARGET)/machine/Machine.o \
 			  $(TARGET)/machine/GlobalDescriptorTable.o \

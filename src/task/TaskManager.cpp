@@ -39,7 +39,11 @@ namespace TaskManager {
             :
         );
 
-        addr &= 0xFFFFFFFFFFFFF000;
+        if (addr <= MemoryManager::KERNEL_PROCESS_STACK_BASE) {
+            addr = MemoryManager::KERNEL_PROCESS_STACK_TOP;
+        } else {
+            addr &= 0xFFFFFFFFFFFFF000;
+        }
 
         return * (Task**) addr;
     }

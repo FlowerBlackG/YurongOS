@@ -8,6 +8,10 @@
 
 #pragma once
 
+/**
+ * 链表节点。
+ * 将该结构嵌入需要用链表连接的对象结构，通过偏移方式得到数据结构本体。
+ */
 struct LinkedListNode {
     LinkedListNode* prev;
     LinkedListNode* next;

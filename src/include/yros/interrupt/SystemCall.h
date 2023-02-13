@@ -15,8 +15,14 @@ struct Task;
 
 namespace SystemCall {
 
-    const int SYSCALL_COUNT = 128;
+    /**
+     * 内核支持的系统调用最大数量。
+     */
+    const int SYSCALL_COUNT = 1024;
 
+    /**
+     * 指向系统调用处理函数的指针数组。
+     */
     extern void* handlers[SYSCALL_COUNT];
 
     void init();

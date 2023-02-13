@@ -85,7 +85,7 @@ int sprintf(char* buffer, const char* format, ...);
  * 格式非法错误逻辑：
  *     width 超出 int 上界：未定义的行为（循环乘10，自然溢出）。
  * 
- * @todo 暂时无法处理64位数据类型及浮点数据类型。
+ * @todo 暂时无法处理浮点数据类型。
  * @todo 暂不支持 %n的处理。
  */
 int vsprintf(char* buffer, const char* format, va_list args);

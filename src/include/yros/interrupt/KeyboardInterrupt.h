@@ -12,7 +12,9 @@
 #include <yros/machine/X86Assembly.h>
 #include <lib/sys/types.h>
 
-
+/**
+ * 键盘中断。
+ */
 namespace KeyboardInterrupt {
 
     const int DATA_PORT = 0x60;

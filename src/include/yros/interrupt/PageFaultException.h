@@ -11,6 +11,9 @@
 #include <yros/machine/X86Assembly.h>
 #include <lib/sys/types.h>
 
+/**
+ * 缺页异常。
+ */
 namespace PageFaultException {
 
     void entrance();

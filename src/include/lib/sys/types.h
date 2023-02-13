@@ -26,10 +26,12 @@
     #define __no_return __attribute__((__noreturn__))
 #endif
 
+/** 令函数不保存 rsp 和 rbp。 */
 #ifndef __omit_frame_pointer
     #define __omit_frame_pointer __attribute__((optimize("omit-frame-pointer")))
 #endif
 
+/** 强制内联。 */
 #ifndef __force_inline
     #define __force_inline __attribute__((always_inline)) inline
 #endif
@@ -39,6 +41,7 @@
     #define __asm __asm__ __volatile__
 #endif
 
+/** 指定代码存放的区域。 */
 #ifndef __section
     #define __section(name) __attribute__((section(name)))
 #endif

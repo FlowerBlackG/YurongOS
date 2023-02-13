@@ -210,14 +210,14 @@ check_cpu:
     ;        https://en.wikipedia.org/wiki/CPUID 
 
     pushfd
-    pop eax
+    pop eax ; 得到 Flags
     mov ecx, eax
-    xor eax, 0x200000
+    xor eax, 0x200000 ; 如果不支持 CPUID 指令，这位在 Flags 寄存器里恒为0.
     push eax
-    popfd
+    popfd ; 手动设置 Flags 寄存器。
 
     pushfd
-    pop eax
+    pop eax ; 重新得到 Flags。如果设置的位被清空了，表明 CPUID 指令不可用。
     xor eax, ecx
     shr eax, 21
     and eax, 1
@@ -227,7 +227,7 @@ check_cpu:
     test eax, eax
     jz .bad_cpu
 
-    mov eax, 0x80000000
+    mov eax, 0x80000000 ; 获知可查询的功能范围。
     cpuid
 
     cmp eax, 0x80000001

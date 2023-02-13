@@ -9,8 +9,11 @@
 
 #include <lib/sys/types.h>
 
+/**
+ * 系统调用编号定义。
+ */
 enum class SystemCallId : int64_t {
-    A, B, C, D, E
+    NOTHING
 };
 
 

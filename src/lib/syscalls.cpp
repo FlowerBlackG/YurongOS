@@ -6,7 +6,7 @@
 
 */
 
-#include <lib/syscall.h>
+#include <lib/syscalls.h>
 #include <lib/sys/types.h>
 
 __force_inline __omit_frame_pointer static int64_t __syscall0(...) {

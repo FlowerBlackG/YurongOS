@@ -13,34 +13,9 @@
 #include <yros/machine/GlobalDescriptorTable.h>
 #include <yros/Kernel.h>
 
-/*
-
-    曾经的写法。为防止新的出错，旧的先留着：todo
-
-    #define IMPLEMENT_EXCEPTION_ENTRANCE(entranceFunctionName, handlerName) \
-    void __omit_frame_pointer entranceFunctionName()  { \
-        __asm ("pushq $0x656e6f6e");  \
-        x86asmSaveContext(); \
-        \
-        x86asmDirectCall(handlerName); \
-        x86asmRestoreContext(); \
-        __asm("addq $8, %rsp"); \
-        x86asmIret(); \
-    }
-
-#define IMPLEMENT_EXCEPTION_WITH_ERRCODE_ENTRANCE(entranceFunctionName, handlerName) \
-    void __omit_frame_pointer entranceFunctionName()  { \
-        x86asmSaveContext(); \
-        \
-        x86asmDirectCall(handlerName); \
-        x86asmRestoreContext(); \
-        __asm ("addq $8, %rsp"); \
-        x86asmIret(); \
-    }
-
-
-*/
-
+/**
+ * 当中断发生在用户态时，执行 swapgs 指令。否则不执行。
+ */
 #define __implHandlerMacros_x86asmSwapgsIfNecessary(functionName) \
     __asm ( \
         "cli \n\t" \
@@ -56,7 +31,7 @@
 
 #define IMPLEMENT_EXCEPTION_ENTRANCE(entranceFunctionName, handlerName) \
     void __omit_frame_pointer entranceFunctionName()  { \
-        __asm ("pushq $0x656e6f6e"); /* ascii: none */ \
+        __asm ("pushq $0x656e6f6e"); /* ascii: none 压入一个伪错误码。 */ \
         __implHandlerMacros_x86asmSwapgsIfNecessary(entranceFunctionName); \
         x86asmSaveContext(); \
         x86asmLoadKernelDataSegments(); \

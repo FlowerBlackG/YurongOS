@@ -34,9 +34,11 @@ typedef uint32_t va_list;
 
 #define va_copy(dest, src) (dest = src)
 
-#define va_arg(ap, type) (*(type*)((ap += sizeof(type)) - sizeof(type)))
+#define va_arg(ap, type) (*(type*)((ap += sizeof(void*)) - sizeof(void*)))
 
 #define va_end(ap) (ap = (va_list) NULL)
+
+#warning x86_32 mode is not recommended.
 
 #else
 

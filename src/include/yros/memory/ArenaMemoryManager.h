@@ -17,7 +17,15 @@ struct ArenaBlockNode {
 };
 
 struct ArenaDescriptor {
+
+    /**
+     * 内存块大小。
+     */
     uint32_t blockSize;
+
+    /**
+     * 每页能容纳的内存块数量。
+     */
     uint32_t blocksPerPage;
 
     ArenaBlockNode* firstFreeBlock;

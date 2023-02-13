@@ -17,6 +17,7 @@
 #include <yros/task/TaskManager.h>
 #include <yros/PerCpuCargo.h>
 #include <yros/machine/RflagsRegister.h>
+#include <lib/SystemCallId.h>
 
 #include <lib/sys/types.h>
 #include <lib/stddef.h>
@@ -143,10 +144,6 @@ namespace SystemCall {
         x86asmSysretq();
     }
 
-    void welcomeMat() {
-
-    }
-
     int64_t test() {
         int x = 1;
         x++;
@@ -155,9 +152,9 @@ namespace SystemCall {
     }
 
     int64_t test2(int x) {
-     
+ 
         char s[32];
-        sprintf(s, "number: %d\n", x);
+        sprintf(s, "[%s] number: %d\n", TaskManager::getCurrentTask()->name, x);
         CRT::getInstance().write(s);
         return 0;
     }

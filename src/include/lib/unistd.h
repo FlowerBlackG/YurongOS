@@ -8,4 +8,4 @@
 
 #pragma once
 
-#include <lib/syscall.h>
+#include <lib/syscalls.h>

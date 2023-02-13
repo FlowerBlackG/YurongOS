@@ -20,6 +20,7 @@
 #include <yros/machine/Msr.h>
 #include <yros/PerCpuCargo.h>
 #include <lib/stddef.h>
+
 /**
  * 调用内核所有模块的对象的构造函数。
  */
@@ -114,6 +115,10 @@ void write_num(int x) {
         x86asmSyscall();
                 x++;
     x--;
+
+    for (int i = 0; i < 30000000; i++) {
+
+    }
         char s[128];
         
     }
@@ -162,9 +167,9 @@ void Kernel::main() {
     );
 
 
-    TaskManager::create(t1, "p1");
-    TaskManager::create(t2, "p1");
-    TaskManager::create(t0, "p1");
+    TaskManager::create(t1, "procT1");
+    TaskManager::create(t2, "t2");
+    TaskManager::create(t0, "is t0");
    // TaskManager::create(t2, "p2", true);
 
 

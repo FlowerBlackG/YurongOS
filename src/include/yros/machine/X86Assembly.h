@@ -24,7 +24,8 @@
 
 #define x86asmSwapgs() __asm ("swapgs")
 
-#define x86asmDirectCall(function) __asm ("call *%%rax" :: "a" (function))
+#define x86asmCall(function) __asm ("call *%%rax" :: "a" (function))
+#define x86asmDirectCall(function) x86asmCall(function)
 #define x86asmNearJmp(target) __asm ("jmp *%%rax" :: "a" (target))
 
 #define x86asmJmp(target) x86asmNearJmp(target)
