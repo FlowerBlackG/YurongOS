@@ -40,6 +40,8 @@ namespace TaskManager {
         bool createTaskFrame = true,
         bool kernelProcess = false
     );
+
+    void putToSleep(Task* task, uint64_t milliseconds);
 }
 
 #if 0

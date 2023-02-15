@@ -38,6 +38,84 @@ LinkedList& LinkedList::insert(LinkedListNode* node, int index) {
     return *this;
 }
 
+LinkedList& LinkedList::insertWhen(
+    LinkedListNode& node,
+    const int64_t cargo, 
+    int (* judge) (const int64_t cargo, LinkedListNode* before, LinkedListNode* after)
+) {
+
+
+    LinkedListNode* prev = nullptr;
+    LinkedListNode* next = this->head;
+
+    do {
+
+        int judgement = judge(cargo, prev, next);
+        if (judgement == 0) { // accept
+
+            this->length++;
+            
+            if (prev && next) {
+
+                // ... -> prev -> (new) -> next -> ...
+
+                prev->next = &node;
+                next->prev = &node;
+                node.prev = prev;
+                node.next = next;
+
+            } else if (prev) {
+                
+                // ... -> prev -> (new) -> tail
+
+                this->tail = prev->next = &node;
+                node.next = nullptr;
+                node.prev = prev;
+            
+            } else if (next) {
+                
+                // head -> (new) -> next -> ...
+
+                this->head = next->prev = &node;
+                node.next = next;
+                node.prev = nullptr;
+            
+            } else {
+                
+                // head ->  (new) -> tail
+                this->head = this->tail = &node;
+                node.prev = node.next = nullptr;
+            
+            }
+
+            break;
+
+        } else if (judgement < 0) { // cancel
+            
+            break;
+
+        } else { // continue
+
+            prev = next;
+            if (next) {
+                next = next->next;
+            }
+
+        }
+
+    } while (prev || next);
+
+    return *this;
+}
+
+LinkedList& LinkedList::insertWhen(
+    LinkedListNode* node,
+    const int64_t cargo, 
+    int (* judge) (const int64_t cargo, LinkedListNode* before, LinkedListNode* after)
+) {
+    return this->insertWhen(*node, cargo, judge);
+}
+
 LinkedList& LinkedList::pushBack(LinkedListNode* node) {
 
     return this->append(node);
@@ -63,8 +141,23 @@ LinkedListNode* LinkedList::removeAt(int index) {
 }
 
 LinkedListNode* LinkedList::removeFirst() {
-// todo
-    return nullptr;
+
+    LinkedListNode* ret = nullptr;
+
+    if (head) {
+
+        length--;
+        ret = head;
+        if (this->head == this->tail) {
+            this->head = this->tail = nullptr;
+        } else {
+            this->head->next->prev = nullptr;
+            this->head = this->head->next;
+        }
+
+    }
+
+    return ret;
 }
 
 LinkedListNode* LinkedList::removeLast() {

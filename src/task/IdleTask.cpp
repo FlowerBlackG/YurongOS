@@ -9,6 +9,7 @@
 #include <yros/task/IdleTask.h>
 
 #include <yros/machine/X86Assembly.h>
+#include <yros/task/TaskManager.h>
 #include <yros/CRT.h>
 
 #include <lib/stdio.h>
@@ -36,11 +37,11 @@ namespace IdleTask {
 
         while (true) {
 
-            int x = 3;
-            x++;
-            x--;
-        CRT::getInstance().write("kerneld tick...\n");
-
+            Task* task = TaskManager::getCurrentTask();
+            if (task->state == TaskState::READY) {
+                // 处理一些事务，如清理已经挂掉的进程。
+            }
+            
             x86asmSti();
             x86asmHlt();
         }

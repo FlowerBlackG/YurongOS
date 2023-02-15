@@ -9,6 +9,7 @@
 #include <yros/CRT.h>
 #include <lib/stdarg.h>
 #include <lib/stdio.h>
+#include <lib/string.h>
 #include <yros/machine/Machine.h>
 #include <yros/machine/X86Assembly.h>
 #include <yros/memory/MemoryManager.h>
@@ -20,6 +21,8 @@
 #include <yros/machine/Msr.h>
 #include <yros/PerCpuCargo.h>
 #include <lib/stddef.h>
+
+#include <lib/syscalls.h>
 
 /**
  * 调用内核所有模块的对象的构造函数。
@@ -103,47 +106,56 @@ void Kernel::panic(const char* s) {
     }
 }
 
-void write_num(int x) {
+void userApp1() {
+
+    char s[128] = "this is the first user app\n";
+    auto len = strlen(s);
+    //auto res = write(1, s, len);
+    //sprintf(s, "[user app 1] return value: %lld\n", res);
+    //write(1, s, strlen(s));
+
+    int counter = 0;
 
     while (true) {
-        __asm (
-            "movq %0, %%rsi \n\t"
-            "movq %0, %%rdi \n\t"
-            "movq $1, %%rax \n\t"
-            ::"m"(x)
-        );
-        x86asmSyscall();
-                x++;
-    x--;
+        sprintf(s, "[app 1] [%d] sleep...\n", counter);
+        write(1, s, strlen(s));
 
-    for (int i = 0; i < 30000000; i++) {
+        sleep(2000);
 
+        counter++;
     }
-        char s[128];
+}
+
+void userApp2() {
+
+    char s[192] =
+        " _   _ _ __ ___  ___ \n"
+        "| | | | '__/ _ \\/ __|\n"
+        "| |_| | | | (_) \\__ \\\n"
+        " \\__, |_|  \\___/|___/\n"
+        "  __/ |              \n"
+        " |___/               \n";
+
+    auto res = write(1, s, strlen(s));
+    sprintf(s, "[user app 2] return value: %lld\n", res);
+    write(1, s, strlen(s));
+
+    int counter = 0;
+
+    sleep(1000);
+
+    while (true) {
         
+        while (true) {
+            sprintf(s, "[app 2] [%d] sleep...\n", counter);
+            write(1, s, strlen(s));
+
+            sleep(2000);
+
+            counter++;
+        }
     }
-}
-
-void t1() {
-    for (int i = 0; i < 20000000; i++)
-            ;
-    write_num(1);
-    
-}
-
-
-void t2() {                    
-    for (int i = 0; i < 50000000; i++)
-            ;
-    
-    write_num(2);
-}
-
-
-void t0() {
-     for (int i = 0; i < 1000; i++)
-            ;
-    write_num(0);
+        
 }
 
 void Kernel::main() {
@@ -167,9 +179,9 @@ void Kernel::main() {
     );
 
 
-    TaskManager::create(t1, "procT1");
-    TaskManager::create(t2, "t2");
-    TaskManager::create(t0, "is t0");
+
+    TaskManager::create(userApp1, "ua1");
+    TaskManager::create(userApp2, "ua2");
    // TaskManager::create(t2, "p2", true);
 
 

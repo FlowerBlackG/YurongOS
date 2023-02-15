@@ -13,7 +13,9 @@
  * 系统调用编号定义。
  */
 enum class SystemCallId : int64_t {
-    NOTHING
+    TEST_CALL = 0,
+    WRITE = 1, 
+    SLEEP = 2
 };
 
 

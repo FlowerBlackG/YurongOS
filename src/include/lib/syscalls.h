@@ -10,3 +10,21 @@
 
 #include <lib/SystemCallId.h>
 
+
+/**
+ * 
+ * 调用号：0 
+ */
+int64_t testCall();
+
+/**
+ * 
+ * 调用号：1 
+ */
+int64_t write(int64_t fd, const char* buffer, size_t count);
+
+/**
+ * 
+ * 调用号：2 
+ */
+int64_t sleep(int64_t milliseconds);

@@ -9,6 +9,7 @@
 #pragma once
 
 #include <lib/sys/types.h>
+#include <lib/LinkedList.h>
 
 /**
  * 函数调用寄存器保存结构。
@@ -78,4 +79,21 @@ struct Task {
 
     TaskState state;
 
+    /**
+     * 多功能链表节点。借助它，可以将进程“挂”到各种地方。
+     * 主要用于将进程挂到某等待队列，如：
+     *   · 等待 sleep 的唤醒
+     *   · 等待读硬盘
+     *   · 等待某进程挂掉
+     */
+    LinkedListNode linkedListNode;
+
+    uint64_t wakeupMoment;
+
 };
+
+#if 1
+static void __task_check_size() {
+    sizeof(Task);
+};
+#endif

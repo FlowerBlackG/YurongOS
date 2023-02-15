@@ -11,6 +11,8 @@
 #include <yros/machine/X86Assembly.h>
 #include <lib/sys/types.h>
 
+struct Task;
+
 /**
  * 时钟中断。
  */
@@ -35,11 +37,19 @@ namespace ClockInterrupt {
 
     extern uint64_t jiffyCounter;
 
+    /**
+     * 从启动算起，经历的时间。单位为毫秒。
+     */
+    extern uint64_t timePassedSinceBoot;
+
     void entrance();
 
     void handler(
         InterruptSoftwareFrame* softwareRegs, 
         InterruptHardwareFrame* hardwareRegs
     );
+
+
+    void putToSleep(Task* task, uint64_t milliseconds);
 
 }

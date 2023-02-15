@@ -29,6 +29,9 @@ namespace SystemCall {
 
     void entrance();
 
-    int64_t test();
-    int64_t test2(int);
+
+    int64_t testCall();
+    int64_t write(int64_t fd, const char* buffer, size_t count);
+    int64_t sleep(int64_t milliseconds);
+
 }

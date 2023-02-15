@@ -2,7 +2,9 @@
     "makefile.extensionOutputFolder": "./.vscode",
     "files.associations": {
         "*.def": "cpp",
+        "*.s": "asm-intel-x86-generic",
         "ostream": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "functional": "cpp"
     }
 }

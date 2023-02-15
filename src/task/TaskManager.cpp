@@ -16,6 +16,7 @@
 #include <yros/memory/PageDirectories.h>
 #include <yros/interrupt/InterruptExit.h>
 #include <yros/interrupt/SystemCall.h>
+#include <yros/interrupt/ClockInterrupt.h>
 #include <yros/PerCpuCargo.h>
 
 #include <lib/string.h>
@@ -55,8 +56,9 @@ namespace TaskManager {
         static int prevId = 0;
 
         Task* next = nullptr;
+        int prevIdBackup = prevId;
         
-        while (true) {
+        do {
             prevId++;
             if (prevId >= TASK_TABLE_SIZE) {
                 prevId = 0;
@@ -68,13 +70,18 @@ namespace TaskManager {
             if (next && next->state == TaskState::READY) {
                 break;
             }
+
+        } while (prevId != prevIdBackup);
+
+        if (!next) {
+            next = taskTable[0];
         }
 
         stage(next);
         x86asmSti();
         switchTo(next);
 
-    }
+    } 
 
     void loadTaskToCargo(Task* task) {
         __asm (
@@ -215,5 +222,9 @@ namespace TaskManager {
 
         Machine::getInstance().setInterruptState(prevInterruptFlag);
         return task;
+    }
+
+    void putToSleep(Task* task, uint64_t milliseconds) {
+        ClockInterrupt::putToSleep(task, milliseconds);
     }
 }

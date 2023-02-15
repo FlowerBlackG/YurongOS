@@ -84,7 +84,19 @@ __force_inline __omit_frame_pointer static int64_t __syscall6(...) {
     return res;
 }
 
-int64_t fcall(int a, int b, int c, int d, int e, int f) {
-    __asm__ __volatile__ ("" ::"a"(12));
-    __syscall6(a,b,c,d,e,f);
+
+int64_t testCall() {
+    __asm ("" :: "a" (SystemCallId::TEST_CALL));
+    return __syscall0();
+}
+
+
+int64_t write(int64_t fd, const char* buffer, size_t count) {
+    __asm ("" :: "a" (SystemCallId::WRITE));
+    return __syscall3(fd, buffer, count);
+}
+
+int64_t sleep(int64_t milliseconds) {
+    __asm ("" :: "a" (SystemCallId::SLEEP));
+    return __syscall1(milliseconds);
 }
