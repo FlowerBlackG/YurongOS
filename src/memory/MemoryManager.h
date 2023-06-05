@@ -9,8 +9,8 @@
 #pragma once
 
 #include <lib/sys/types.h>
-#include <yros/memory/FreeMemoryManager.h>
-#include <yros/memory/PageDirectories.h>
+#include <memory/FreeMemoryManager.h>
+#include <memory/PageDirectories.h>
 
 /**
  * 内存描述符结构。在启动阶段，从 bios 读取。

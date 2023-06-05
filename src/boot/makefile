@@ -1,5 +1,7 @@
 # 启动引导构建文件。
 
+include ../makefile.inc
+
 .DEFAULT_GOAL := all
 
 TARGET = ../../build/objs/boot
@@ -12,7 +14,7 @@ OBJS = $(patsubst %.asm, $(TARGET)/%.bin, $(SOURCE))
 
 $(TARGET)/%.bin: %.asm
 	$(shell mkdir -p $(dir $@))
-	nasm -f bin $< -o $@
+	$(ASM) -f bin $< -o $@
 
 .PHONY: all
 all: $(OBJS)

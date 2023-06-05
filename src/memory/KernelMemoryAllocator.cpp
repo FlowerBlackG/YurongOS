@@ -6,11 +6,11 @@
 
 */
 
-#include <yros/memory/MemoryManager.h>
-#include <yros/memory/ArenaMemoryManager.h>
-#include <yros/memory/KernelMemoryAllocator.h>
+#include <memory/MemoryManager.h>
+#include <memory/ArenaMemoryManager.h>
+#include <memory/KernelMemoryAllocator.h>
 #include <lib/string.h>
-#include <yros/Kernel.h>
+#include <misc/Kernel.h>
 
 namespace KernelMemoryAllocator {
 

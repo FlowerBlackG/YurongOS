@@ -6,12 +6,12 @@
 
 */
 
-#include <yros/interrupt/PageFaultException.h>
-#include <yros/interrupt/ImplementHandlerMacros.h>
+#include <interrupt/PageFaultException.h>
+#include <interrupt/ImplementHandlerMacros.h>
 
-#include <yros/CRT.h>
+#include <crt/CRT.h>
 
-#include <yros/memory/PageDirectories.h>
+#include <memory/PageDirectories.h>
 #include <lib/stdio.h>
 
 namespace PageFaultException {

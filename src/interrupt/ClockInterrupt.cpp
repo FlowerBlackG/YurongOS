@@ -7,12 +7,12 @@
 */
 
 
-#include <yros/interrupt/ClockInterrupt.h>
-#include <yros/interrupt/ImplementHandlerMacros.h>
-#include <yros/CRT.h>
-#include <yros/IO.h>
-#include <yros/machine/Machine.h>
-#include <yros/task/TaskManager.h>
+#include <interrupt/ClockInterrupt.h>
+#include <interrupt/ImplementHandlerMacros.h>
+#include <crt/CRT.h>
+#include <misc/IO.h>
+#include <machine/Machine.h>
+#include <task/TaskManager.h>
 
 #include <lib/LinkedList.h>
 #include <lib/stddef.h>

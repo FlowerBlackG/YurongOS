@@ -100,3 +100,9 @@ int64_t sleep(int64_t milliseconds) {
     __asm ("" :: "a" (SystemCallId::SLEEP));
     return __syscall1(milliseconds);
 }
+
+
+int64_t fork() {
+    __asm ("" :: "a" (SystemCallId::FORK));
+    return __syscall0();
+}

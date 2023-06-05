@@ -19,11 +19,11 @@ OBJS = $(CPP_OBJS) $(ASM_OBJS)
 
 $(TARGET)/%.o: %.asm
 	$(shell mkdir -p $(dir $@))
-	nasm -f elf64 -g $< -o $@
+	$(ASM) -f elf64 -g $< -o $@
 
 $(TARGET)/%.o: %.cpp
 	$(shell mkdir -p $(dir $@))
-	g++ $(CFLAGS) -I../include -c -o $@ $<
+	$(CPP) $(CFLAGS) -I../ -c -o $@ $<
 
 .PHONY: all
 all: $(OBJS)

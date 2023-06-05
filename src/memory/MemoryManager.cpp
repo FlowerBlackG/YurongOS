@@ -6,14 +6,14 @@
 
 */
 
-#include <yros/memory/MemoryManager.h>
-#include <yros/memory/ArenaMemoryManager.h>
-#include <yros/CRT.h>
+#include <memory/MemoryManager.h>
+#include <memory/ArenaMemoryManager.h>
+#include <crt/CRT.h>
 #include <lib/stdio.h>
 #include <lib/string.h>
 
 #include <lib/sys/types.h>
-#include <yros/machine/Cmos.h>
+#include <machine/Cmos.h>
 
 namespace MemoryManager {
 

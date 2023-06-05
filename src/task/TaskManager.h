@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <yros/task/Task.h>
+#include <task/Task.h>
 
 namespace TaskManager {
 

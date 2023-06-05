@@ -6,22 +6,20 @@
 
 */
 
-#include <yros/interrupt/SystemCall.h>
-#include <yros/interrupt/ImplementHandlerMacros.h>
-#include <yros/interrupt/ClockInterrupt.h>
+#include <interrupt/SystemCall.h>
+#include <interrupt/ImplementHandlerMacros.h>
+#include <interrupt/ClockInterrupt.h>
 
-#include <yros/machine/X86Assembly.h>
-#include <yros/machine/Msr.h>
-#include <yros/machine/GlobalDescriptorTable.h>
+#include <machine/X86Assembly.h>
+#include <machine/Msr.h>
+#include <machine/GlobalDescriptorTable.h>
 
-#include <yros/memory/MemoryManager.h>
-#include <yros/memory/KernelMemoryAllocator.h>
-#include <yros/task/TaskManager.h>
-#include <yros/PerCpuCargo.h>
-#include <yros/machine/RflagsRegister.h>
-#include <yros/CRT.h>
-
-#include <lib/SystemCallId.h>
+#include <memory/MemoryManager.h>
+#include <memory/KernelMemoryAllocator.h>
+#include <task/TaskManager.h>
+#include <misc/PerCpuCargo.h>
+#include <machine/RflagsRegister.h>
+#include <crt/CRT.h>
 
 #include <lib/sys/types.h>
 #include <lib/stddef.h>
@@ -38,7 +36,8 @@ namespace SystemCall {
     void* handlers[SYSCALL_COUNT] = {
         SYSCALL_HANDLER(testCall),
         SYSCALL_HANDLER(write),
-        SYSCALL_HANDLER(sleep)
+        SYSCALL_HANDLER(sleep),
+        SYSCALL_HANDLER(fork),
     };
 
 #undef SYSCALL_HANDLER
@@ -89,7 +88,11 @@ void __omit_frame_pointer SystemCall::entrance() {
         "pushq %%r12 \n\t" // old r13
         "pushq %%r11 \n\t"
         "pushq %%rcx \n\t"
+
+        // 用户通过 r10 存放第四个参数。
+        // SystemV ABI 使用 rcx 存放第四个参数
         "movq %%r10, %%rcx \n\t" 
+
         "pushq %%rbx \n\t"
         "movq %%ds, %%r12 \n\t"
         "pushq %%r12 \n\t"
@@ -104,7 +107,7 @@ void __omit_frame_pointer SystemCall::entrance() {
 
     __asm ("pushq %rdx"); // 加载段寄存器时，会借用 rdx。
     x86asmLoadKernelDataSegments();
-    
+
     __asm ("movq %rax, %rbx");
     
     __asm (
@@ -116,6 +119,10 @@ void __omit_frame_pointer SystemCall::entrance() {
         
         "addq %%rbx, %%rax \n\t"
         "movq (%%rax), %%rax \n\t"
+
+        // 用 r10 指向系统调用保护的软件寄存器。
+        "movq %%rsp, %%r10 \n\t"
+
         "call *%%rax \n\t"
 
         :
@@ -188,3 +195,14 @@ int64_t SystemCall::sleep(int64_t milliseconds) {
 }
 
 
+int64_t SystemCall::fork() {
+
+    SystemCall::SoftwareFrame* softwareFrame;
+    
+    __asm ("movq %%r10, %0" : "=m" (softwareFrame) :);
+
+    int x;
+    x++;
+    
+    return 0;
+}

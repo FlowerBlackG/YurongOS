@@ -3,11 +3,11 @@
  * 创建于 2022年7月6日。
  */
 
-#include <yros/CRT.h>
-#include <yros/IO.h>
+#include <crt/CRT.h>
+#include <misc/IO.h>
 #include <lib/string.h>
-#include <yros/AsciiChar.h>
-#include <yros/machine/Machine.h>
+#include <misc/AsciiChar.h>
+#include <machine/Machine.h>
 
 
 

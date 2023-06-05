@@ -6,18 +6,18 @@
 
 */
 
-#include <yros/task/TaskManager.h>
-#include <yros/Kernel.h>
-#include <yros/machine/Machine.h>
-#include <yros/memory/KernelMemoryAllocator.h>
-#include <yros/memory/MemoryManager.h>
-#include <yros/machine/X86Assembly.h>
-#include <yros/machine/GlobalDescriptorTable.h>
-#include <yros/memory/PageDirectories.h>
-#include <yros/interrupt/InterruptExit.h>
-#include <yros/interrupt/SystemCall.h>
-#include <yros/interrupt/ClockInterrupt.h>
-#include <yros/PerCpuCargo.h>
+#include <task/TaskManager.h>
+#include <misc/Kernel.h>
+#include <machine/Machine.h>
+#include <memory/KernelMemoryAllocator.h>
+#include <memory/MemoryManager.h>
+#include <machine/X86Assembly.h>
+#include <machine/GlobalDescriptorTable.h>
+#include <memory/PageDirectories.h>
+#include <interrupt/InterruptExit.h>
+#include <interrupt/SystemCall.h>
+#include <interrupt/ClockInterrupt.h>
+#include <misc/PerCpuCargo.h>
 
 #include <lib/string.h>
 #include <lib/stddef.h>

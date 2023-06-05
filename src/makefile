@@ -1,5 +1,7 @@
 # 顶层构建文件。
 
+include makefile.inc
+
 .DEFAULT_GOAL := all
 
 # 普通文件构建目标路径。
@@ -11,20 +13,18 @@ ASM_DUMP_TARGET = ../build/asm-dump
 YROS_TARGET = ../build/YurongOS
 
 # 递归构建目录。
-DIRS = boot kernel lib crt machine memory interrupt task
+DIRS = boot misc lib crt machine memory interrupt task
 .PHONY: $(DIRS)
 $(DIRS):
 	$(MAKE) --directory=$@
 
-# 内核构建目标路径。
-KERNEL_TARGET = $(TARGET)/kernel
 
 # 注意：必须将 kernel_entry 放在开头，不然地址无法正常跳转。
-KERNEL_OBJS = $(KERNEL_TARGET)/kernel_entry.o \
-			  $(KERNEL_TARGET)/io.o \
-			  $(KERNEL_TARGET)/PerCpuCargo.o \
+KERNEL_OBJS = $(TARGET)/misc/kernel_entry.o \
+			  $(TARGET)/misc/io.o \
+			  $(TARGET)/misc/PerCpuCargo.o \
 			  $(TARGET)/crt/CRT.o \
-			  $(KERNEL_TARGET)/kernel.o \
+			  $(TARGET)/misc/main.o \
 			  $(TARGET)/lib/string.o \
 			  $(TARGET)/lib/stdio.o \
 			  $(TARGET)/lib/syscalls.o \
@@ -52,10 +52,10 @@ KERNEL_OBJS = $(KERNEL_TARGET)/kernel_entry.o \
 yros_kernel: $(DIRS)
 	$(shell mkdir -p $(dir $@))
 	$(shell mkdir -p $(ASM_DUMP_TARGET))
-	ld -m elf_x86_64 -static $(KERNEL_OBJS) -o $(KERNEL_TARGET)/kernel.exe -T kernel.link.ld 
-	objcopy -O binary $(KERNEL_TARGET)/kernel.exe $(KERNEL_TARGET)/kernel.bin
-	objdump -d $(KERNEL_TARGET)/kernel.exe > $(ASM_DUMP_TARGET)/kernel.exe.dump.text.asm
-	objdump -D $(KERNEL_TARGET)/kernel.exe > $(ASM_DUMP_TARGET)/kernel.exe.dump.full.asm
+	ld -m elf_x86_64 -static $(KERNEL_OBJS) -o $(TARGET)/kernel.exe -T kernel.link.ld 
+	objcopy -O binary $(TARGET)/kernel.exe $(TARGET)/kernel.bin
+	objdump -d $(TARGET)/kernel.exe > $(ASM_DUMP_TARGET)/kernel.exe.dump.text.asm
+	objdump -D $(TARGET)/kernel.exe > $(ASM_DUMP_TARGET)/kernel.exe.dump.full.asm
 
 # 部署文件。
 .PHONY: deploy
@@ -67,7 +67,7 @@ deploy: yros_kernel
 		bs=512 count=1 conv=notrunc
 	dd if=$(TARGET)/boot/kernel_loader.bin of=$(YROS_TARGET)/disk.img \
 		bs=512 count=2 seek=2 conv=notrunc
-	dd if=$(TARGET)/kernel/kernel.bin of=$(YROS_TARGET)/disk.img \
+	dd if=$(TARGET)/kernel.bin of=$(YROS_TARGET)/disk.img \
 		bs=512 count=1996 seek=4 conv=notrunc
 	cp ../tools/bochsrc $(YROS_TARGET)/
 

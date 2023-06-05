@@ -8,7 +8,7 @@
 
 #include <lib/sys/types.h>
 
-#include <yros/machine/GlobalDescriptorTable.h>
+#include <machine/GlobalDescriptorTable.h>
 
 #define x86asmSti() __asm ("sti")
 #define x86asmCli() __asm ("cli")

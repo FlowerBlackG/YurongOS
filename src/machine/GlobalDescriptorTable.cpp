@@ -4,11 +4,11 @@
  * 创建于 2022年7月15日。
  */
 
-#include <yros/machine/GlobalDescriptorTable.h>
-#include <yros/memory/MemoryManager.h>
+#include <machine/GlobalDescriptorTable.h>
+#include <memory/MemoryManager.h>
 #include <lib/string.h>
 #include <lib/stdio.h>
-#include <yros/CRT.h>
+#include <crt/CRT.h>
 
 namespace GlobalDescriptorTable {
 

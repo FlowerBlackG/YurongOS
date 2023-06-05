@@ -1,6 +1,7 @@
 # makefile 变量定义。
 
 CC = g++
+CPP = g++
 ASM = nasm
 MAKE = make
 

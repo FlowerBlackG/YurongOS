@@ -8,10 +8,10 @@
 
 #pragma once
 
-#include <yros/machine/X86Assembly.h>
-#include <yros/interrupt/InterruptExit.h>
-#include <yros/machine/GlobalDescriptorTable.h>
-#include <yros/Kernel.h>
+#include <machine/X86Assembly.h>
+#include <interrupt/InterruptExit.h>
+#include <machine/GlobalDescriptorTable.h>
+#include <misc/Kernel.h>
 
 /**
  * 当中断发生在用户态时，执行 swapgs 指令。否则不执行。

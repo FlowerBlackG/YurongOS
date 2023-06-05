@@ -6,7 +6,7 @@
 #pragma once
 #include <lib/sys/types.h>
 
-#include <yros/memory/MemoryManager.h>
+#include <memory/MemoryManager.h>
 
 class CRT {
 protected:

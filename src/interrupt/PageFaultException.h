@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <yros/machine/X86Assembly.h>
+#include <machine/X86Assembly.h>
 #include <lib/sys/types.h>
 
 /**

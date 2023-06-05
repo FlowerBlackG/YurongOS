@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <yros/interrupt/InterruptDescriptorTable.h>
-#include <yros/machine/X86Assembly.h>
+#include <interrupt/InterruptDescriptorTable.h>
+#include <machine/X86Assembly.h>
 #include <lib/sys/types.h>
 
 namespace InterruptHandlers {

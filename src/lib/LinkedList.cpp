@@ -34,7 +34,30 @@ LinkedList& LinkedList::append(LinkedListNode* node) {
 
 
 LinkedList& LinkedList::insert(LinkedListNode* node, int index) {
-// todo
+
+    if (index >= this->length) {
+        pushBack(node);
+    } else if (index <= 0) {
+        if (this->head) {
+            node->next = this->head->next;
+            this->head->next->prev = node;
+        }
+
+        node->prev = nullptr;
+        this->head = node;
+        this->length++;
+    } else {
+        
+        auto prevNode = this->get(index);
+        node->prev = prevNode;
+        node->next = prevNode->next;
+        prevNode->next->prev = node;
+        prevNode->next = node;
+        this->length++;
+
+    }
+    
+
     return *this;
 }
 
@@ -124,9 +147,24 @@ LinkedList& LinkedList::pushBack(LinkedListNode* node) {
 
 
 LinkedList& LinkedList::remove(LinkedListNode* node) {
-// todo
 
+    if (node == this->head && node == this->tail) {
+        this->head = this->tail = nullptr;
+        
+    } else if (node == this->head) {
+        this->head->next->prev = nullptr;
+        this->head = this->head->next;
+        
+    } else if (node == this->tail) {
+        this->tail->prev->next = nullptr;
+        this->tail = this->tail->prev;
+        
+    } else {
+        node->prev->next = node->next;
+        node->next->prev = node->prev;
+    }
 
+    this->length --;
 
     return *this;
 }

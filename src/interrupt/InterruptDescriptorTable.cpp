@@ -3,7 +3,7 @@
  * 创建于 2022年7月15日。
  */
 
-#include <yros/interrupt/InterruptDescriptorTable.h>
+#include <interrupt/InterruptDescriptorTable.h>
 
 
 

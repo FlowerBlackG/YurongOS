@@ -4,22 +4,22 @@
  */
 
 #include <lib/sys/types.h>
-#include <yros/IO.h>
-#include <yros/Kernel.h>
-#include <yros/CRT.h>
+#include <misc/IO.h>
+#include <misc/Kernel.h>
+#include <crt/CRT.h>
 #include <lib/stdarg.h>
 #include <lib/stdio.h>
 #include <lib/string.h>
-#include <yros/machine/Machine.h>
-#include <yros/machine/X86Assembly.h>
-#include <yros/memory/MemoryManager.h>
-#include <yros/memory/KernelMemoryAllocator.h>
-#include <yros/task/TaskManager.h>
-#include <yros/interrupt/SystemCall.h>
-#include <yros/interrupt/InterruptExit.h>
-#include <yros/task/IdleTask.h>
-#include <yros/machine/Msr.h>
-#include <yros/PerCpuCargo.h>
+#include <machine/Machine.h>
+#include <machine/X86Assembly.h>
+#include <memory/MemoryManager.h>
+#include <memory/KernelMemoryAllocator.h>
+#include <task/TaskManager.h>
+#include <interrupt/SystemCall.h>
+#include <interrupt/InterruptExit.h>
+#include <task/IdleTask.h>
+#include <machine/Msr.h>
+#include <misc/PerCpuCargo.h>
 #include <lib/stddef.h>
 
 #include <lib/syscalls.h>
@@ -151,6 +151,8 @@ void userApp2() {
             write(1, s, strlen(s));
 
             sleep(2000);
+
+            fork();
 
             counter++;
         }

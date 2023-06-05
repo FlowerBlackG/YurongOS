@@ -6,11 +6,11 @@
 
 */
 
-#include <yros/task/IdleTask.h>
+#include <task/IdleTask.h>
 
-#include <yros/machine/X86Assembly.h>
-#include <yros/task/TaskManager.h>
-#include <yros/CRT.h>
+#include <machine/X86Assembly.h>
+#include <task/TaskManager.h>
+#include <crt/CRT.h>
 
 #include <lib/stdio.h>
 

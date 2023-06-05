@@ -6,7 +6,7 @@
 
 */
 
-#include <yros/PerCpuCargo.h>
+#include <misc/PerCpuCargo.h>
 
 PerCpuCargo __section(".per_cpu_cargo") cargo[1];
 

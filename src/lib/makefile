@@ -11,7 +11,7 @@ OBJS = $(patsubst %.cpp, $(TARGET)/%.o, $(CPP_SOURCE))
 
 $(TARGET)/%.o: %.cpp
 	$(shell mkdir -p $(dir $@))
-	g++ $(CFLAGS) -I../include -c -o $@ $<
+	$(CPP) $(CFLAGS) -I../ -c -o $@ $<
 
 .PHONY: all
 all: $(OBJS)
