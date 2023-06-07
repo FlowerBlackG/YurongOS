@@ -145,10 +145,13 @@ void userApp2() {
     sleep(1000);
 
     while (true) {
-        
+        int written = 0;
         while (true) {
-            sprintf(s, "[app 2] [%d] sleep...\n", counter);
-            write(1, s, strlen(s));
+
+            int testRes = testCall();
+
+            sprintf(s, "[app 2] [%d] sleep... (%x) (%d)\n", counter, testRes, written);
+            written = write(1, s, strlen(s));
 
             sleep(2000);
 

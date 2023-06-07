@@ -10,6 +10,7 @@
 
 #include <lib/sys/types.h>
 #include <lib/LinkedList.h>
+#include <interrupt/SystemCall.h>
 
 /**
  * 函数调用寄存器保存结构。
@@ -24,6 +25,7 @@ struct TaskFrame {
     uint64_t rbp;
     uint64_t rip;
 };
+
 
 enum class TaskState {
 
@@ -53,9 +55,12 @@ struct Task {
      */
     static const int TASK_NAME_MAX_LENGTH = 16;
 
-
     /** 内核栈。 */
     unsigned long kernelStackPointer;
+
+
+    SystemCall::SoftwareFrame* syscallSoftwareFrame;
+
 
     /** 任务名称。 */
     char name[TASK_NAME_MAX_LENGTH];

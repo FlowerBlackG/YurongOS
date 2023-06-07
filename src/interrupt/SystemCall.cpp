@@ -26,6 +26,7 @@
 #include <lib/string.h>
 #include <lib/stdio.h>
 
+#define cpuCurrentTask perCpuCargo->currentTask
 
 namespace SystemCall {
 
@@ -98,11 +99,22 @@ void __omit_frame_pointer SystemCall::entrance() {
         "pushq %%r12 \n\t"
         "movq %%es, %%r12 \n\t"
         "pushq %%r12 \n\t"
+
+        "pushq %%rax \n\t"  // 实际没必要保存，只是为了后面弹出。
+        // 把 rax 也加入系统调用保存帧，这样可以通过改 rax 定义返回值。
+
+        "movq %%gs:0, %%r12 \n\t" // Cargo.self => r12
+        "addq %0, %%r12 \n\t" // 令 r12 指向 currentTask 指针
+        "movq (%%r12), %%r12 \n\t"
+        "addq %2, %%r12 \n\t"
+        "movq %%rsp, (%%r12) \n\t"
         
         :
         :
             "i" (offsetof(PerCpuCargo, currentTask)),
-            "i" (MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP)
+            "i" (MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP),
+            "i" (offsetof(Task, syscallSoftwareFrame))
+            
     );
 
     __asm ("pushq %rdx"); // 加载段寄存器时，会借用 rdx。
@@ -132,6 +144,8 @@ void __omit_frame_pointer SystemCall::entrance() {
     );
 
     __asm (
+        "popq %%rax \n\t"
+
         "popq %%r12 \n\t"
         "movq %%r12, %%es \n\t"
         "popq %%r12 \n\t"
@@ -166,43 +180,43 @@ void __omit_frame_pointer SystemCall::entrance() {
 
 /* ------------ 系统调用处理函数。 ----------- */
 
-int64_t SystemCall::testCall() {
+void SystemCall::testCall() {
     int x = 1;
     x++;
     x--;
-    return 0;
+
+    cpuCurrentTask->syscallSoftwareFrame->rax = 0xfbfb;
+    
 }
 
-int64_t SystemCall::write(int64_t fd, const char* buffer, size_t count) {
+void SystemCall::write(int64_t fd, const char* buffer, size_t count) {
 
     if (fd != 1) { // 暂时只支持 stdout。
-        return 0;
+        cpuCurrentTask->syscallSoftwareFrame->rax = -1;
+        return;
     }
 
     // 暂时不管安全性问题，假设字符串正常且所处内存位置是合法的。
 
     CRT::getInstance().write(buffer);
 
-    return count;
+    // return count
+    cpuCurrentTask->syscallSoftwareFrame->rax = count;
+    
 }
 
-int64_t SystemCall::sleep(int64_t milliseconds) {
+void SystemCall::sleep(int64_t milliseconds) {
 
     TaskManager::putToSleep(TaskManager::getCurrentTask(), milliseconds);
     TaskManager::schedule();
 
-    return 0;
+
 }
 
 
-int64_t SystemCall::fork() {
+void SystemCall::fork() {
 
-    SystemCall::SoftwareFrame* softwareFrame;
-    
-    __asm ("movq %%r10, %0" : "=m" (softwareFrame) :);
-
-    int x;
-    x++;
-    
-    return 0;
+    // todo
 }
+
+#undef cpuCurrentTask

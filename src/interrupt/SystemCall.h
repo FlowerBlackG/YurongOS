@@ -19,14 +19,15 @@ namespace SystemCall {
      * 系统调用软件帧。
      */
     struct SoftwareFrame {
-        uint64_t es;
-        uint64_t ds;
-        uint64_t rbx;
-        uint64_t rcx;
-        uint64_t r11;
-        uint64_t r13;
-        uint64_t r12;
-        uint64_t rsp;
+        int64_t rax;
+        int64_t es;
+        int64_t ds;
+        int64_t rbx;
+        int64_t rcx;
+        int64_t r11;
+        int64_t r13;
+        int64_t r12;
+        int64_t rsp;
     };
 
     /**
@@ -44,9 +45,16 @@ namespace SystemCall {
     void entrance();
 
 
-    int64_t testCall();
-    int64_t write(int64_t fd, const char* buffer, size_t count);
-    int64_t sleep(int64_t milliseconds);
-    int64_t fork();
+    void testCall();
+    void write(int64_t fd, const char* buffer, size_t count);
+    void sleep(int64_t milliseconds);
+    void fork();
 
 }
+
+#if 0
+
+void __check_size() {
+    sizeof(SystemCall::SoftwareFrame);
+}
+#endif
