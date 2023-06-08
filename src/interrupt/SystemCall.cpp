@@ -180,10 +180,71 @@ void __omit_frame_pointer SystemCall::entrance() {
 
 /* ------------ 系统调用处理函数。 ----------- */
 
-void SystemCall::testCall() {
+void SystemCall::testCall() { // 测试函数。不宜多调用。
     int x = 1;
     x++;
     x--;
+
+
+    Task* task = cpuCurrentTask;
+
+    char buf[2048];
+
+    MemoryManager::walkPageTables(
+        (PageMapLevel4) task->pml4Address,
+        reinterpret_cast<int64_t>(buf),
+        
+        [] (const int64_t cargo, PageMapLevel4 pml4, PageMapLevel4Entry& pml4e) {
+            auto idx = &pml4e - pml4;
+            auto buf = reinterpret_cast<char*>(cargo);
+
+            if (pml4e.pageFrameNumber == 0) {
+                return MemoryManager::WalkPageTablesCommand::SKIP_THIS_ENTRY;
+            }
+
+
+
+            if (idx >= 256) {
+
+                return MemoryManager::WalkPageTablesCommand::SKIP_THIS_ENTRY;
+            }
+
+            // 尝试进入
+
+            return MemoryManager::WalkPageTablesCommand::WALK_INTO;
+        },
+
+        [] (
+            const int64_t cargo, 
+            PageMapLevel4 pml4, PageMapLevel4Entry& pml4e,
+            PageMapLevel3 pml3, PageMapLevel3Entry& pml3e
+        ) {
+
+
+
+            return MemoryManager::WalkPageTablesCommand::SKIP_THIS_ENTRY;
+        },
+
+        [] (
+            const int64_t cargo, 
+            PageMapLevel4 pml4, PageMapLevel4Entry& pml4e,
+            PageMapLevel3 pml3, PageMapLevel3Entry& pml3e,
+            PageMapLevel2 pml2, PageMapLevel2Entry& pml2e
+        ) {
+            return MemoryManager::WalkPageTablesCommand::SKIP_THIS_ENTRY;
+        },
+
+        [] (
+            const int64_t cargo, 
+            PageMapLevel4 pml4, PageMapLevel4Entry& pml4e,
+            PageMapLevel3 pml3, PageMapLevel3Entry& pml3e,
+            PageMapLevel2 pml2, PageMapLevel2Entry& pml2e,
+            PageMapLevel1 pml1, PageMapLevel1Entry& pml1e
+        ) {
+            return MemoryManager::WalkPageTablesCommand::SKIP_THIS_ENTRY;
+        }
+
+    );
 
     cpuCurrentTask->syscallSoftwareFrame->rax = 0xfbfb;
     

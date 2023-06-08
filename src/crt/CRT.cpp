@@ -9,7 +9,7 @@
 #include <misc/AsciiChar.h>
 #include <machine/Machine.h>
 
-
+#include <misc/Kernel.h>
 
 CRT CRT::instance;
 
@@ -94,7 +94,7 @@ void CRT::setForegroundColor(uint8_t color, uint8_t blink, uint8_t highlight) {
     }
 }
 
-void CRT::scrollUp(uint16_t lines) {
+void CRT::scrollDown(uint16_t lines) {
     if (lines == 0) {
         return;
     }
@@ -104,11 +104,16 @@ void CRT::scrollUp(uint16_t lines) {
         size_t targetScreenPos = currentScreenPos + CRT::COLS * lines;
         if (targetScreenPos * 2 + CRT::PAGE_MEMORY_SIZE <= CRT::MEMORY_SIZE) {
             // 新的区域之前可能显示过其他内容。手动清空一下。
+
+
+#if 1 // todo: 暂时很摆烂
+
             memset(
                 (void*) (MEMORY_BASE + 2 * (targetScreenPos - lines * COLS) + PAGE_MEMORY_SIZE),
                 0, 
                 lines * 2 * CRT::COLS
             );
+#endif
 
             this->setCurrentScreenPos(targetScreenPos);
         } else {
@@ -132,6 +137,19 @@ void CRT::scrollUp(uint16_t lines) {
     } else {
         this->clear(); // 滚动行数超出屏幕高度了，直接清屏就行。
     }
+}
+
+
+void CRT::scrollUp(uint16_t lines) {
+ //   Kernel::panic("scroll up");
+    if (lines == 0) {
+        return;
+    }
+
+    // todo: 目前的实现非常摆烂。
+    size_t targetScreenPos = currentScreenPos - CRT::COLS * lines;
+    this->setCurrentScreenPos(targetScreenPos);
+   // this->moveCursor(this->cursorX, this->cursorY);
 }
 
 
@@ -162,7 +180,7 @@ void CRT::putchar(uint8_t ch) {
             moveCursor(cursorX + 1, cursorY);
         } else {
             if (cursorY + 1 == PAGE_MEMORY_SIZE / 2 / COLS) {
-                scrollUp(1);
+                scrollDown(1);
             }
             moveCursor(0, cursorY + 1);
         }
@@ -176,7 +194,7 @@ void CRT::putchar(uint8_t ch) {
 
         case AsciiChar::LF: // \n
             if (cursorY + 1 == PAGE_MEMORY_SIZE / 2 / COLS) {
-                scrollUp(1);
+                scrollDown(1);
             }
             moveCursor(cursorX, cursorY + 1);
 

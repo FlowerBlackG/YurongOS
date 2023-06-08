@@ -13,7 +13,7 @@ ASM_DUMP_TARGET = ../build/asm-dump
 YROS_TARGET = ../build/YurongOS
 
 # 递归构建目录。
-DIRS = boot misc lib crt machine memory interrupt task
+DIRS = boot misc lib crt machine memory interrupt task serial
 .PHONY: $(DIRS)
 $(DIRS):
 	$(MAKE) --directory=$@

@@ -116,9 +116,14 @@ void userApp1() {
 
     int counter = 0;
 
+
+
+    testCall();
+
+
     while (true) {
         sprintf(s, "[app 1] [%d] sleep...\n", counter);
-        write(1, s, strlen(s));
+        //write(1, s, strlen(s));
 
         sleep(2000);
 
@@ -148,14 +153,14 @@ void userApp2() {
         int written = 0;
         while (true) {
 
-            int testRes = testCall();
+            int testRes = 0;//testCall();
 
             sprintf(s, "[app 2] [%d] sleep... (%x) (%d)\n", counter, testRes, written);
-            written = write(1, s, strlen(s));
+            //written = write(1, s, strlen(s));
 
             sleep(2000);
 
-            fork();
+            //fork();
 
             counter++;
         }

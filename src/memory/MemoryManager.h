@@ -82,6 +82,87 @@ namespace MemoryManager {
         bool us = 1
     );
 
+    enum class WalkPageTablesCommand {
+        SKIP_THIS_ENTRY,
+        BACK_TO_UPPER,
+        WALK_INTO
+    };
+
+
+    /* walk page tables 调用模板：
+    
+        MemoryManager::walkPageTables(
+            (PageMapLevel4) task->pml4Address,
+            cargo
+
+            [] (const int64_t cargo, PageMapLevel4 pml4, PageMapLevel4Entry& pml4e) {
+                return MemoryManager::WalkPageTablesCommand::SKIP_THIS_ENTRY;
+            },
+
+            [] (
+                const int64_t cargo,
+                PageMapLevel4 pml4, PageMapLevel4Entry& pml4e,
+                PageMapLevel3 pml3, PageMapLevel3Entry& pml3e
+            ) {
+                return MemoryManager::WalkPageTablesCommand::SKIP_THIS_ENTRY;
+            },
+
+            [] (
+                const int64_t cargo,
+                PageMapLevel4 pml4, PageMapLevel4Entry& pml4e,
+                PageMapLevel3 pml3, PageMapLevel3Entry& pml3e,
+                PageMapLevel2 pml2, PageMapLevel2Entry& pml2e
+            ) {
+                return MemoryManager::WalkPageTablesCommand::SKIP_THIS_ENTRY;
+            },
+
+            [] (
+                const int64_t cargo,
+                PageMapLevel4 pml4, PageMapLevel4Entry& pml4e,
+                PageMapLevel3 pml3, PageMapLevel3Entry& pml3e,
+                PageMapLevel2 pml2, PageMapLevel2Entry& pml2e,
+                PageMapLevel1 pml1, PageMapLevel1Entry& pml1e
+            ) {
+                return MemoryManager::WalkPageTablesCommand::SKIP_THIS_ENTRY;
+            }
+        );
+    
+    */
+
+    /**
+     * 页表 DFS 遍历。
+     */
+    void walkPageTables(
+        PageMapLevel4 pml4,
+        const int64_t cargo,
+
+        WalkPageTablesCommand (* onPml4EntryDiscovered) (
+            const int64_t cargo,
+            PageMapLevel4, PageMapLevel4Entry&
+        ),
+
+        WalkPageTablesCommand (* onPml3EntryDiscovered) (
+            const int64_t cargo,
+            PageMapLevel4, PageMapLevel4Entry&, 
+            PageMapLevel3, PageMapLevel3Entry&
+        ),
+
+        WalkPageTablesCommand (* onPml2EntryDiscovered) (
+            const int64_t cargo,
+            PageMapLevel4, PageMapLevel4Entry&, 
+            PageMapLevel3, PageMapLevel3Entry&, 
+            PageMapLevel2, PageMapLevel2Entry&
+        ),
+
+        WalkPageTablesCommand (* onPml1EntryDiscovered) (
+            const int64_t cargo,
+            PageMapLevel4, PageMapLevel4Entry&, 
+            PageMapLevel3, PageMapLevel3Entry&, 
+            PageMapLevel2, PageMapLevel2Entry&, 
+            PageMapLevel1, PageMapLevel1Entry&
+        )
+    );
+
     /**
      * 系统总内存。
      * 含所有内存，包括不让使用的。

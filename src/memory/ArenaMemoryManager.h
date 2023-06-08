@@ -45,6 +45,11 @@ struct ArenaStage {
 
 /**
  * arena 内存管理器。
+ * 
+ * 该管理器负责完成小内存分配。工作在线性空间内。
+ * descriptor 们被内核使用。她们工作在“直接映射”区。
+ * 这个管理器是“死”的。她内部只负责存储数个描述符（descriptors）。
+ * 具体的分配过程，要看 Kernel Memory Manager 等外层应用。
  */
 namespace ArenaMemoryManager {
     const int MINIMUM_BLOCK_SIZE = 16;

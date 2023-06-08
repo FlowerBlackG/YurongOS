@@ -130,6 +130,7 @@ public:
         uint8_t highlight = 2
     );
 
+    void scrollDown(uint16_t lines = 1);
     void scrollUp(uint16_t lines = 1);
 
     void putchar(uint8_t ch);

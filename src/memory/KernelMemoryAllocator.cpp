@@ -12,6 +12,22 @@
 #include <lib/string.h>
 #include <misc/Kernel.h>
 
+/**
+ * 内核内存分配器。实现动态内存管理。
+ * 管理器运行在虚地址空间的物理内存映射区。
+ * 
+ * 管理器支持小内存管理，可以无忧无虑地以字节为单位申请和释放内存。
+ * 
+ * 当申请的内存较小时，分配器内部借助 arena 技术完成内存碎片管理。
+ * 
+ * 当申请的内存较大时，分配器会在内存块开头写入一个 arena 结构。
+ * 此时，返回的内存地址是紧邻在 arena 结构后的。
+ * 
+ * 如果直接使用本管理器的页分配功能，将不启用 arena 技术。
+ * 
+ * 使用 malloc 申请的内存，使用 free 释放。
+ * 使用 allocPage 申请的内存，使用 freePage 释放。
+ */
 namespace KernelMemoryAllocator {
 
     void* malloc(uint64_t size) {

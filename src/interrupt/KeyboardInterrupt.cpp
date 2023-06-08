@@ -45,11 +45,27 @@ namespace KeyboardInterrupt {
         uint8_t key = keymap[scancode];
 
         if (key >= AsciiChar::START_OF_VISIBLE_CHARS && key <= AsciiChar::END_OF_VISIBLE_CHARS) {
-            CRT::getInstance().putchar(key);
+        //    CRT::getInstance().putchar(key);
         } else {
-            CRT::getInstance().write("------------\nkeyboard interrupt\n");
-            CRT::getInstance().write(s);
+        //    CRT::getInstance().write("------------\nkeyboard interrupt\n");
+        //    CRT::getInstance().write(s);
         }
+
+        ///////////////////////////////// 滚屏测试专用 - 开始
+
+        if (key == 'w') {
+
+            CRT::getInstance().scrollUp();
+
+        } else if (key == 's') {
+
+            CRT::getInstance().scrollDown();
+
+        }
+
+
+        ///////////////////////////////// 滚屏测试专用 - 结束
+
 
         /* 通知中断控制器，该中断处理完毕。 */
         IO::outByte(Machine::PIC_MASTER_CTRL, Machine::PIC_EOI);

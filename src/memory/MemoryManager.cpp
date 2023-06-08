@@ -255,3 +255,156 @@ int MemoryManager::mapPage(
 
     return 0;
 }
+
+
+void MemoryManager::walkPageTables(
+    PageMapLevel4 pml4,
+    const int64_t cargo,
+
+    WalkPageTablesCommand (* onPml4EntryDiscovered) (
+        const int64_t cargo,
+        PageMapLevel4, PageMapLevel4Entry&
+    ),
+
+    WalkPageTablesCommand (* onPml3EntryDiscovered) (
+        const int64_t cargo,
+        PageMapLevel4, PageMapLevel4Entry&, 
+        PageMapLevel3, PageMapLevel3Entry&
+    ),
+
+    WalkPageTablesCommand (* onPml2EntryDiscovered) (
+        const int64_t cargo,
+        PageMapLevel4, PageMapLevel4Entry&, 
+        PageMapLevel3, PageMapLevel3Entry&, 
+        PageMapLevel2, PageMapLevel2Entry&
+    ),
+
+    WalkPageTablesCommand (* onPml1EntryDiscovered) (
+        const int64_t cargo,
+        PageMapLevel4, PageMapLevel4Entry&, 
+        PageMapLevel3, PageMapLevel3Entry&, 
+        PageMapLevel2, PageMapLevel2Entry&, 
+        PageMapLevel1, PageMapLevel1Entry&
+    )
+) {
+
+    const int pageSize = MemoryManager::PAGE_SIZE;
+
+    const int pml4EntriesPerPage = pageSize / sizeof(PageMapLevel4Entry);
+    const int pml3EntriesPerPage = pageSize / sizeof(PageMapLevel3Entry);
+    const int pml2EntriesPerPage = pageSize / sizeof(PageMapLevel2Entry);
+    const int pml1EntriesPerPage = pageSize / sizeof(PageMapLevel1Entry);
+
+    const auto&& walkPml1 = [
+        &onPml1EntryDiscovered = onPml1EntryDiscovered,
+        &cargo = cargo
+    ] (
+        PageMapLevel4 pml4, PageMapLevel4Entry& pml4e,
+        PageMapLevel3 pml3, PageMapLevel3Entry& pml3e,
+        PageMapLevel2 pml2, PageMapLevel2Entry& pml2e,
+        PageMapLevel1 pml1
+    ) {
+
+        for (int idx = 0; idx < pml1EntriesPerPage; idx++) {
+        
+           
+            PageMapLevel1Entry& entry = pml1[idx];
+            auto cmd = onPml1EntryDiscovered(
+                cargo, pml4, pml4e, pml3, pml3e, pml2, pml2e, pml1, entry
+            );
+
+            if (cmd == WalkPageTablesCommand::WALK_INTO) {
+                // do nothing
+            } else if (cmd == WalkPageTablesCommand::BACK_TO_UPPER) {
+                break;
+            } else if (cmd == WalkPageTablesCommand::SKIP_THIS_ENTRY) {
+                // do nothing
+            } else {
+                // 不应该抵达这里。
+            }
+
+            
+
+        }
+    };
+    
+    const auto&& walkPml2 = [
+        &onPml2EntryDiscovered = onPml2EntryDiscovered,
+        &walkPml1 = walkPml1,
+        &cargo = cargo
+    ] (
+        PageMapLevel4 pml4, PageMapLevel4Entry& pml4e,
+        PageMapLevel3 pml3, PageMapLevel3Entry& pml3e,
+        PageMapLevel2 pml2
+    ) {
+        for (int idx = 0; idx < pml2EntriesPerPage; idx++) {
+        
+            PageMapLevel2Entry& entry = pml2[idx];
+            auto cmd = onPml2EntryDiscovered(cargo, pml4, pml4e, pml3, pml3e, pml2, entry);
+
+            if (cmd == WalkPageTablesCommand::WALK_INTO) {
+                uintptr_t pml1addr = entry.pageFrameNumber * PAGE_SIZE;
+                PageMapLevel1 pml1 = (PageMapLevel1) (pml1addr + ADDRESS_OF_PHYSICAL_MEMORY_MAP);
+                walkPml1(pml4, pml4e, pml3, pml3e, pml2, entry, pml1);
+            } else if (cmd == WalkPageTablesCommand::BACK_TO_UPPER) {
+                break;
+            } else if (cmd == WalkPageTablesCommand::SKIP_THIS_ENTRY) {
+                // do nothing
+            } else {
+                // 不应该抵达这里。
+            }
+
+        }
+    };
+
+    const auto&& walkPml3 = [
+        &onPml3EntryDiscovered = onPml3EntryDiscovered,
+        &walkPml2 = walkPml2,
+        &cargo = cargo
+    ] (
+        PageMapLevel4 pml4, PageMapLevel4Entry& pml4e,
+        PageMapLevel3 pml3
+    ) {
+
+        for (int idx = 0; idx < pml3EntriesPerPage; idx++) {
+            PageMapLevel3Entry& entry = pml3[idx];
+            auto cmd = onPml3EntryDiscovered(cargo, pml4, pml4e, pml3, entry);
+
+            if (cmd == WalkPageTablesCommand::WALK_INTO) {
+                uintptr_t pml2addr = entry.pageFrameNumber * PAGE_SIZE;
+                PageMapLevel2 pml2 = (PageMapLevel2) (pml2addr + ADDRESS_OF_PHYSICAL_MEMORY_MAP);
+                walkPml2(pml4, pml4e, pml3, entry, pml2);
+            } else if (cmd == WalkPageTablesCommand::BACK_TO_UPPER) {
+                break;
+            } else if (cmd == WalkPageTablesCommand::SKIP_THIS_ENTRY) {
+                // do nothing
+            } else {
+                // 不应该抵达这里。
+            }
+        }
+
+    };
+
+
+    // walk pml 4
+    for (int idx = 0; idx < pml4EntriesPerPage; idx++) {
+        PageMapLevel4Entry& entry = pml4[idx];
+        auto cmd = onPml4EntryDiscovered(cargo, pml4, entry);
+
+        if (cmd == WalkPageTablesCommand::WALK_INTO) {
+            uintptr_t pml3addr = entry.pageFrameNumber * PAGE_SIZE;
+            PageMapLevel3 pml3 = (PageMapLevel3) (pml3addr + ADDRESS_OF_PHYSICAL_MEMORY_MAP);
+            walkPml3(pml4, entry, pml3);
+        } else if (cmd == WalkPageTablesCommand::BACK_TO_UPPER) {
+            break;
+        } else if (cmd == WalkPageTablesCommand::SKIP_THIS_ENTRY) {
+            // do nothing
+        } else {
+            // 不应该抵达这里。
+        }
+
+        
+
+    }
+
+}
