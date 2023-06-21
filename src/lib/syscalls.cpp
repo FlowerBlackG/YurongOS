@@ -9,6 +9,9 @@
 #include <lib/syscalls.h>
 #include <lib/sys/types.h>
 
+
+/* ------ 面向用户的系统调用，通用进入点。 ------ */
+
 __force_inline __omit_frame_pointer static int64_t __syscall0(...) {
     int64_t res;
     __asm (
@@ -85,6 +88,8 @@ __force_inline __omit_frame_pointer static int64_t __syscall6(...) {
 }
 
 
+/* ------ 面向用户的系统调用。 ------ */
+
 int64_t testCall() {
     __asm ("" :: "a" (SystemCallId::TEST_CALL));
     return __syscall0();
@@ -102,7 +107,7 @@ int64_t sleep(int64_t milliseconds) {
 }
 
 
-int64_t fork() {
-    __asm ("" :: "a" (SystemCallId::FORK));
+int64_t newProcess() {
+    __asm ("" :: "a" (SystemCallId::NEW_PROCESS));
     return __syscall0();
 }

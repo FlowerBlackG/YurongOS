@@ -19,7 +19,7 @@ enum class SystemCallId : int64_t {
     TEST_CALL = 0,
     WRITE = 1, 
     SLEEP = 2,
-    FORK = 3
+    NEW_PROCESS = 3
 };
 
 #endif
@@ -45,9 +45,9 @@ int64_t sleep(int64_t milliseconds);
 
 
 /**
- * 进程分裂。
+ * 创建进程。
  * 调用号：3
  * 
- * @return int64_t 进程id。子进程返回0，父进程返回子进程id。
+ * @return int64_t 子进程id。
  */
-int64_t fork();
+int64_t newProcess();

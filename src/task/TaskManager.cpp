@@ -65,7 +65,6 @@ namespace TaskManager {
             }
 
             next = taskTable[prevId];
-            x86asmBochsMagicBreakpoint();
 
             if (next && next->state == TaskState::READY) {
                 break;

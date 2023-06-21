@@ -38,7 +38,7 @@ namespace SystemCall {
         SYSCALL_HANDLER(testCall),
         SYSCALL_HANDLER(write),
         SYSCALL_HANDLER(sleep),
-        SYSCALL_HANDLER(fork),
+        SYSCALL_HANDLER(newProcess),
     };
 
 #undef SYSCALL_HANDLER
@@ -191,7 +191,7 @@ void SystemCall::testCall() { // 测试函数。不宜多调用。
     char buf[2048];
 
     MemoryManager::walkPageTables(
-        (PageMapLevel4) task->pml4Address,
+        (PageMapLevel4) (task->pml4Address + MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP),
         reinterpret_cast<int64_t>(buf),
         
         [] (const int64_t cargo, PageMapLevel4 pml4, PageMapLevel4Entry& pml4e) {
@@ -275,7 +275,7 @@ void SystemCall::sleep(int64_t milliseconds) {
 }
 
 
-void SystemCall::fork() {
+void SystemCall::newProcess() {
 
     // todo
 }

@@ -121,7 +121,7 @@ typedef PageMapLevel2Entry* PageMapLevel2;
 typedef PageMapLevel3Entry* PageMapLevel3;
 typedef PageMapLevel4Entry* PageMapLevel4;
 
-#if 1
+#if 0
 static void __check_size() {
     sizeof(PageTableEntry);
     sizeof(PageDirectoryEntry);

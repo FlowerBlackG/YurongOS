@@ -118,12 +118,12 @@ void userApp1() {
 
 
 
-    testCall();
+    //testCall();
 
 
     while (true) {
         sprintf(s, "[app 1] [%d] sleep...\n", counter);
-        //write(1, s, strlen(s));
+        write(1, s, strlen(s));
 
         sleep(2000);
 
@@ -141,6 +141,7 @@ void userApp2() {
         "  __/ |              \n"
         " |___/               \n";
 
+ 
     auto res = write(1, s, strlen(s));
     sprintf(s, "[user app 2] return value: %lld\n", res);
     write(1, s, strlen(s));
@@ -156,7 +157,7 @@ void userApp2() {
             int testRes = 0;//testCall();
 
             sprintf(s, "[app 2] [%d] sleep... (%x) (%d)\n", counter, testRes, written);
-            //written = write(1, s, strlen(s));
+            written = write(1, s, strlen(s));
 
             sleep(2000);
 

@@ -48,7 +48,7 @@ namespace SystemCall {
     void testCall();
     void write(int64_t fd, const char* buffer, size_t count);
     void sleep(int64_t milliseconds);
-    void fork();
+    void newProcess();
 
 }
 
