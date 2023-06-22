@@ -1,3 +1,5 @@
+; SPDX-License-Identifier: MulanPSL-2.0
+
 ; 中断出口。
 ; 创建于 2023年2月8日 江西省上饶市玉山县。
 

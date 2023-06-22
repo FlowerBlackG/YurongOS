@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
+
 /*
 
     缺页异常处理器
@@ -145,14 +148,14 @@ namespace PageFaultException {
         // 缺页发生在用户态。
 
         unsigned long pml4addr = cr3;
-        auto pml4 = (PageMapLevel4) (pml4addr + MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP);
+        auto pml4 = (PageMapLevel4) (pml4addr + memory::MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP);
 
-        uintptr_t newPageAddr = MemoryManager::allocPage();
+        uintptr_t newPageAddr = memory::MemoryManager::allocPage();
         if (!newPageAddr) {
             Kernel::panic("[error] memory ran out (d91a).\n");
         }
 
-        int resCode = MemoryManager::mapPage(pml4, cr2, newPageAddr, true, true);
+        int resCode = memory::MemoryManager::mapPage(pml4, cr2, newPageAddr, true, true);
         
         if (resCode) {
             sprintf(s, "[error] user memory allocation failed (%d).\n", resCode);

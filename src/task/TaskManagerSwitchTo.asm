@@ -1,3 +1,5 @@
+; SPDX-License-Identifier: MulanPSL-2.0
+
 ;
 ; TaskManager::switchTo(Task*)
 ; gcc 总做一些诡异的操作，因此使用纯汇编实现。

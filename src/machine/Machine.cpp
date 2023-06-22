@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
  * 硬件控制。
  * 创建于 2022年7月15日。
@@ -7,7 +9,7 @@
 #include <lib/stdint.h>
 #include <lib/string.h>
 #include <crt/CRT.h>
-#include <misc/IO.h>
+#include <misc/io.h>
 #include <lib/stdio.h>
 #include <machine/X86Assembly.h>
 #include <interrupt/InterruptHandlers.h>
@@ -28,7 +30,7 @@ void Machine::init() {
 
     // 需要在设置中断前初始化内存。
     // 内存初始化过程中，会依赖 bios 提供的中断程序。
-    MemoryManager::init();
+    memory::MemoryManager::init();
 
     this->initIdt();
     this->initPit();
@@ -157,18 +159,18 @@ void Machine::initIdt() {
 
 
 void Machine::initPic() {
-    IO::outByte(PIC_MASTER_CTRL, 0b00010001);
-    IO::outByte(PIC_MASTER_DATA, 0x20);
-    IO::outByte(PIC_MASTER_DATA, 0b00000100);
-    IO::outByte(PIC_MASTER_DATA, 0b00000001);
+    io::outByte(PIC_MASTER_CTRL, 0b00010001);
+    io::outByte(PIC_MASTER_DATA, 0x20);
+    io::outByte(PIC_MASTER_DATA, 0b00000100);
+    io::outByte(PIC_MASTER_DATA, 0b00000001);
 
-    IO::outByte(PIC_SLAVE_CTRL, 0b00010001);
-    IO::outByte(PIC_SLAVE_DATA, 0x28);
-    IO::outByte(PIC_SLAVE_DATA, 2);
-    IO::outByte(PIC_SLAVE_DATA, 0b00000001);
+    io::outByte(PIC_SLAVE_CTRL, 0b00010001);
+    io::outByte(PIC_SLAVE_DATA, 0x28);
+    io::outByte(PIC_SLAVE_DATA, 2);
+    io::outByte(PIC_SLAVE_DATA, 0b00000001);
 
-    IO::outByte(PIC_MASTER_DATA, 0b11111100);
-    IO::outByte(PIC_SLAVE_DATA, 0b11111111);
+    io::outByte(PIC_MASTER_DATA, 0b11111100);
+    io::outByte(PIC_SLAVE_DATA, 0b11111111);
 
 }
 
@@ -198,7 +200,7 @@ void Machine::initPit() {
         ref: https://wiki.osdev.org/Programmable_Interval_Timer
     */
 
-    IO::outByte(0x43, 0b00110110);
-    IO::outByte(0x40, ClockInterrupt::CLOCK_COUNTER & 0xff);
-    IO::outByte(0x40, (ClockInterrupt::CLOCK_COUNTER >> 8) & 0xff);
+    io::outByte(0x43, 0b00110110);
+    io::outByte(0x40, ClockInterrupt::CLOCK_COUNTER & 0xff);
+    io::outByte(0x40, (ClockInterrupt::CLOCK_COUNTER >> 8) & 0xff);
 }

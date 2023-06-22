@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
  * CRT 显示器控制头文件。
  * 创建于 2022年7月2日。
@@ -46,7 +48,8 @@ protected:
     /**
      * CRT 显存位置开始地址。
      */
-    static const long MEMORY_BASE = 0xb8000 + MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
+    static const long MEMORY_BASE = 0xb8000 
+        + memory::MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
 
     /**
      * CRT 显存大小。32KB。

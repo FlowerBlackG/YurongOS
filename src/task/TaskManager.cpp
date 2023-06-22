@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
 
     任务管理器
@@ -40,8 +42,8 @@ namespace TaskManager {
             :
         );
 
-        if (addr <= MemoryManager::KERNEL_PROCESS_STACK_BASE) {
-            addr = MemoryManager::KERNEL_PROCESS_STACK_TOP;
+        if (addr <= memory::MemoryManager::KERNEL_PROCESS_STACK_BASE) {
+            addr = memory::MemoryManager::KERNEL_PROCESS_STACK_TOP;
         } else {
             addr &= 0xFFFFFFFFFFFFF000;
         }
@@ -101,13 +103,13 @@ namespace TaskManager {
         auto& tss = GlobalDescriptorTable::taskStateSegment;
         unsigned long sp = (unsigned long) task->kernelStackPointer;
         sp &= 0xFFFFFFFFFFFFF000;
-        sp += MemoryManager::PAGE_SIZE;
+        sp += memory::MemoryManager::PAGE_SIZE;
         tss.rsp0Low = sp & 0xFFFFFFFF;
         tss.rsp0High = ((sp >> 16) >> 16) & 0xFFFFFFFF;
 
         uint64_t rsp;
         __asm ("movq %%rsp, %0" :"=m"(rsp):);
-        if (rsp < MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP - 1024ULL*1024*1024) {
+        if (rsp < memory::MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP - 1024ULL*1024*1024) {
             int x=  1;
             x++;
             x--;
@@ -115,8 +117,8 @@ namespace TaskManager {
 
         loadTaskToCargo(task);
 
-        const auto kernelPml4Addr = MemoryManager::KERNEL_PML4_ADDRESS 
-            + MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
+        const auto kernelPml4Addr = memory::MemoryManager::KERNEL_PML4_ADDRESS 
+            + memory::MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
         
         auto kernelPml4 = (PageMapLevel4) kernelPml4Addr;
 
@@ -150,7 +152,7 @@ namespace TaskManager {
             Kernel::panic("[error] kernel process can only be process 0.\n");
         }
 
-        Task* task = (Task*) KernelMemoryAllocator::allocPage();
+        Task* task = (Task*) memory::KernelMemoryAllocator::allocPage();
 
         taskTable[pid] = task;
         task->processId = pid;
@@ -160,12 +162,12 @@ namespace TaskManager {
         unsigned long kernelStackAddr;
         
         if (kernelProcess) {
-            kernelStackAddr = MemoryManager::KERNEL_PROCESS_STACK_BASE - 1 * 1024 * 1024;
-            * (long*) (MemoryManager::KERNEL_PROCESS_STACK_TOP) = (long) task;
+            kernelStackAddr = memory::MemoryManager::KERNEL_PROCESS_STACK_BASE - 1 * 1024 * 1024;
+            * (long*) (memory::MemoryManager::KERNEL_PROCESS_STACK_TOP) = (long) task;
         } else {
-            kernelStackAddr = (unsigned long) KernelMemoryAllocator::allocPage();    
+            kernelStackAddr = (unsigned long) memory::KernelMemoryAllocator::allocPage();    
             * (long*) (kernelStackAddr) = (long) task;
-            kernelStackAddr += MemoryManager::PAGE_SIZE;
+            kernelStackAddr += memory::MemoryManager::PAGE_SIZE;
         }
 
 
@@ -202,21 +204,21 @@ namespace TaskManager {
         task->kernelStackPointer = kernelStackAddr;
 
         if (kernelProcess) {
-            task->pml4Address = MemoryManager::KERNEL_PML4_ADDRESS;
-            hwContext->rsp = MemoryManager::KERNEL_PROCESS_STACK_BASE;
+            task->pml4Address = memory::MemoryManager::KERNEL_PML4_ADDRESS;
+            hwContext->rsp = memory::MemoryManager::KERNEL_PROCESS_STACK_BASE;
 
         } else {
-            auto pml4 = (uint64_t) KernelMemoryAllocator::allocWhitePage();
+            auto pml4 = (uint64_t) memory::KernelMemoryAllocator::allocWhitePage();
 
-            uint64_t kernelPml4 = MemoryManager::KERNEL_PML4_ADDRESS;
-            kernelPml4 += MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
+            uint64_t kernelPml4 = memory::MemoryManager::KERNEL_PML4_ADDRESS;
+            kernelPml4 += memory::MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
 
-            memcpy((void*) pml4, (void*) kernelPml4, MemoryManager::PAGE_SIZE);
+            memcpy((void*) pml4, (void*) kernelPml4, memory::MemoryManager::PAGE_SIZE);
 
-            pml4 -= MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
+            pml4 -= memory::MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
             task->pml4Address = pml4;
 
-            hwContext->rsp = MemoryManager::USER_STACK_BASE;
+            hwContext->rsp = memory::MemoryManager::USER_STACK_BASE;
         }
 
         Machine::getInstance().setInterruptState(prevInterruptFlag);

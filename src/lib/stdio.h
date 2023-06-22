@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
  * 标准输入输出头文件。
  * 创建于 2022年7月13日。

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
 
     内存管理器。
@@ -14,6 +16,8 @@
 
 #include <lib/sys/types.h>
 #include <machine/Cmos.h>
+
+namespace memory {
 
 namespace MemoryManager {
 
@@ -407,4 +411,5 @@ void MemoryManager::walkPageTables(
 
     }
 
+}
 }

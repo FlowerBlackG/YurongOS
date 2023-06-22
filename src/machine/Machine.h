@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
  * 硬件控制。
  * 创建于 2022年7月15日。

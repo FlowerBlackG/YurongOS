@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
  * 中断描述符表相关。
  * 创建于 2022年7月15日。

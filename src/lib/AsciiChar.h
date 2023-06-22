@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
  * ASCII 特殊字符定义。
  * 创建于 2022年7月12日。

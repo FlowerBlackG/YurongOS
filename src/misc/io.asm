@@ -1,3 +1,7 @@
+; SPDX-License-Identifier: MulanPSL-2.0
+
+
+
 ; io 操作。
 ; 创建于 2022年7月2日。
 

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
 
     时钟中断
@@ -10,7 +12,7 @@
 #include <interrupt/ClockInterrupt.h>
 #include <interrupt/ImplementHandlerMacros.h>
 #include <crt/CRT.h>
-#include <misc/IO.h>
+#include <misc/io.h>
 #include <machine/Machine.h>
 #include <task/TaskManager.h>
 
@@ -54,7 +56,7 @@ namespace ClockInterrupt {
 
         wakeupSleptEnoughTasks();
         
-        IO::outByte(Machine::PIC_MASTER_CTRL, Machine::PIC_EOI);
+        io::outByte(Machine::PIC_MASTER_CTRL, Machine::PIC_EOI);
         TaskManager::schedule();
     }
 

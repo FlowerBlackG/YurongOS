@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
  * 全局描述符表相关内容。
  * 包含段选择子等。

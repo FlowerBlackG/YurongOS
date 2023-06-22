@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
 
     空闲内存管理器
@@ -9,6 +11,8 @@
 #pragma once
 
 #include <lib/sys/types.h>
+
+namespace memory {
 
 /**
  * 空闲内存管理器。负责分配和释放物理内存。
@@ -122,3 +126,4 @@ namespace FreeMemoryManager {
     
 };
 
+}

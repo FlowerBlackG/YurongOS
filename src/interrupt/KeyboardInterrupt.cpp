@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
+
 /*
 
     键盘中断
@@ -10,9 +13,9 @@
 #include <interrupt/ImplementHandlerMacros.h>
 #include <crt/CRT.h>
 #include <machine/Machine.h>
-#include <misc/IO.h>
+#include <misc/io.h>
 #include <lib/stdio.h>
-#include <misc/AsciiChar.h>
+#include <lib/AsciiChar.h>
 
 #include <task/TaskManager.h>
 
@@ -35,8 +38,8 @@ namespace KeyboardInterrupt {
     ) {
 
         
-        auto&& status = IO::inByte(KeyboardInterrupt::STATUS_PORT);
-        auto&& scancode = IO::inByte(KeyboardInterrupt::DATA_PORT);
+        auto&& status = io::inByte(KeyboardInterrupt::STATUS_PORT);
+        auto&& scancode = io::inByte(KeyboardInterrupt::DATA_PORT);
 
         char s[128];
         sprintf(s, "status: %d\ndata: %d\n", status, scancode);
@@ -68,7 +71,7 @@ namespace KeyboardInterrupt {
 
 
         /* 通知中断控制器，该中断处理完毕。 */
-        IO::outByte(Machine::PIC_MASTER_CTRL, Machine::PIC_EOI);
+        io::outByte(Machine::PIC_MASTER_CTRL, Machine::PIC_EOI);
 
         TaskManager::schedule();
     }

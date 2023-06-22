@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
 
     arena 内存管理器。
@@ -8,6 +10,9 @@
 
 #include <memory/ArenaMemoryManager.h>
 #include <memory/MemoryManager.h>
+
+namespace memory {
+
 
 ArenaBlockNode* ArenaStage::getBlock(uint32_t index) {
     if (index >= descriptor->blocksPerPage) {
@@ -43,6 +48,9 @@ namespace ArenaMemoryManager {
         return reinterpret_cast<ArenaStage*> (uint64_t(memoryAddr) & 0xfffffffffffff000);
     }
 
+
+
+}
 
 
 }

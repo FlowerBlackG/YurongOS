@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
 
     内核堆内存管理器。
@@ -10,6 +12,8 @@
 #pragma once
 
 #include <lib/sys/types.h>
+
+namespace memory {
 
 /**
  * 内核内存分配器。
@@ -41,3 +45,4 @@ namespace KernelMemoryAllocator {
     void freePage(void* addr, uint64_t count = 1);
 
 };
+}

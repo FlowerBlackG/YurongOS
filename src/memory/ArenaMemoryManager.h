@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
 
     arena 内存管理器。
@@ -10,6 +12,9 @@
 #pragma once
 
 #include <lib/sys/types.h>
+
+
+namespace memory {
 
 struct ArenaBlockNode {
     ArenaBlockNode* prev;
@@ -70,3 +75,6 @@ static void __check_size() {
 };
 
 #endif
+
+
+}

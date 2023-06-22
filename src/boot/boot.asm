@@ -1,3 +1,5 @@
+; SPDX-License-Identifier: MulanPSL-2.0
+
 ;
 ; 启动引导程序（主引导扇区）
 ; 

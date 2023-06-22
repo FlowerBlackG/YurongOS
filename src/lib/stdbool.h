@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
  * 为 C 语言提供 bool 数据类型支持。
  */

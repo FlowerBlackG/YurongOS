@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
  * 整数类型头文件。
  * 创建于 2022年7月2日。

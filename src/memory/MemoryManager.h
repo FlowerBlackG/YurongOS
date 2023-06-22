@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
 
     内存管理器。
@@ -11,7 +13,7 @@
 #include <lib/sys/types.h>
 #include <memory/FreeMemoryManager.h>
 #include <memory/PageDirectories.h>
-
+namespace memory {
 /**
  * 内存描述符结构。在启动阶段，从 bios 读取。
  */
@@ -184,3 +186,4 @@ namespace MemoryManager {
 
 };
 
+}

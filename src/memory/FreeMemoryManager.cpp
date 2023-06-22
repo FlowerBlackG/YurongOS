@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
 
     空闲内存管理器
@@ -9,6 +11,8 @@
 #include <memory/FreeMemoryManager.h>
 #include <memory/MemoryManager.h>
 #include <machine/Machine.h>
+
+namespace memory {
 
 namespace FreeMemoryManager {
     PageLinkNode* currentPage;
@@ -643,4 +647,6 @@ int FreeMemoryManager::PageLinkNode::popNode(int count) {
 
     nodeUsed -= count;
     return count;
+}
+
 }

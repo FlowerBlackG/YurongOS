@@ -1,10 +1,12 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
  * 系统内核。
  * 创建于 2022年7月1日
  */
 
 #include <lib/sys/types.h>
-#include <misc/IO.h>
+#include <misc/io.h>
 #include <misc/Kernel.h>
 #include <crt/CRT.h>
 #include <lib/stdarg.h>

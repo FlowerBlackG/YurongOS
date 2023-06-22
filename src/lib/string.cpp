@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
  * 字符串处理函数。
  * 创建于 2022年7月4日。

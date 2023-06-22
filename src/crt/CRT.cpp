@@ -1,12 +1,14 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
 /*
  * CRT 实现。
  * 创建于 2022年7月6日。
  */
 
 #include <crt/CRT.h>
-#include <misc/IO.h>
+#include <misc/io.h>
 #include <lib/string.h>
-#include <misc/AsciiChar.h>
+#include <lib/AsciiChar.h>
 #include <machine/Machine.h>
 
 #include <misc/Kernel.h>
@@ -15,20 +17,20 @@ CRT CRT::instance;
 
 
 CRT::CRT() {
-
+    
 }
 
 void CRT::init() {
-    IO::outByte(CRT::ADDR_REG, CRT::Reg::SCREEN_POS_HIGH);
-    this->currentScreenPos = IO::inByte(CRT::DATA_REG) << 8;
-    IO::outByte(CRT::ADDR_REG, CRT::Reg::SCREEN_POS_LOW);
-    this->currentScreenPos |= IO::inByte(CRT::DATA_REG);
+    io::outByte(CRT::ADDR_REG, CRT::Reg::SCREEN_POS_HIGH);
+    this->currentScreenPos = io::inByte(CRT::DATA_REG) << 8;
+    io::outByte(CRT::ADDR_REG, CRT::Reg::SCREEN_POS_LOW);
+    this->currentScreenPos |= io::inByte(CRT::DATA_REG);
 
     /* 获取光标位置。 */
-    IO::outByte(CRT::ADDR_REG, CRT::Reg::CURSOR_HIGH);
-    uint16_t cursorPos = IO::inByte(CRT::DATA_REG) << 8;
-    IO::outByte(CRT::ADDR_REG, CRT::Reg::CURSOR_LOW);
-    cursorPos |= IO::inByte(CRT::DATA_REG);
+    io::outByte(CRT::ADDR_REG, CRT::Reg::CURSOR_HIGH);
+    uint16_t cursorPos = io::inByte(CRT::DATA_REG) << 8;
+    io::outByte(CRT::ADDR_REG, CRT::Reg::CURSOR_LOW);
+    cursorPos |= io::inByte(CRT::DATA_REG);
 
     cursorPos -= this->currentScreenPos;
 
@@ -56,10 +58,10 @@ void CRT::moveCursor(uint8_t x, uint8_t y) {
     uint16_t cursorPos = this->cursorY * CRT::COLS + this->cursorX;
     cursorPos += this->currentScreenPos;
 
-    IO::outByte(CRT::ADDR_REG, CRT::Reg::CURSOR_HIGH);
-    IO::outByte(CRT::DATA_REG, cursorPos >> 8);
-    IO::outByte(CRT::ADDR_REG, CRT::Reg::CURSOR_LOW);
-    IO::outByte(CRT::DATA_REG, cursorPos);
+    io::outByte(CRT::ADDR_REG, CRT::Reg::CURSOR_HIGH);
+    io::outByte(CRT::DATA_REG, cursorPos >> 8);
+    io::outByte(CRT::ADDR_REG, CRT::Reg::CURSOR_LOW);
+    io::outByte(CRT::DATA_REG, cursorPos);
 }
 
 void CRT::setCharAttr(uint8_t attr) {
@@ -155,10 +157,10 @@ void CRT::scrollUp(uint16_t lines) {
 
 void CRT::setCurrentScreenPos(size_t pos) { // protected
     this->currentScreenPos = pos; // 内部调用，不做错误检测与处理。
-    IO::outByte(CRT::ADDR_REG, CRT::Reg::SCREEN_POS_HIGH);
-    IO::outByte(CRT::DATA_REG, this->currentScreenPos >> 8);
-    IO::outByte(CRT::ADDR_REG, CRT::Reg::SCREEN_POS_LOW);
-    IO::outByte(CRT::DATA_REG, this->currentScreenPos);
+    io::outByte(CRT::ADDR_REG, CRT::Reg::SCREEN_POS_HIGH);
+    io::outByte(CRT::DATA_REG, this->currentScreenPos >> 8);
+    io::outByte(CRT::ADDR_REG, CRT::Reg::SCREEN_POS_LOW);
+    io::outByte(CRT::DATA_REG, this->currentScreenPos);
 }
 
 void CRT::putchar(uint8_t ch) {

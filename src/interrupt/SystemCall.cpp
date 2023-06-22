@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MulanPSL-2.0
+
+
 /*
 
     系统调用
@@ -112,7 +115,7 @@ void __omit_frame_pointer SystemCall::entrance() {
         :
         :
             "i" (offsetof(PerCpuCargo, currentTask)),
-            "i" (MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP),
+            "i" (memory::MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP),
             "i" (offsetof(Task, syscallSoftwareFrame))
             
     );
@@ -190,8 +193,8 @@ void SystemCall::testCall() { // 测试函数。不宜多调用。
 
     char buf[2048];
 
-    MemoryManager::walkPageTables(
-        (PageMapLevel4) (task->pml4Address + MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP),
+    memory::MemoryManager::walkPageTables(
+        (PageMapLevel4) (task->pml4Address + memory::MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP),
         reinterpret_cast<int64_t>(buf),
         
         [] (const int64_t cargo, PageMapLevel4 pml4, PageMapLevel4Entry& pml4e) {
@@ -199,19 +202,19 @@ void SystemCall::testCall() { // 测试函数。不宜多调用。
             auto buf = reinterpret_cast<char*>(cargo);
 
             if (pml4e.pageFrameNumber == 0) {
-                return MemoryManager::WalkPageTablesCommand::SKIP_THIS_ENTRY;
+                return memory::MemoryManager::WalkPageTablesCommand::SKIP_THIS_ENTRY;
             }
 
 
 
             if (idx >= 256) {
 
-                return MemoryManager::WalkPageTablesCommand::SKIP_THIS_ENTRY;
+                return memory::MemoryManager::WalkPageTablesCommand::SKIP_THIS_ENTRY;
             }
 
             // 尝试进入
 
-            return MemoryManager::WalkPageTablesCommand::WALK_INTO;
+            return memory::MemoryManager::WalkPageTablesCommand::WALK_INTO;
         },
 
         [] (
@@ -222,7 +225,7 @@ void SystemCall::testCall() { // 测试函数。不宜多调用。
 
 
 
-            return MemoryManager::WalkPageTablesCommand::SKIP_THIS_ENTRY;
+            return memory::MemoryManager::WalkPageTablesCommand::SKIP_THIS_ENTRY;
         },
 
         [] (
@@ -231,7 +234,7 @@ void SystemCall::testCall() { // 测试函数。不宜多调用。
             PageMapLevel3 pml3, PageMapLevel3Entry& pml3e,
             PageMapLevel2 pml2, PageMapLevel2Entry& pml2e
         ) {
-            return MemoryManager::WalkPageTablesCommand::SKIP_THIS_ENTRY;
+            return memory::MemoryManager::WalkPageTablesCommand::SKIP_THIS_ENTRY;
         },
 
         [] (
@@ -241,7 +244,7 @@ void SystemCall::testCall() { // 测试函数。不宜多调用。
             PageMapLevel2 pml2, PageMapLevel2Entry& pml2e,
             PageMapLevel1 pml1, PageMapLevel1Entry& pml1e
         ) {
-            return MemoryManager::WalkPageTablesCommand::SKIP_THIS_ENTRY;
+            return memory::MemoryManager::WalkPageTablesCommand::SKIP_THIS_ENTRY;
         }
 
     );
