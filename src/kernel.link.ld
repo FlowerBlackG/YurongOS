@@ -7,7 +7,7 @@ SECTIONS
     
     .text 0xffffa00000100000:
     {
-        
+        misc/kernel_entry.o(.text)
         *(.text)
         *(.rodata*)
         . = ALIGN(4096);

@@ -294,3 +294,16 @@ bool LinkedList::isEmpty() {
 bool LinkedList::isNotEmpty() {
     return this->length != 0;
 }
+
+
+void LinkedList::forEach(
+    void (* callable) (
+        LinkedListNode* node
+    )
+) {
+    auto curr = this->head;
+    while (curr) {
+        callable(curr);
+        curr = curr->next;
+    }
+}

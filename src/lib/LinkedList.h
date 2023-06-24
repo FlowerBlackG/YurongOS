@@ -68,5 +68,11 @@ struct LinkedList {
     bool isEmpty();
     bool isNotEmpty();
 
+    void forEach(
+        void (* callable) (
+            LinkedListNode* node
+        )
+    );
+
     // todo.
 };

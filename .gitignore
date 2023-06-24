@@ -15,6 +15,7 @@ bochs/
 *.img.lock
 *.map
 
-build/
-
 .idea
+
+build
+target

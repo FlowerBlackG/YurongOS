@@ -34,21 +34,22 @@ namespace TaskManager {
 
     Task* getCurrentTask() {
 
-        unsigned long addr;
+        intptr_t addr;
+
 
         __asm (
-            "movq %%rsp, %%rax"
-            : "=a" (addr)
-            :
+            "movq %%gs:0, %%r8 \n\t" // cargo.self => r8
+            "addq %1, %%r8 \n\t" // ptr currentTask => r8
+            "movq (%%r8), %%rax \n\t"
+
+            :   "=a" (addr)
+            : 
+                "i" (offsetof(PerCpuCargo, currentTask))
+            : 
+                "%r8"
         );
 
-        if (addr <= memory::MemoryManager::KERNEL_PROCESS_STACK_BASE) {
-            addr = memory::MemoryManager::KERNEL_PROCESS_STACK_TOP;
-        } else {
-            addr &= 0xFFFFFFFFFFFFF000;
-        }
-
-        return * (Task**) addr;
+        return (Task*) addr;
     }
 
     void schedule() {
@@ -107,14 +108,6 @@ namespace TaskManager {
         tss.rsp0Low = sp & 0xFFFFFFFF;
         tss.rsp0High = ((sp >> 16) >> 16) & 0xFFFFFFFF;
 
-        uint64_t rsp;
-        __asm ("movq %%rsp, %0" :"=m"(rsp):);
-        if (rsp < memory::MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP - 1024ULL*1024*1024) {
-            int x=  1;
-            x++;
-            x--;
-        }
-
         loadTaskToCargo(task);
 
         const auto kernelPml4Addr = memory::MemoryManager::KERNEL_PML4_ADDRESS 
@@ -162,7 +155,18 @@ namespace TaskManager {
         unsigned long kernelStackAddr;
         
         if (kernelProcess) {
-            kernelStackAddr = memory::MemoryManager::KERNEL_PROCESS_STACK_BASE - 1 * 1024 * 1024;
+
+            /* 
+                系统启动过程中，以及 main 函数执行的时候，使用的栈和我们计划分配给
+                kernel daemon 的是同一个。栈里还有少量数据。如果直接使用，会把少量
+                但还需要使用的数据干碎，导致启动 kernel daemon 前系统就挂掉了。
+
+                所以我们需要故意浪费一点空间。
+            */
+
+            const auto reserved = 1 * 1024 * 1024; // 1MB
+            kernelStackAddr = memory::MemoryManager::KERNEL_PROCESS_STACK_BASE - reserved;
+
             * (long*) (memory::MemoryManager::KERNEL_PROCESS_STACK_TOP) = (long) task;
         } else {
             kernelStackAddr = (unsigned long) memory::KernelMemoryAllocator::allocPage();    

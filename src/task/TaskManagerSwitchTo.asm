@@ -18,15 +18,21 @@ _ZN11TaskManager8switchToEP4Task:
     push rbp
     mov rbp, rsp
 
+    ; save some registers according to SysV ABI
     push rbx
     push r12
     push r13
     push r14
     push r15
 
+
+    ; get ptr to current task
+
     mov rax, rsp
 
     mov rbx, 0xFFFFC00000000000
+    
+    ; check whether current task is kernel daemon 
     cmp rax, rbx
     jg .save_rsp
 

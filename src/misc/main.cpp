@@ -116,7 +116,7 @@ void userApp1() {
     //sprintf(s, "[user app 1] return value: %lld\n", res);
     //write(1, s, strlen(s));
 
-    int counter = 0;
+    long long counter = 0;
 
 
 
@@ -124,7 +124,8 @@ void userApp1() {
 
 
     while (true) {
-        sprintf(s, "[app 1] [%d] sleep...\n", counter);
+        counter = testCall();
+        sprintf(s, "[app 1] [%llx] sleep...\n", counter);
         write(1, s, strlen(s));
 
         sleep(2000);
@@ -145,7 +146,7 @@ void userApp2() {
 
  
     auto res = write(1, s, strlen(s));
-    sprintf(s, "[user app 2] return value: %lld\n", res);
+    sprintf(s, "[user app 2] return value: %llx\n", res);
     write(1, s, strlen(s));
 
     int counter = 0;
@@ -156,9 +157,9 @@ void userApp2() {
         int written = 0;
         while (true) {
 
-            int testRes = 0;//testCall();
+            long long testRes = testCall();
 
-            sprintf(s, "[app 2] [%d] sleep... (%x) (%d)\n", counter, testRes, written);
+            sprintf(s, "[app 2] [%d] sleep... (%llx) (%d)\n", counter, testRes, written);
             written = write(1, s, strlen(s));
 
             sleep(2000);

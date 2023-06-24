@@ -5,13 +5,13 @@
 # !*                                           *! #
 # !* ----------------------------------------- *! #
 
-# 中断控制构建文件。
+# 并发控制模块构建。
 
 .DEFAULT_GOAL := all
 
 include ../makefile.inc
 
-TARGET = ../../build/objs/interrupt
+TARGET = ../../build/objs/concurrent
 
 # 目录下所有 .asm 文件。空格分隔。
 ASM_SOURCE = $(wildcard *.asm)
@@ -26,7 +26,7 @@ OBJS = $(CPP_OBJS) $(ASM_OBJS)
 
 $(TARGET)/%.o: %.asm
 	$(shell mkdir -p $(dir $@))
-	$(ASM) -f elf64 -g $< -o $@
+	$(ASM) -f elf64 $< -o $@
 
 $(TARGET)/%.o: %.cpp
 	$(shell mkdir -p $(dir $@))

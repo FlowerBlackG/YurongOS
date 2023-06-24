@@ -97,6 +97,11 @@ struct Task {
 
     uint64_t wakeupMoment;
 
+
+    /* ------ methods ------ */
+
+    void putToSleep(uint64_t milliseconds);
+
 };
 
 #if 1

@@ -140,3 +140,21 @@ YurongOS（雨融系统）是一个运行于 x86-64 平台的玩具级操作系�
 | FFFF A000 0000 0000<br />160TB<br />320, 0, 0, 0 | FFFF A000 007F FFFF<br />320, 0, 3, 511 | 8MB |   00 0000   | 1M 以下区域 和<br />系统内核静态 |
 |    FFFF BFFF FFA0 0000<br />191T+1023G+1018M    |           FFFF BFFF FFFF FFFF           | 6MB |   80 0000   |              核心栈              |
 |          FFFF C000 0000 0000<br />192TB          |           FFFF DFFF FFFF FFFF           | 32TB |   00 0000   |           物理内存映射           |
+
+## 构建方式
+
+建议在 Linux 环境下构建 YROS。参考环境：Arch Linux \(GNU/Linux 6.3.8), GCC \(g++\) 13.1.1, CMake 3.26.4
+
+构建：
+
+```bash
+cd src
+make
+```
+
+运行：
+
+```bash
+cd src
+make qemu  # make qemug / vmdk
+```
