@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <lib/LinkedList.h>
+#include <lib/collections/LinkedList.h>
 
 namespace concurrent {
 
@@ -29,9 +29,13 @@ public:
         return !this->isLocked();
     };
 
-
 protected:
-    bool value;
+
+    /**
+     * false 表示未被占用。
+     * true 表示被占用。
+     */
+    bool occupied;
     LinkedList waiters;
 };
 

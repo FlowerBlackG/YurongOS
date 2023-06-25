@@ -20,7 +20,7 @@ char* strncpy(char* dest, const char* src, size_t count) {
     char* pDest = dest;
     const char* pSrc = src;
 
-    while (pDest - (char*) dest < count) {
+    while (pDest < ((char*) dest) + count) {
         *pDest = *pSrc;
         if (*pDest == '\0') {
             break;
@@ -71,11 +71,11 @@ size_t strlen(const char* str) {
     // 暂不考虑 long 的宽度超过 8 字节的情况。
 
     while (true) {
-        const long& longWords = *longPtr++;
+        const unsigned long& longWords = *longPtr++;
         if (((longWords - lowMagic) & ~longWords & highMagic) != 0) {
             auto prevLongPtr = longPtr - 1;
             const char* p = (const char*) prevLongPtr;
-            while (p - (const char*) prevLongPtr < sizeof(long)) {
+            while (p < ((const char*) prevLongPtr) + sizeof(long)) {
                 if (*p == '\0') {
                     return p - str;
                 } else {
@@ -106,7 +106,7 @@ int strncmp(const char* lhs, const char* rhs, size_t count) {
     const char* pLhs = lhs;
     const char* pRhs = rhs;
 
-    while (pLhs - lhs < count) {
+    while (pLhs < lhs + count) {
         if (*pLhs != *pRhs) {
             return *(const unsigned char*) pLhs - *(const unsigned char*) pRhs;
         } 
@@ -254,9 +254,9 @@ char* strtok(char* str, const char* delim) {
 }
 
 void* memchr(const void* ptr, int ch, size_t count) {
-    const unsigned char* cPtr = (const unsigned char*) ptr;
+    auto* cPtr = (const unsigned char*) ptr;
     unsigned char b = ch;
-    while (cPtr - (const unsigned char*) ptr < count) {
+    while (cPtr < ((const unsigned char*) ptr) + count) {
         if (b == *cPtr) {
             return (void*) cPtr;
         } else {
@@ -264,13 +264,13 @@ void* memchr(const void* ptr, int ch, size_t count) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 int memcmp(const void* lhs, const void* rhs, size_t count) {
-    const unsigned char* pLhs = (const unsigned char*) lhs;
-    const unsigned char* pRhs = (const unsigned char*) rhs;
-    while (pRhs - (const unsigned char*) rhs < count) {
+    auto pLhs = (const unsigned char*) lhs;
+    auto pRhs = (const unsigned char*) rhs;
+    while (pRhs < ((const unsigned char*) rhs) + count) {
         if (*pLhs != *pRhs) {
             return *pLhs - *pRhs;
         } else {
@@ -285,7 +285,7 @@ int memcmp(const void* lhs, const void* rhs, size_t count) {
 void* memset(void* dest, int ch, size_t count) {
     char b = (char) ch;
     char* p = (char*) dest;
-    while (p - (char*) dest < count) {
+    while (p < ((char*) dest) + count) {
         *p++ = b;
     }
 
@@ -295,7 +295,7 @@ void* memset(void* dest, int ch, size_t count) {
 void* memcpy(void* dest, const void* src, size_t count) {
     char* pDest = (char*) dest;
     char* pSrc = (char*) src;
-    while (pSrc - (char*) src < count) {
+    while (pSrc < ((char*) src) + count) {
         *pDest++ = *pSrc++;
     }
 

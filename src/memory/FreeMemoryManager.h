@@ -116,7 +116,7 @@ namespace FreeMemoryManager {
         PageLinkNode* nextNode;
         DoubleLinkedTreeNode nodes[50];
 
-        uint64_t nodeUsed;
+        int64_t nodeUsed;
         uint8_t padding[72];
 
         DoubleLinkedTreeNode* allocNode();

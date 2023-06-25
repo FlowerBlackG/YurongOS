@@ -12,9 +12,11 @@
 #include <machine/Machine.h>
 
 #include <misc/Kernel.h>
+#include <concurrent/Mutex.h>
 
 CRT CRT::instance;
 
+static concurrent::Mutex crtMutex;
 
 CRT::CRT() {
     
@@ -74,6 +76,9 @@ void CRT::setBackgroundColor(uint8_t color) {
 }
 
 void CRT::setForegroundColor(uint8_t color, uint8_t blink, uint8_t highlight) {
+
+    crtMutex.lock();
+
     this->charAttr &= 0xf8; // 删除颜色属性。
     this->charAttr |= color & 0x7; // 设置新的颜色属性。
 
@@ -94,6 +99,8 @@ void CRT::setForegroundColor(uint8_t color, uint8_t blink, uint8_t highlight) {
     } else if (highlight == 2) { // 翻转。
         this->charAttr ^= CharAttr::HIGH_LIGHT_BIT;
     }
+
+    crtMutex.unlock();
 }
 
 void CRT::scrollDown(uint16_t lines) {
@@ -143,7 +150,7 @@ void CRT::scrollDown(uint16_t lines) {
 
 
 void CRT::scrollUp(uint16_t lines) {
- //   Kernel::panic("scroll up");
+
     if (lines == 0) {
         return;
     }
@@ -151,7 +158,6 @@ void CRT::scrollUp(uint16_t lines) {
     // todo: 目前的实现非常摆烂。
     size_t targetScreenPos = currentScreenPos - CRT::COLS * lines;
     this->setCurrentScreenPos(targetScreenPos);
-   // this->moveCursor(this->cursorX, this->cursorY);
 }
 
 
@@ -165,11 +171,11 @@ void CRT::setCurrentScreenPos(size_t pos) { // protected
 
 void CRT::putchar(uint8_t ch) {
 
-    bool prevIf = Machine::getInstance().getAndSetInterruptState(false);
+    crtMutex.lock();
 
     // 光标所在位置的显示内存地址。
-    char* cursorMemAddr = (char*) (
-        MEMORY_BASE + (currentScreenPos + cursorY * COLS + cursorX) * 2
+    char *cursorMemAddr = (char *) (
+            MEMORY_BASE + (currentScreenPos + cursorY * COLS + cursorX) * 2
     );
 
     if (ch >= AsciiChar::START_OF_VISIBLE_CHARS && ch <= AsciiChar::END_OF_VISIBLE_CHARS) {
@@ -187,9 +193,7 @@ void CRT::putchar(uint8_t ch) {
             moveCursor(0, cursorY + 1);
         }
 
-    } 
-    else switch(ch) 
-    {
+    } else switch (ch) {
         case AsciiChar::CR: // \r
             moveCursor(0, cursorY);
             break;
@@ -201,12 +205,13 @@ void CRT::putchar(uint8_t ch) {
             moveCursor(cursorX, cursorY + 1);
 
             break;
-        
+
         default:
             break;
     }
 
-    Machine::getInstance().setInterruptState(prevIf);
+    crtMutex.unlock();
+
 }
 
 
@@ -216,7 +221,7 @@ size_t CRT::write(const char* str, size_t len) {
     }
 
     const char* p = str;
-    while ((len < 0 || p - str < len) && *p != AsciiChar::NUL) {
+    while (p - str < len && *p != AsciiChar::NUL) {
 
         // 对于 \n，如果前一个不是 \r，则补充输出 \r。
         if (*p == AsciiChar::LF && ((p > str && *(p - 1) != AsciiChar::CR) || p == str)) {

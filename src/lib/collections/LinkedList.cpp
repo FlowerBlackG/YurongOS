@@ -8,7 +8,7 @@
 
 */
 
-#include <lib/LinkedList.h>
+#include "./LinkedList.h"
 
 
 
@@ -295,6 +295,9 @@ bool LinkedList::isNotEmpty() {
     return this->length != 0;
 }
 
+void LinkedList::clear() {
+    this->head = this->tail = nullptr;
+}
 
 void LinkedList::forEach(
     void (* callable) (

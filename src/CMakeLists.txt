@@ -6,7 +6,8 @@
 ]]
 
 
-cmake_minimum_required(VERSION 3.26.4)
+#cmake_minimum_required(VERSION 3.26.4)
+cmake_minimum_required(VERSION 3.24.1)
 
 set(YROS_VERSION_NAME "0.0.1")
 set(YROS_VERSION_CODE 1)

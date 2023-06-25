@@ -87,7 +87,7 @@ namespace KernelMemoryAllocator {
             list = firstBlock;
             firstBlock->prev = nullptr;
 
-            for (int idx = 1; idx < newStage->count; idx++) {
+            for (uint32_t idx = 1; idx < newStage->count; idx++) {
                 ArenaBlockNode* block = newStage->getBlock(idx);
                 block->prev = newStage->getBlock(idx - 1);
                 newStage->getBlock(idx - 1)->next = block;

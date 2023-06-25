@@ -148,7 +148,7 @@ struct InterruptHardwareFrame {
         "popq %r15 \n\t" \
     )
 
-#if 1
+#if 0
 static void __x86asm_check_size() {
     sizeof(InterruptHardwareFrame);
     sizeof(InterruptSoftwareFrame);

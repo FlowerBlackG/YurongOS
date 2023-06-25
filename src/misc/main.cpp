@@ -23,6 +23,7 @@
 #include <machine/Msr.h>
 #include <misc/PerCpuCargo.h>
 #include <lib/stddef.h>
+#include <concurrent/Mutex.h>
 
 #include <lib/syscalls.h>
 
@@ -108,6 +109,8 @@ void Kernel::panic(const char* s) {
     }
 }
 
+concurrent::Mutex mutex;
+
 void userApp1() {
 
     char s[128] = "this is the first user app\n";
@@ -119,12 +122,11 @@ void userApp1() {
     long long counter = 0;
 
 
-
-    //testCall();
+    testCall();
 
 
     while (true) {
-        counter = testCall();
+        counter = 0;//testCall();
         sprintf(s, "[app 1] [%llx] sleep...\n", counter);
         write(1, s, strlen(s));
 
@@ -144,7 +146,9 @@ void userApp2() {
         "  __/ |              \n"
         " |___/               \n";
 
- 
+
+    testCall();
+
     auto res = write(1, s, strlen(s));
     sprintf(s, "[user app 2] return value: %llx\n", res);
     write(1, s, strlen(s));
@@ -157,7 +161,7 @@ void userApp2() {
         int written = 0;
         while (true) {
 
-            long long testRes = testCall();
+            long long testRes = 0;// testCall();
 
             sprintf(s, "[app 2] [%d] sleep... (%llx) (%d)\n", counter, testRes, written);
             written = write(1, s, strlen(s));
@@ -196,8 +200,9 @@ void Kernel::main() {
 
     TaskManager::create(userApp1, "ua1");
     TaskManager::create(userApp2, "ua2");
-   // TaskManager::create(t2, "p2", true);
+    // TaskManager::create(t2, "p2", true);
 
+    CRT::getInstance().setForegroundColor(CRT::CharAttr::Color::WHITE, 0, 1);
 
     // 启动 idle 进程。
 

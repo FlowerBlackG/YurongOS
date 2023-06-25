@@ -24,6 +24,8 @@
 #include <machine/RflagsRegister.h>
 #include <crt/CRT.h>
 
+#include <concurrent/Mutex.h>
+
 #include <lib/sys/types.h>
 #include <lib/stddef.h>
 #include <lib/string.h>
@@ -187,7 +189,6 @@ void SystemCall::testCall() { // 测试函数。不宜多调用。
     int x = 1;
     x++;
     x--;
-
 
     Task* task = cpuCurrentTask;
 

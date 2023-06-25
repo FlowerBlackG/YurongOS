@@ -63,10 +63,15 @@ QEMU_DISK := -boot c -drive file=$(DISK_IMG),if=ide,index=0,media=disk,format=ra
 qemu: deploy
 	$(QEMU) $(QEMU_DISK)
 
+# 使用 qemu 启动，且开启 gdb 服务器（用于调试）。
 .PHONY: qemug
 qemug: deploy
 	$(QEMU) $(QEMU_DISK) -s -S
 
+# 在 qemug 的基础上，以守护进程方式启动（适用于 idea 系列 ide）。
+.PHONY: qemugd
+qemugd: deploy
+	$(QEMU) $(QEMU_DISK) -s -S -daemonize
 
 # vmware 硬盘。
 $(TARGET_DIR)/disk.vmdk: deploy

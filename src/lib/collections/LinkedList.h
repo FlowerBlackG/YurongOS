@@ -22,6 +22,52 @@ struct LinkedListNode {
     LinkedListNode* next;
 };
 
+
+class LinkedListIterator {
+
+    typedef LinkedListIterator Self;
+    typedef LinkedListNode ElementType;
+
+public:
+    LinkedListIterator(ElementType* node) { this->node = node;}
+
+    ElementType& operator * () const { return *node; };
+
+    Self& operator ++ () {
+        node++;
+        return *this;
+    };
+
+    Self operator ++ (int) {
+        auto tmp = *this;
+        node++;
+        return tmp;
+    }
+
+    Self& operator -- () {
+        node--;
+        return *this;
+    }
+
+    Self operator -- (int) {
+        auto tmp = *this;
+        node--;
+        return tmp;
+    }
+
+    friend bool operator == (const Self& a, const Self& b) {
+        return a.node == b.node;
+    }
+
+    friend bool operator != (const Self& a, const Self& b) {
+        return a.node != b.node;
+    }
+
+
+protected:
+    ElementType* node;
+};
+
 struct LinkedList {
     LinkedListNode* head = nullptr;
     LinkedListNode* tail = nullptr;
@@ -68,11 +114,25 @@ struct LinkedList {
     bool isEmpty();
     bool isNotEmpty();
 
+    void clear();
+
     void forEach(
         void (* callable) (
             LinkedListNode* node
         )
     );
 
-    // todo.
+    // ------ 迭代相关 ------
+
+    LinkedListIterator begin() const {
+        return LinkedListIterator(this->head);
+    }
+
+    LinkedListIterator end() const {
+        return LinkedListIterator(this->tail);
+    }
 };
+
+
+
+

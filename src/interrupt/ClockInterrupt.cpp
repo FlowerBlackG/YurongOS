@@ -16,7 +16,7 @@
 #include <machine/Machine.h>
 #include <task/TaskManager.h>
 
-#include <lib/LinkedList.h>
+#include <lib/collections/LinkedList.h>
 #include <lib/stddef.h>
 
 namespace ClockInterrupt {

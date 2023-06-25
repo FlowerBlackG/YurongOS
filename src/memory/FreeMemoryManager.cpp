@@ -117,11 +117,10 @@ int FreeMemoryManager::free(uint64_t address, uint64_t size, bool dontAdjustPage
 
     if (moreNode) {
         uint64_t moreNodeAddr = moreNode->addressIdxData().value;
-        uint64_t moreNodeSize = moreNode->sizeIdxData().value;
 
         if (address == moreNodeAddr) {
             
-            Machine::getInstance().setInterruptState(prevInterruptState);
+            Machine::setInterruptState(prevInterruptState);
             return 0;
         } else if (address + size > moreNodeAddr) {
             size = moreNodeAddr - address;
@@ -640,7 +639,7 @@ FreeMemoryManager::PageLinkNode::allocNode() {
 
 int FreeMemoryManager::PageLinkNode::popNode(int count) {
     if (count > nodeUsed) {
-        count = nodeUsed;
+        count = (int) nodeUsed;
     } else if (count <= 0) {
         return 0;
     }

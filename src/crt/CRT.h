@@ -129,8 +129,8 @@ public:
      */
     void setForegroundColor(
         uint8_t color = CharAttr::Color::WHITE,
-        uint8_t blink = 2,
-        uint8_t highlight = 2
+        uint8_t blink = 3,
+        uint8_t highlight = 3
     );
 
     void scrollDown(uint16_t lines = 1);

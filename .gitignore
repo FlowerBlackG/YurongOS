@@ -15,7 +15,9 @@ bochs/
 *.img.lock
 *.map
 
-.idea
+#.idea
 
 build
 target
+
+src/nohup.out

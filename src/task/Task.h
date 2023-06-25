@@ -11,7 +11,7 @@
 #pragma once
 
 #include <lib/sys/types.h>
-#include <lib/LinkedList.h>
+#include <lib/collections/LinkedList.h>
 #include <interrupt/SystemCall.h>
 
 /**
@@ -104,7 +104,7 @@ struct Task {
 
 };
 
-#if 1
+#if 0
 static void __task_check_size() {
     sizeof(Task);
 };
