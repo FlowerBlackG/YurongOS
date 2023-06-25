@@ -26,6 +26,8 @@
 #include <concurrent/Mutex.h>
 
 #include <lib/syscalls.h>
+#include <device/pci.h>
+#include <device/acpi.h>
 
 /**
  * 调用内核所有模块的对象的构造函数。
@@ -109,8 +111,6 @@ void Kernel::panic(const char* s) {
     }
 }
 
-concurrent::Mutex mutex;
-
 void userApp1() {
 
     char s[128] = "this is the first user app\n";
@@ -176,18 +176,48 @@ void userApp2() {
         
 }
 
-void Kernel::main() {
-
-    char s[256];
-
+static inline void initModules() {
     CRT::getInstance().init();
-    CRT::getInstance().write("welcome to yros!\n");   
+    CRT::getInstance().write("welcome to yros!\n");
 
     Machine::getInstance().init();
     TaskManager::init();
     SystemCall::init();
+    device::pci::init();
+
+    device::acpi::init();
+}
+
+
+static inline void launchKernelDaemon(Task* pTask) {
+    // 启动 idle 进程。
+
+    x86asmSwapgs();
+
+    TaskManager::loadTaskToCargo(pTask);
+
+    __asm (
+        "movq %0, %%rsp \n\t"
+        :
+        : "r" (pTask->kernelStackPointer)
+    );
+
+    x86asmSti();
+    x86asmNearJmp(interruptExit);
+    x86asmUd2();
+}
+
+
+void Kernel::main() {
+
+    char s[256];
+
+    initModules();
 
     Msr::write(Msr::KERNEL_GS_BASE, (uint64_t) perCpuCargo);
+
+    x86asmCli();
+    x86asmHlt();
 
     Task* idleTask = TaskManager::create(
         IdleTask::entrance, 
@@ -202,22 +232,5 @@ void Kernel::main() {
     TaskManager::create(userApp2, "ua2");
     // TaskManager::create(t2, "p2", true);
 
-    CRT::getInstance().setForegroundColor(CRT::CharAttr::Color::WHITE, 0, 1);
-
-    // 启动 idle 进程。
-
-    x86asmSwapgs();
-
-    TaskManager::loadTaskToCargo(idleTask);
-
-    __asm (
-        "movq %0, %%rsp \n\t"
-        :
-        : "r" (idleTask->kernelStackPointer)
-    );
-    
-    x86asmSti();
-    x86asmNearJmp(interruptExit);
-
-    x86asmUd2();
+    launchKernelDaemon(idleTask);
 }

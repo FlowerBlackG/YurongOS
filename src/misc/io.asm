@@ -38,6 +38,19 @@ __io_in_word:
     leave ; 恢复栈帧。
     ret
 
+global __io_in_dword
+__io_in_dword:
+    push rbp
+    mov rbp, rsp
+
+    xor rax, rax
+    mov rdx, rdi
+    
+    in eax, dx
+
+    leave
+    ret
+
 global __io_out_byte
 __io_out_byte:
     push rbp
@@ -61,3 +74,16 @@ __io_out_word:
 
     leave
     ret
+
+global __io_out_dword
+__io_out_dword:
+    push rbp
+    mov rbp, rsp
+
+    mov rdx, rdi ; port
+    mov rax, rsi ; data
+    out dx, eax
+
+    leave
+    ret
+

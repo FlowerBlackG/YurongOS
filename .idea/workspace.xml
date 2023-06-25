@@ -18,6 +18,7 @@
       <config projectName="YurongOS" targetName="crt" />
       <config projectName="YurongOS" targetName="lib" />
       <config projectName="YurongOS" targetName="boot" />
+      <config projectName="YurongOS" targetName="device" />
       <config projectName="YurongOS" targetName="memory" />
       <config projectName="YurongOS" targetName="interrupt" />
       <config projectName="YurongOS" targetName="task" />
@@ -33,24 +34,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="84140622-39a6-4ba8-a784-edc5a8e8b017" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.vscode/launch.json" beforeDir="false" afterPath="$PROJECT_DIR$/.vscode/launch.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/concurrent/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/concurrent/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/concurrent/Mutex.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/concurrent/Mutex.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/concurrent/Mutex.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/concurrent/Mutex.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/crt/CRT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/crt/CRT.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/crt/CRT.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/crt/CRT.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/interrupt/ClockInterrupt.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/interrupt/ClockInterrupt.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/interrupt/SystemCall.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/interrupt/SystemCall.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/LinkedList.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/collections/LinkedList.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/LinkedList.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/collections/LinkedList.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/string.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/string.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/machine/X86Assembly.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/machine/X86Assembly.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/crt/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/crt/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/makefile" beforeDir="false" afterPath="$PROJECT_DIR$/src/makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/memory/FreeMemoryManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/FreeMemoryManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/memory/FreeMemoryManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/FreeMemoryManager.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/memory/KernelMemoryAllocator.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/KernelMemoryAllocator.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/misc/io.asm" beforeDir="false" afterPath="$PROJECT_DIR$/src/misc/io.asm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/misc/io.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/misc/io.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/misc/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/misc/main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/task/Task.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/task/Task.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,6 +62,9 @@
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
+  </component>
+  <component name="OCResolveContextSettings">
+    <option name="configuration" value="0-Debug-device" />
   </component>
   <component name="ProjectId" id="2RYBfnop3OzDcqzhHrruISVo691" />
   <component name="ProjectLevelVcsManager">
@@ -93,6 +89,7 @@
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
     "settings.editor.selected.configurable": "preferences.keymap",
     "vue.rearranger.settings.migration": "true"
   }
@@ -103,6 +100,11 @@
     </key>
   </component>
   <component name="RunManager" selected="Custom Build Application.make qemu">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="make all" type="CLionExternalRunConfiguration" factoryName="Application" PROGRAM_PARAMS="all" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" WORKING_DIR="file://$ProjectFileDir$/src" PASS_PARENT_ENVS_2="true" PROJECT_NAME="YurongOS" TARGET_NAME="GNU Make" CONFIG_NAME="GNU Make" RUN_PATH="/bin/make">
       <method v="2" />
     </configuration>
@@ -112,19 +114,23 @@
     <configuration name="make qemu" type="CLionExternalRunConfiguration" factoryName="Application" PROGRAM_PARAMS="qemu" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" WORKING_DIR="file://$ProjectFileDir$/src" PASS_PARENT_ENVS_2="true" PROJECT_NAME="YurongOS" TARGET_NAME="GNU Make" CONFIG_NAME="GNU Make" RUN_PATH="/bin/make">
       <method v="2" />
     </configuration>
-    <configuration name="make qemug" type="CLionExternalRunConfiguration" factoryName="Application" PROGRAM_PARAMS="qemug" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" WORKING_DIR="file://$ProjectFileDir$/src" PASS_PARENT_ENVS_2="true" PROJECT_NAME="YurongOS" TARGET_NAME="GNU Make" CONFIG_NAME="GNU Make" RUN_PATH="/bin/make">
+    <configuration name="make qemug" type="CLionExternalRunConfiguration" factoryName="Application" singleton="false" PROGRAM_PARAMS="qemug" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" WORKING_DIR="file://$ProjectFileDir$/src" PASS_PARENT_ENVS_2="true" PROJECT_NAME="YurongOS" TARGET_NAME="GNU Make" CONFIG_NAME="GNU Make" RUN_PATH="/bin/make">
       <method v="2" />
     </configuration>
     <configuration name="make qemugd" type="CLionExternalRunConfiguration" factoryName="Application" PROGRAM_PARAMS="qemugd" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" WORKING_DIR="file://$ProjectFileDir$/src" PASS_PARENT_ENVS_2="true" PROJECT_NAME="YurongOS" TARGET_NAME="GNU Make" CONFIG_NAME="GNU Make" RUN_PATH="/bin/make">
       <method v="2" />
     </configuration>
-    <configuration name="qemu debug" type="CLion_Remote" version="1" remoteCommand="127.0.0.1:1234" symbolFile="$ProjectFileDir$/target/objs/kernel.exe" sysroot="">
+    <configuration name="qemu debug" type="CLion_Remote" singleton="false" version="1" remoteCommand="127.0.0.1:1234" symbolFile="$ProjectFileDir$/target/objs/kernel.exe" sysroot="">
       <debugger kind="GDB" isBundled="true" />
+      <method v="2" />
+    </configuration>
+    <configuration name="device" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="YurongOS" TARGET_NAME="device" CONFIG_NAME="Debug">
       <method v="2">
-        <option name="RunConfigurationTask" enabled="true" run_configuration_name="make qemugd" run_configuration_type="CLionExternalRunConfiguration" />
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <list>
+      <item itemvalue="CMake Application.device" />
       <item itemvalue="Custom Build Application.make qemugd" />
       <item itemvalue="Custom Build Application.make qemug" />
       <item itemvalue="Custom Build Application.make all" />
@@ -149,7 +155,8 @@
       <workItem from="1687672351746" duration="133000" />
       <workItem from="1687672494199" duration="161000" />
       <workItem from="1687672662402" duration="442000" />
-      <workItem from="1687673115719" duration="2279000" />
+      <workItem from="1687673115719" duration="3183000" />
+      <workItem from="1687692171156" duration="9395000" />
     </task>
     <servers />
   </component>
@@ -172,6 +179,16 @@
           <url>file://$PROJECT_DIR$/src/crt/CRT.cpp</url>
           <line>81</line>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/device/acpi.cpp</url>
+          <line>41</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/device/acpi.cpp</url>
+          <line>54</line>
+          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

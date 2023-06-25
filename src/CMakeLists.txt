@@ -44,7 +44,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -nostdlib")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-stack-protector")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-threadsafe-statics")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O1")  # 适当优化。
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O1")  # 适当优化。
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mno-red-zone")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mno-mmx")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mno-sse")
@@ -63,6 +63,7 @@ add_subdirectory(memory)
 add_subdirectory(misc)
 add_subdirectory(serial)
 add_subdirectory(task)
+add_subdirectory(device)
 
 
 # 构建 kernel.exe
@@ -88,6 +89,7 @@ target_link_libraries(
     memory 
     serial
     concurrent
+    device
 )
 
 set_target_properties(kernel PROPERTIES SUFFIX ".exe")

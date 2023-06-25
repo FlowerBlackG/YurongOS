@@ -50,11 +50,15 @@ clean:
 
 QEMU := qemu-system-x86_64 
 QEMU += -m 8G
-QEMU += -cpu Icelake-Server 
+QEMU += -cpu Icelake-Server
 QEMU += -audiodev pa,id=hda 
 QEMU += -machine pcspk-audiodev=hda 
 QEMU += -rtc base=localtime 
 QEMU += -d cpu_reset -D $(TARGET_DIR)/qemu.log 
+
+
+QEMU += -chardev stdio,mux=on,id=com1
+QEMU += -serial chardev:com1 # 串口1
 
 QEMU_DISK := -boot c -drive file=$(DISK_IMG),if=ide,index=0,media=disk,format=raw
 

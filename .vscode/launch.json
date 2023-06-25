@@ -5,7 +5,7 @@
             "name": "YurongOS - build and debug kernel",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/objs/kernel.exe",
+            "program": "${workspaceFolder}/target/objs/kernel.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/src",

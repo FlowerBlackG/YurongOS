@@ -46,7 +46,7 @@ void Mutex::unlock() {
 
     // 将等待队列里的所有进程设为就绪状态。
     for (auto& it : this->waiters) {
-        auto pTask = (Task*) &it - offsetof(Task, linkedListNode);
+        auto pTask = (Task*) (intptr_t(&it) - offsetof(Task, linkedListNode));
         pTask->state = TaskState::READY;
     }
 
