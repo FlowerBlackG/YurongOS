@@ -18,7 +18,7 @@ namespace memory {
 /**
  * malloc for the Kernel
  */
-inline void* kmalloc(uint64_t size) {
+inline void* kmalloc(size_t size) {
     return KernelMemoryAllocator::malloc(size);
 }
 

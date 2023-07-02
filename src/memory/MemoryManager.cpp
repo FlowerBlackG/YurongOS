@@ -8,11 +8,13 @@
 
 */
 
+#include <memory/memory.h>
 #include <memory/MemoryManager.h>
 #include <memory/ArenaMemoryManager.h>
 #include <crt/CRT.h>
 #include <lib/stdio.h>
 #include <lib/string.h>
+#include <lib/config.h>
 
 #include <lib/sys/types.h>
 #include <machine/Cmos.h>
@@ -37,6 +39,9 @@ void MemoryManager::init() {
     processArds();
 
     ArenaMemoryManager::init();
+
+    lib::defaultAllocator.alloc = KernelMemoryAllocator::malloc;
+    lib::defaultAllocator.free = KernelMemoryAllocator::free;
 }
 
 void MemoryManager::processArds() {

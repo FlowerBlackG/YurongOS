@@ -12,6 +12,7 @@
 #include <lib/stdarg.h>
 #include <lib/stdio.h>
 #include <lib/string.h>
+#include <lib/collections/Map.hpp>
 #include <machine/Machine.h>
 #include <machine/X86Assembly.h>
 #include <memory/MemoryManager.h>
@@ -183,8 +184,11 @@ static inline void initModules() {
     Machine::getInstance().init();
     TaskManager::init();
     SystemCall::init();
-    device::pci::init();
 
+    /*
+     * 初始化 ACPI
+     * 该过程包含对 PCIe 的初始化。
+     */
     device::acpi::init();
 }
 

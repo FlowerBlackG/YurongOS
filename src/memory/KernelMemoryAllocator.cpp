@@ -34,7 +34,7 @@ namespace memory {
  */
 namespace KernelMemoryAllocator {
 
-    void* malloc(uint64_t size) {
+    void* malloc(size_t size) {
 
         if (!size) {
             return nullptr;

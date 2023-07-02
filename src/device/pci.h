@@ -3,7 +3,8 @@
 
 /* 
  * PCI 设备管理
- * 
+ * 使用 PCI Express 方式。不使用传统方式。
+ *
  * 创建于 2023年6月25日 上海市嘉定区安亭镇
  */
 
@@ -24,6 +25,7 @@
 
 #include <lib/sys/types.h>
 #include <lib/collections/LinkedList.h>
+#include <lib/collections/Map.hpp>
 #include <misc/io.h>
 
 namespace device {
@@ -60,29 +62,134 @@ struct ConfigAddress {
 
 } __packed;
 
+
+struct SegmentGroup {
+    intptr_t baseAddrOfEnhancedConfMechanism;
+    uint16_t groupNumber;
+    uint8_t startPCIBusNumber;
+    uint8_t endPCIBusNumber;
+};
+
+extern lib::collections::Map<uint16_t, SegmentGroup> segmentGroups;
+
+
+struct ExtendedConfigSpace {
+    uint16_t vendorId;
+    uint16_t deviceId;
+
+    uint16_t command;
+    uint16_t status;
+
+    uint8_t revisionId;
+    uint8_t progIf;
+    uint8_t subclass;
+    uint8_t classCode;
+
+    uint8_t cacheLineSize;
+
+    // 0x0D
+    uint8_t latencyTimer;
+
+    // 0x0E
+    uint8_t headerType : 7;
+    // if MF = 1, then this device has multiple functions.
+    uint8_t headerTypeMF : 1;
+
+    // 0x0F
+    uint8_t bist;
+
+} __packed;
+
+struct BaseAddressRegister {
+    uint32_t value;
+
+    inline bool isMemorySpaceBAR() {
+        return !(value & 1);
+    }
+
+    inline bool isIOSpaceBAR() {
+        return (value & 1);
+    }
+
+    inline uint32_t baseAddress() {
+        if (isIOSpaceBAR()) {
+            return value >> 2;
+        } else {
+            return value >> 4;
+        }
+    }
+
+    inline bool prefetchable() {
+        return value & 0x8;
+    }
+
+    inline uint8_t memorySpaceBARType() {
+        return (value >> 1) & 0x3;
+    }
+} __packed;
+
+struct ExtendedConfigSpaceType0 : ExtendedConfigSpace {
+
+    // common header derived from parent...
+
+    BaseAddressRegister bar[6];
+
+    uint32_t cardbusCISPointer;
+
+    uint16_t subsystemVendorId;
+    uint16_t subsystemId;
+
+    uint32_t expansionROMBaseAddress;
+
+    uint32_t capabilitiesPointer : 8;
+    uint32_t reserved0 : 24;
+
+    uint32_t reserved1 : 32;
+
+    uint8_t interruptLine;
+    uint8_t interruptPin;
+    uint8_t minGrant;
+    uint8_t maxLatency;
+
+} __packed;
+
+/**
+ * PCI 设备结构。
+ */
 struct Device {
     LinkedListNode node;
+    uint16_t segmentGroup;
     uint8_t bus;
     uint8_t device;
     uint8_t function;
-    uint16_t vendorId;
-    uint16_t deviceId;
-    uint8_t revision;
-    uint32_t classCode;
+    ExtendedConfigSpace* configSpace;
+
+    inline uint16_t deviceId() {
+        return configSpace->deviceId;
+    }
+
+    inline uint16_t vendorId() {
+        return configSpace->vendorId;
+    }
 };
 
+void enumSegmentGroup(
+    uint16_t group, intptr_t confSpaceBaseAddr,
+    uint8_t startBusNumber, uint8_t endBusNumber
+);
 
-
-void init();
-void enumDevice();
-void checkDevice(int32_t bus, int32_t device);
+void checkDevice(
+    const SegmentGroup& segmentGroup,
+    int32_t bus,
+    int32_t device
+);
 
 Device* findDeviceById(uint16_t vendorId, uint16_t deviceId);
 
 inline ConfigAddress formConfigAddress(
-    uint32_t bus, 
-    uint32_t device, 
-    uint32_t function, 
+    uint32_t bus,
+    uint32_t device,
+    uint32_t function,
     uint32_t address
 ) {
     uint32_t res = 0x80000000; // enable
@@ -97,7 +204,7 @@ inline ConfigAddress formConfigAddress(
 
 
 void inline ioOutDWord(
-    uint8_t bus, uint8_t dev, uint8_t func, 
+    uint8_t bus, uint8_t dev, uint8_t func,
     uint8_t addr, uint32_t value
 ) {
     io::outDWord(CONF_ADDR_REG, formConfigAddress(bus, dev, func, addr));
@@ -112,6 +219,8 @@ uint32_t inline ioInDWord(
     
     return io::inDWord(CONF_DATA_REG);
 }
+
+
 
 #if 0
 static void __check_size() {

@@ -34,16 +34,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="84140622-39a6-4ba8-a784-edc5a8e8b017" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/device/acpi/acpi.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.vscode/launch.json" beforeDir="false" afterPath="$PROJECT_DIR$/.vscode/launch.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/boot/boot.asm" beforeDir="false" afterPath="$PROJECT_DIR$/src/boot/boot.asm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/boot/kernel_loader.asm" beforeDir="false" afterPath="$PROJECT_DIR$/src/boot/kernel_loader.asm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/device/acpi.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/device/acpi/acpi.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/device/acpi.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/makefile" beforeDir="false" afterPath="$PROJECT_DIR$/src/makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/memory/MemoryManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/MemoryManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/device/acpi/acpi.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/device/acpi/acpi.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/device/pci.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/device/pci.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/device/pci.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/device/pci.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/memory/KernelMemoryAllocator.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/KernelMemoryAllocator.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/memory/KernelMemoryAllocator.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/KernelMemoryAllocator.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/memory/MemoryManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/MemoryManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/memory/memory.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/memory.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/misc/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/misc/main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -102,11 +101,6 @@
     </key>
   </component>
   <component name="RunManager" selected="Custom Build Application.make qemu">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="make all" type="CLionExternalRunConfiguration" factoryName="Application" PROGRAM_PARAMS="all" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" WORKING_DIR="file://$ProjectFileDir$/src" PASS_PARENT_ENVS_2="true" PROJECT_NAME="YurongOS" TARGET_NAME="GNU Make" CONFIG_NAME="GNU Make" RUN_PATH="/bin/make">
       <method v="2" />
     </configuration>
@@ -125,6 +119,11 @@
     <configuration name="qemu debug" type="CLion_Remote" singleton="false" version="1" remoteCommand="127.0.0.1:1234" symbolFile="$ProjectFileDir$/target/objs/kernel.exe" sysroot="">
       <debugger kind="GDB" isBundled="true" />
       <method v="2" />
+    </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
     </configuration>
     <configuration name="device" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="YurongOS" TARGET_NAME="device" CONFIG_NAME="Debug">
       <method v="2">
@@ -165,7 +164,8 @@
       <workItem from="1688013146579" duration="8202000" />
       <workItem from="1688110901558" duration="1290000" />
       <workItem from="1688112198233" duration="66000" />
-      <workItem from="1688112271867" duration="5860000" />
+      <workItem from="1688112271867" duration="24055000" />
+      <workItem from="1688302945340" duration="3390000" />
     </task>
     <servers />
   </component>
@@ -188,11 +188,6 @@
           <url>file://$PROJECT_DIR$/src/crt/CRT.cpp</url>
           <line>81</line>
           <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/device/acpi/dsdt.cpp</url>
-          <line>22</line>
-          <option name="timeStamp" value="12" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

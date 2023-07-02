@@ -8,6 +8,7 @@
 
 #include "./acpi.h"
 #include "./fadt.h"
+#include "./mcfg.h"
 
 #include <memory/MemoryManager.h>
 #include <lib/stdio.h>
@@ -110,6 +111,8 @@ static void processSystemDescriptorTable(SystemDescriptorTableHeader* table) {
         { *reinterpret_cast<const uint32_t*>("FACP"), acpi::initFixedACPIDescriptionTable },
         // MADT
         { *reinterpret_cast<const uint32_t*>("APIC"), nullptr },
+        // MCFG
+        { *reinterpret_cast<const uint32_t*>("MCFG"), acpi::initMemoryMappedConfigurationSpaceAccessTable }
     };
 
 
