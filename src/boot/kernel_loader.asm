@@ -39,13 +39,80 @@ dd 0x644f6f47 ; 魔数：GoOd
 ; 四级页表位于 0x1000 处。
 pml4_address equ 0x1000
 
-jmp switch_to_long_mode
+call detect_memory  ; 执行内存检测
+jmp switch_to_long_mode  ; 后续工作
 
 align 4 ; 4 字节对齐
 empty_idt:
     .length dw 0
     .base dd 0
 
+;
+; 内存检测过程：
+;
+; BIOS 系统调用 15h 的 e820h 号子程序可以提供一定的信息（ARDS，内存范围描述结构）：
+; 字节偏移  含义
+; 0        基地址的低 32 位
+; 4        基地址的高 32 位
+; 8        内存长度的低 32 位（字节为单位）
+; 12       内存长度的高 32 位
+; 16       本段内存类型
+; 
+; 内存类型
+; 1: 可用
+; 其他: 不可用
+;
+; 调用输入：
+;   eax 传入子程序号（e820h），ebx 传入0.
+;   ebx 传入要读取的 ARDS 编号。第1次为0，之后该值会被设置。直接重复传入直到被设为0.
+;   es:di 指向当前读到的 ARDS 缓冲区。
+;   ecx: ARDS 结构字节大小。
+;        该结构本为 20 字节，拓展填充至 24 字节。
+;   edx: 固定为 0x534d4150 (SMAP 的 ASCII 码，是个校验签名)。
+;
+; 返回信息：
+;   cf: 0 -> 正常，1 -> 出错
+;   eax: 0x534d4150（SMAP 的 ASCII 码）
+;   es:di, ecx: 与传入时一致。
+;   ebx: 后续 ARDS 值。0表示检测结束。
+;
+; 参考文献：
+;   踌躇月光.操作系统实现 - 008 内存检测.哔哩哔哩, 2022
+;
+
+
+; 检测内存。
+; 结果存放位置：
+;   count: 0x500
+;   buffer: 0x504
+detect_memory:
+    ; 准备传入参数。
+    xor ebx, ebx
+    xor eax, eax
+    mov es, ax
+    mov di, 0x508
+    mov edx, 0x534d4150
+    mov dword eax, [0x500]
+
+.detect_one:
+    mov eax, 0xe820 ; 子功能号。
+    mov ecx, 20
+    int 0x15 ; 系统调用。
+
+    ; 当 cf 置位（等于1），则跳转。
+    jc error
+
+    cmp cl, 20
+    jne error
+
+    add edi, 24 ; 移动指针位置。
+    inc word [0x500] ; 计数。
+    cmp ebx, 0
+    jnz .detect_one
+
+    ; 检测完毕。
+
+    ret
 
 switch_to_long_mode:
 

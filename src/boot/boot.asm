@@ -150,10 +150,6 @@ start:
     or al, 2
     out 0x92, al
 
-    call detect_memory ; 执行内存检测。
-    mov si, msg_memory_detect_done
-    call print
-
     ; 进入 unreal mode (big real mode)
     ; 这样才能访问 1M 以上内存。
 
@@ -178,7 +174,7 @@ start:
     pop ds
 
     ; 加载二级加载器。
-    mov bl, 2
+    mov ebx, 2
     mov ecx, 2
     mov edi, 0x7800 ; 将二级启动器加载到内存 0x7800 的位置。
     call read_disk
@@ -190,28 +186,16 @@ start:
 
     ; 加载内核代码。要求用户内存不小于 10MB。
     ; 内核代码共 7MB，从 1MB 位置开始存放（0x 10 0000）
-    ; 每次读 128个扇区，即 64KB。总共读 112 轮。
-    mov ecx, 4 ; 读取目标扇区号。从第4个扇区开始读。
-    mov edx, 0x100000 ; 存放内存位置。
-
+    ; 每“轮”读 128个扇区，即 64KB。总共读 112 轮。
+    
     mov si, msg_reading_kernel
     call print
 
-.loop_read_kernel:
-    push ecx
-    push edx
+    mov ebx, 4 ; 读取目标扇区号。从第4个扇区开始读。
+    mov ecx, (128 * 112) 
+    mov edi, 0x100000 ; 存放内存位置。
 
-    mov bl, 128
-    mov edi, edx
     call read_disk
-
-    pop edx
-    pop ecx
-
-    add ecx, 128 ; 每次读到128个扇区。
-    add edx, (512 * 128)
-    cmp ecx, (32 * 128 + 4) ; 只读 32 轮。
-    jne .loop_read_kernel 
 
     mov si, msg_kernel_read
     call print
@@ -219,73 +203,6 @@ start:
     ; 跳转到二级启动器。
     jmp 0:0x7804 ; 前 4 字节是魔数。
 
-
-;
-; 内存检测过程：
-;
-; BIOS 系统调用 15h 的 e820h 号子程序可以提供一定的信息（ARDS，内存范围描述结构）：
-; 字节偏移  含义
-; 0        基地址的低 32 位
-; 4        基地址的高 32 位
-; 8        内存长度的低 32 位（字节为单位）
-; 12       内存长度的高 32 位
-; 16       本段内存类型
-; 
-; 内存类型
-; 1: 可用
-; 其他: 不可用
-;
-; 调用输入：
-;   eax 传入子程序号（e820h），ebx 传入0.
-;   ebx 传入要读取的 ARDS 编号。第1次为0，之后该值会被设置。直接重复传入直到被设为0.
-;   es:di 指向当前读到的 ARDS 缓冲区。
-;   ecx: ARDS 结构字节大小。
-;        该结构本为 20 字节，拓展填充至 24 字节。
-;   edx: 固定为 0x534d4150 (SMAP 的 ASCII 码，是个校验签名)。
-;
-; 返回信息：
-;   cf: 0 -> 正常，1 -> 出错
-;   eax: 0x534d4150（SMAP 的 ASCII 码）
-;   es:di, ecx: 与传入时一致。
-;   ebx: 后续 ARDS 值。0表示检测结束。
-;
-; 参考文献：
-;   踌躇月光.操作系统实现 - 008 内存检测.哔哩哔哩, 2022
-;
-
-
-; 检测内存。
-; 结果存放位置：
-;   count: 0x500
-;   buffer: 0x504
-detect_memory:
-    ; 准备传入参数。
-    xor ebx, ebx
-    xor eax, eax
-    mov es, ax
-    mov di, 0x508
-    mov edx, 0x534d4150
-    mov dword eax, [0x500]
-
-.detect_one:
-    mov eax, 0xe820 ; 子功能号。
-    mov ecx, 20
-    int 0x15 ; 系统调用。
-
-    ; 当 cf 置位（等于1），则跳转。
-    jc error
-
-    cmp cl, 20
-    jne error
-
-    add edi, 24 ; 移动指针位置。
-    inc word [0x500] ; 计数。
-    cmp ebx, 0
-    jnz .detect_one
-
-    ; 检测完毕。
-
-    ret
 
 ; 输出字符串。
 print:
@@ -313,97 +230,171 @@ error:
     jmp .begin_hlt
 
 .msg:
-    db "e: failed to boot.", 0x0d, 0x0a, 0
+    db "failed !", 0x0d, 0x0a, 0
 
 
-msg_memory_detect_done:
-    db "i: mem detect done.", 0x0d, 0x0a, 0
-    
 msg_second_loader_read:
-    db "i: 2nd loader read.", 0x0d, 0x0a, 0
+    db "2 ldr ok", 0x0d, 0x0a, 0
 
 msg_reading_kernel:
-    db "i: reading kernel...", 0x0d, 0x0a, 0
+    db "rd krnl..", 0x0d, 0x0a, 0
 
 msg_kernel_read:
-    db "i: kernel read.", 0x0d, 0x0a, 0
+    db "krnl rd", 0x0d, 0x0a, 0
 
 ; 读硬盘。
+; 考虑到安装的设备可能很复杂，
+; 这里直接使用 bios 13h 号程序。
+;
+; 模式：该函数只能在 real mode 下被调用。
+;       unreal mode 也可以。其内部使用了传统段机制。
+;
 ; 参数：edi 读取的目标内存。
-;      ecx 起始扇区。
-;      bl 扇区数。
+;      ebx 起始扇区。
+;      ecx 扇区数。
 read_disk:
-    ; 设置读取扇区的数量。
-    mov dx, 0x1f2 ; 0x1f2 是设置读写扇区数量的端口。
-    mov al, bl
-    out dx, al
+    ; 实现思路：
+    ;     由于 int 13h 难以访问 1MB 以上内存，
+    ;     我们先将数据读取到 1MB 以下的一个缓存，
+    ;     再手动拷贝到 1MB 以上空间。
+    ;
+    ;     这样会带来一些时间开销，但 io 显然更慢。
+    ;
 
-    ; 设置读取扇区号。
-    ; 0x1f3 低8位
-    ; 0x1f4 中8位
-    ; 0x1f5 高8位
+    ; size of packet (1 Byte)
+    mov byte [disk_addr_pack_size_of_dap], 16
 
-    inc dx ; 0x1f3
-    mov al, cl
-    out dx, al
+    ; zero (1 Byte)
+    mov byte [disk_addr_pack_zero], 0
 
-    inc dx ; 0x1f4
-    shr ecx, 8
-    mov al, cl
-    out dx, al
+    ; buffer - offset (2 Bytes)
+    mov eax, disk_buffer_addr
+    and eax, 0xFFFF  ; 16 bits
+    mov word [disk_addr_pack_buf_off], ax
 
-    
-    inc dx ; 0x1f5
-    shr ecx, 8
-    mov al, cl
-    out dx, al
+    ; buffer - segment (2 Bytes)
+    mov eax, disk_buffer_addr
+    and eax, 0xFFFF_0000  ; upper 2 Bytes
+    shr eax, 4
+    mov word [disk_addr_pack_buf_seg], ax
 
-    inc dx ; 0x1f6
-    shr ecx, 8
-    and cl, 0x0f
-    mov al, 0b1110_0000 ; 主盘，LBA 模式。
-    or al, cl
-    out dx, al
+.read_loop:
 
-    inc dx ; 0x1f7
-    mov al, 0x20 ; 0x20 表示读硬盘。
-    out dx, al
+    ; num of sectors (2 Bytes)
+    ; eax 表示本次读取多少个扇区。
+    mov eax, ecx
+    cmp eax, disk_buffer_size_sects
+    jle .set_num_of_sects 
+    mov eax, disk_buffer_size_sects
 
-    xor ecx, ecx
-    mov cl, bl
+.set_num_of_sects:
 
-.read:
-    push cx
-    call .wait
-    call .read_sector
-    pop cx
-    loop .read
+    sub ecx, eax  ; ecx 存储剩余扇区数。
+
+    mov word [disk_addr_pack_num_of_sect], ax
+
+    ; lower 32 bits of LBA (4 Bytes)
+    mov dword [disk_addr_pack_lba_low], ebx
+    add ebx, eax
+
+    ; upper 16 bits of LBA (4 Bytes)
+    mov word [disk_addr_pack_lba_high], 0
+
+    push eax
+    push edi
+    push ecx
+    push ebx
+
+    ; 读取硬盘
+    mov si, disk_addr_packet
+    mov ah, 0x42  ; 读取硬盘
+    mov dl, 0x80  ; 目标：0 号硬盘
+ 
+    int 0x13
+    jc .error
+
+    pop ebx
+    pop ecx
+    pop edi
+    pop eax
+
+    ; 内存拷贝。
+    push ecx
+    push ebx
+
+    shl eax, 9 ; 每扇区 512 字节。
+    mov ecx, eax ; 字节数
+    mov ebx, edi ; 目标地址
+    add edi, eax
+    mov eax, disk_buffer_addr ; 源地址
+    call memcpy
+
+    pop ebx
+    pop ecx
+
+   
+
+    cmp ecx, 0
+    jnz .read_loop
 
     ret
 
-    .wait:
-        mov dx, 0x1f7
-    .check:
-        in al, dx
+.error:
+    jmp error
 
-        and al, 0b1000_1000
-        cmp al, 0b0000_1000 ; 检查数据是否准备完毕。
-        jnz .check
 
-        ret
-    
-    .read_sector:
-        mov dx, 0x1f0
-        mov cx, 256 ; 一个扇区的大小是 256 个字。
-    .read_word:
-        in ax, dx
+disk_buffer_addr equ 0x58000
+disk_buffer_end equ  0x60000
+disk_buffer_size equ (disk_buffer_end - disk_buffer_addr) ; 要求是 2 的 X 次方（X 至少是 9）。
+disk_buffer_size_sects equ (disk_buffer_size / 512)
+disk_buffer_size_sects_mask equ (disk_buffer_size_sects - 1)
 
-        mov [edi], ax
-        add edi, 2
 
-        loop .read_word
+; 地址信息包（disk address packet, DAP）
+; https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)
+; 要求按照 4 字节对齐。
+;
+; offset size desc
+; -------------------------------------
+; 0      1  size of DAP (just set it to 16 bytes)
+; 1      1  always 0
+; 2      2  number of sectors to transfer      
+; 4      2  transfer buffer (offset)
+; 6      2  transfer buffer (segment)
+; 8      4  lower 32 bits of 48-bit starting LBA 
+; 12     4  upper 16 bits of 48-bit starting LBA
+;
+disk_addr_packet equ 0xFF0
+disk_addr_pack_size_of_dap equ (disk_addr_packet + 0)
+disk_addr_pack_zero equ (disk_addr_packet + 1)
+disk_addr_pack_num_of_sect equ (disk_addr_packet + 2)
+disk_addr_pack_buf_off equ (disk_addr_packet + 4)
+disk_addr_pack_buf_seg equ (disk_addr_packet + 6)
+disk_addr_pack_lba_low equ (disk_addr_packet + 8)
+disk_addr_pack_lba_high equ (disk_addr_packet + 12)
 
-        ret
+
+; 内存拷贝
+; 
+; 参数：
+;       eax: 源地址。建议 4 字节对齐。
+;       ebx: 目标地址。建议 4 字节对齐。
+;       ecx: 字节数。要求是 4 的倍数。
+;
+; 寄存器破坏：
+;     edx, ecx, eax, ebx
+memcpy:
+.cp_loop:
+    cmp ecx, 0
+    jz .end
+    mov dword edx, [eax]
+    mov dword [ebx], edx
+    sub ecx, 4
+    add eax, 4
+    add ebx, 4
+    jmp .cp_loop
+.end:
+    ret
 
 
 unreal_mode_gdt_pointer:
@@ -417,6 +408,7 @@ unreal_mode_gdt_data:
     dq 0x00cf92000000ffff
 unreal_mode_gdt_end:
 
+db 0xfb  ; 用一个特殊的字节标记结尾。
 
 times 510 - ($ - $$) db 0 ; 填充
 

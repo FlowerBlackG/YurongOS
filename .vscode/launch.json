@@ -26,6 +26,12 @@
                 }
             ],
             "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "nasm - debug active file",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": ""
         }
     ]
 }

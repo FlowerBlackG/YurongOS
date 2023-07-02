@@ -34,15 +34,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="84140622-39a6-4ba8-a784-edc5a8e8b017" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/device/acpi/acpi.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.vscode/launch.json" beforeDir="false" afterPath="$PROJECT_DIR$/.vscode/launch.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/concurrent/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/concurrent/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/concurrent/Mutex.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/concurrent/Mutex.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/crt/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/crt/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/boot/boot.asm" beforeDir="false" afterPath="$PROJECT_DIR$/src/boot/boot.asm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/boot/kernel_loader.asm" beforeDir="false" afterPath="$PROJECT_DIR$/src/boot/kernel_loader.asm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/device/acpi.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/device/acpi/acpi.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/device/acpi.h" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/makefile" beforeDir="false" afterPath="$PROJECT_DIR$/src/makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/misc/io.asm" beforeDir="false" afterPath="$PROJECT_DIR$/src/misc/io.asm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/misc/io.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/misc/io.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/memory/MemoryManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/MemoryManager.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/misc/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/misc/main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -74,28 +75,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "master",
-    "last_opened_file_path": "/home/flowerblack/Desktop/ide-eval-resetter-2.1.6.zip",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.keymap",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/flowerblack/Desktop/MyFiles/code-archive/linux&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/device/acpi" />
       <recent name="$PROJECT_DIR$/src/lib/collections" />
     </key>
   </component>
@@ -156,7 +158,14 @@
       <workItem from="1687672494199" duration="161000" />
       <workItem from="1687672662402" duration="442000" />
       <workItem from="1687673115719" duration="3183000" />
-      <workItem from="1687692171156" duration="9395000" />
+      <workItem from="1687692171156" duration="10068000" />
+      <workItem from="1687750189059" duration="5159000" />
+      <workItem from="1687872052141" duration="3077000" />
+      <workItem from="1688010309249" duration="599000" />
+      <workItem from="1688013146579" duration="8202000" />
+      <workItem from="1688110901558" duration="1290000" />
+      <workItem from="1688112198233" duration="66000" />
+      <workItem from="1688112271867" duration="5860000" />
     </task>
     <servers />
   </component>
@@ -181,14 +190,9 @@
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/device/acpi.cpp</url>
-          <line>41</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/device/acpi.cpp</url>
-          <line>54</line>
-          <option name="timeStamp" value="4" />
+          <url>file://$PROJECT_DIR$/src/device/acpi/dsdt.cpp</url>
+          <line>22</line>
+          <option name="timeStamp" value="12" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

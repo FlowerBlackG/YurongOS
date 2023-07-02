@@ -27,7 +27,7 @@
 
 #include <lib/syscalls.h>
 #include <device/pci.h>
-#include <device/acpi.h>
+#include <device/acpi/acpi.h>
 
 /**
  * 调用内核所有模块的对象的构造函数。

@@ -36,7 +36,7 @@ struct Ards {
 namespace MemoryManager {
 
     const uintptr_t ADDRESS_OF_PHYSICAL_MEMORY_MAP = 0xFFFFC00000000000UL;
-    const uintptr_t BEGIN_OF_USABLE_ADDRESS = 0xF00000;
+    const uintptr_t BEGIN_OF_USABLE_ADDRESS = 0xF00000;  // 15MB
     const int PAGE_SIZE = 4096;
 
     /**

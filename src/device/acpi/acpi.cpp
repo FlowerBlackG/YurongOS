@@ -7,6 +7,7 @@
  */
 
 #include "./acpi.h"
+#include "./fadt.h"
 
 #include <memory/MemoryManager.h>
 #include <lib/stdio.h>
@@ -19,6 +20,8 @@ namespace acpi {
 
 RootSystemDescriptor* rootSystemDescriptor = nullptr;
 RootSystemDescriptor2* rootSystemDescriptor2 = nullptr;
+RootSystemDescriptionTable* rootSystemDescriptionTable = nullptr;
+ExtendedRootSystemDescriptorTable* extendedRootSystemDescriptorTable = nullptr;
 
 static inline intptr_t addrOfPhysicalMemoryMap() {
     return memory::MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
@@ -68,6 +71,7 @@ static inline bool findRsdt() {
 
     acpi::rootSystemDescriptor = reinterpret_cast<RootSystemDescriptor*>(xsdtAddr);
     if (acpi::rootSystemDescriptor->revision > 0) {
+        acpi::rootSystemDescriptor = nullptr;
         acpi::rootSystemDescriptor2 = reinterpret_cast<RootSystemDescriptor2*>(xsdtAddr);
     }
 
@@ -82,11 +86,74 @@ static inline bool findRsdt() {
     return true;
 }
 
+static SystemDescriptorTableHeader* getSDT(int index) {
+    if (acpi::extendedRootSystemDescriptorTable) {
+        return extendedRootSystemDescriptorTable->getSDT(index);
+    }
+
+    return rootSystemDescriptionTable->getSDT(index);
+}
+
+static void processSystemDescriptorTable(SystemDescriptorTableHeader* table) {
+    char s[128];
+    sprintf(s, "table: %.4s, %.6s, %.8s ... ",
+        table->signature,
+        table->oemId, table->oemTableId
+    );
+    CRT::getInstance().write(s);
+
+    struct {
+        const uint32_t signatureFlag;
+        void (*processor) (SystemDescriptorTableHeader* table);
+    } const interestedTables[] = {
+        // FADT
+        { *reinterpret_cast<const uint32_t*>("FACP"), acpi::initFixedACPIDescriptionTable },
+        // MADT
+        { *reinterpret_cast<const uint32_t*>("APIC"), nullptr },
+    };
+
+
+    bool caught = false;
+    for (auto& it : interestedTables) {
+        if (it.signatureFlag == *(uint32_t*) (void*) (table->signature)) {
+            caught = true;
+            if (it.processor) {
+                CRT::getInstance().write("processed.\n");
+                it.processor(table);
+            } else {
+                CRT::getInstance().write("saw but ignored.\n");
+            }
+
+            break;
+        }
+
+    }
+
+    if (!caught) {
+        CRT::getInstance().write("\n");
+    }
+
+}
+
 void init() {
     if (!findRsdt()) {
         Kernel::panic("failed to find xsdt.");
     }
-}
+
+    if (acpi::rootSystemDescriptor) {
+        auto addr = addrOfPhysicalMemoryMap() + rootSystemDescriptor->rsdtAddress;
+        acpi::rootSystemDescriptionTable = (RootSystemDescriptionTable*) addr;
+    } else {
+        auto addr = addrOfPhysicalMemoryMap() + rootSystemDescriptor2->xsdtAddress;
+        acpi::extendedRootSystemDescriptorTable = (ExtendedRootSystemDescriptorTable*) addr;
+    }
+
+    SystemDescriptorTableHeader* table;
+    for (int i = 0; (table = getSDT(i)); i++) {
+        processSystemDescriptorTable(table);
+    }
 
 }
-}
+
+} // namespace acpi
+} // namespace device
