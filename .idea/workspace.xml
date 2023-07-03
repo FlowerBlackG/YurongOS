@@ -35,15 +35,17 @@
   <component name="ChangeListManager">
     <list default="true" id="84140622-39a6-4ba8-a784-edc5a8e8b017" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/concurrent/Mutex.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/concurrent/Mutex.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/device/acpi/acpi.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/device/acpi/acpi.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/device/pci.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/device/pci.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/device/pci.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/device/pci.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/memory/KernelMemoryAllocator.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/KernelMemoryAllocator.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/memory/KernelMemoryAllocator.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/KernelMemoryAllocator.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/memory/MemoryManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/MemoryManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/memory/memory.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory/memory.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/interrupt/ClockInterrupt.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/interrupt/ClockInterrupt.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/collections/Map.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/collections/Map.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/machine/Machine.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/machine/Machine.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/misc/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/misc/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/serial/Serial.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/serial/Serial.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/serial/Serial.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/serial/Serial.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/task/IdleTask.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/task/IdleTask.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/task/Task.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/task/Task.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/task/TaskManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/task/TaskManager.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,6 +106,11 @@
     <configuration name="make all" type="CLionExternalRunConfiguration" factoryName="Application" PROGRAM_PARAMS="all" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" WORKING_DIR="file://$ProjectFileDir$/src" PASS_PARENT_ENVS_2="true" PROJECT_NAME="YurongOS" TARGET_NAME="GNU Make" CONFIG_NAME="GNU Make" RUN_PATH="/bin/make">
       <method v="2" />
     </configuration>
+    <configuration name="make clean &amp;&amp; make qemu" type="CLionExternalRunConfiguration" factoryName="Application" PROGRAM_PARAMS="qemu" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" WORKING_DIR="file://$ProjectFileDir$/src" PASS_PARENT_ENVS_2="true" PROJECT_NAME="YurongOS" TARGET_NAME="GNU Make" CONFIG_NAME="GNU Make" RUN_PATH="/bin/make">
+      <method v="2">
+        <option name="RunConfigurationTask" enabled="true" run_configuration_name="make clean" run_configuration_type="CLionExternalRunConfiguration" />
+      </method>
+    </configuration>
     <configuration name="make clean" type="CLionExternalRunConfiguration" factoryName="Application" PROGRAM_PARAMS="clean" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" WORKING_DIR="file://$ProjectFileDir$/src" PASS_PARENT_ENVS_2="true" PROJECT_NAME="YurongOS" TARGET_NAME="GNU Make" CONFIG_NAME="GNU Make" RUN_PATH="/bin/make">
       <method v="2" />
     </configuration>
@@ -137,6 +144,7 @@
       <item itemvalue="Custom Build Application.make all" />
       <item itemvalue="Custom Build Application.make clean" />
       <item itemvalue="Custom Build Application.make qemu" />
+      <item itemvalue="Custom Build Application.make clean &amp;&amp; make qemu" />
       <item itemvalue="Remote Debug.qemu debug" />
     </list>
   </component>
@@ -165,7 +173,9 @@
       <workItem from="1688110901558" duration="1290000" />
       <workItem from="1688112198233" duration="66000" />
       <workItem from="1688112271867" duration="24055000" />
-      <workItem from="1688302945340" duration="3390000" />
+      <workItem from="1688302945340" duration="3594000" />
+      <workItem from="1688348200124" duration="5303000" />
+      <workItem from="1688367143887" duration="7390000" />
     </task>
     <servers />
   </component>
@@ -189,8 +199,23 @@
           <line>81</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/device/acpi/madt.h</url>
+          <line>147</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/device/acpi/madt.h</url>
+          <line>153</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+    <watches-manager>
+      <configuration name="CLion_Remote">
+        <watch expression="&amp;record" />
+      </configuration>
+    </watches-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

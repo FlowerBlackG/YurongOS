@@ -29,12 +29,14 @@ struct TaskFrame {
 };
 
 
-enum class TaskState {
+enum class TaskStatus {
 
     /**
      * 就绪。包含正在运行。
      */
     READY,
+
+    RUNNING, // todo: 该状态未启用。
 
     /**
      * 阻塞。
@@ -84,7 +86,7 @@ struct Task {
 
     bool kernelProcess;
 
-    TaskState state;
+    TaskStatus state;
 
     /**
      * 多功能链表节点。借助它，可以将进程“挂”到各种地方。

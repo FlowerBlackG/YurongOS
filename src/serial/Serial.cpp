@@ -9,3 +9,9 @@
 
 #include <serial/Serial.h>
 
+namespace Serial {
+
+
+
+
+}

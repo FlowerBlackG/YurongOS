@@ -69,7 +69,7 @@ namespace TaskManager {
 
             next = taskTable[prevId];
 
-            if (next && next->state == TaskState::READY) {
+            if (next && next->state == TaskStatus::READY) {
                 break;
             }
 

@@ -169,7 +169,8 @@ void Machine::initPic() {
     io::outByte(PIC_SLAVE_DATA, 2);
     io::outByte(PIC_SLAVE_DATA, 0b00000001);
 
-    io::outByte(PIC_MASTER_DATA, 0b11111100);
+    // io::outByte(PIC_MASTER_DATA, 0b11111100);
+    io::outByte(PIC_MASTER_DATA, 0b11111111); // 屏蔽 pic 的所有中断。使用 apic 控制中断。
     io::outByte(PIC_SLAVE_DATA, 0b11111111);
 
 }

@@ -9,9 +9,17 @@
 
 #pragma once
 
+#include <lib/sys/types.h>
 
 namespace Serial {
 
+const int16_t COM1_IO_PORT_BASE = 0x3F8;
+const int16_t COM2_IO_PORT_BASE = 0x2F8;
+
+const int16_t COM_IO_DATA_OFFSET = 0;
+const int16_t COM_IO_INTERRUPT_ENABLE_REG_OFFSET = 1;
+
+// todo
 
 //int write()
 

@@ -13,6 +13,7 @@
 #include <lib/stdio.h>
 #include <lib/string.h>
 #include <lib/collections/Map.hpp>
+#include <lib/collections/ArrayList.hpp>
 #include <machine/Machine.h>
 #include <machine/X86Assembly.h>
 #include <memory/MemoryManager.h>

@@ -9,6 +9,7 @@
 #include "./acpi.h"
 #include "./fadt.h"
 #include "./mcfg.h"
+#include "./madt.h"
 
 #include <memory/MemoryManager.h>
 #include <lib/stdio.h>
@@ -110,7 +111,7 @@ static void processSystemDescriptorTable(SystemDescriptorTableHeader* table) {
         // FADT
         { *reinterpret_cast<const uint32_t*>("FACP"), acpi::initFixedACPIDescriptionTable },
         // MADT
-        { *reinterpret_cast<const uint32_t*>("APIC"), nullptr },
+        { *reinterpret_cast<const uint32_t*>("APIC"), acpi::initMultipleAPICDescriptionTable },
         // MCFG
         { *reinterpret_cast<const uint32_t*>("MCFG"), acpi::initMemoryMappedConfigurationSpaceAccessTable }
     };

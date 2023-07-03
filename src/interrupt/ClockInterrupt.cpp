@@ -37,7 +37,7 @@ namespace ClockInterrupt {
         while (currNode) {
             Task* task = (Task*) ((intptr_t) currNode - offsetof(Task, linkedListNode));
             if (task->wakeupMoment <= timePassedSinceBoot) {
-                task->state = TaskState::READY;
+                task->state = TaskStatus::READY;
                 sleepingTaskList.removeFirst();
                 currNode = sleepingTaskList.getFirst();
             } else {
@@ -67,7 +67,7 @@ namespace ClockInterrupt {
         }
 
         task->wakeupMoment = timePassedSinceBoot + milliseconds;
-        task->state = TaskState::BLOCKED;
+        task->state = TaskStatus::BLOCKED;
 
         const auto insertJudge = [] (
             const int64_t cargo, LinkedListNode* before, LinkedListNode* after

@@ -7,6 +7,9 @@
  * https://github.com/FlowerBlackG/data-structure-learning/blob/main/RedBlackTree/C%2B%2B/RedBlackTree.h
  * https://github.com/FlowerBlackG/data-structure-learning/blob/main/RedBlackTree/C%2B%2B/RedBlackTree.hpp
  *
+ * 重型结构警告：
+ *   该结构借助模板实现，每次使用都可能导致引用的程序体积剧增（约4KB）。
+ *
  * 创建于 2023年7月2日 上海市嘉定区安亭镇
  *
  * 2022年1月 于上饶市玉山县 实现原版结构。
@@ -173,7 +176,7 @@ template<typename KeyType, typename DataType>
 Map<KeyType, DataType>::~Map()
 {
 	if (this->root != nullptr) {
-	//	this->cleanup(this->root);
+		this->cleanup(this->root);
 		this->root = nullptr;
 	}
 }
