@@ -36,8 +36,6 @@ enum class TaskStatus {
      */
     READY,
 
-    RUNNING, // todo: 该状态未启用。
-
     /**
      * 阻塞。
      */
@@ -86,7 +84,7 @@ struct Task {
 
     bool kernelProcess;
 
-    TaskStatus state;
+    TaskStatus status;
 
     /**
      * 多功能链表节点。借助它，可以将进程“挂”到各种地方。

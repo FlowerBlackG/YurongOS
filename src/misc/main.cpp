@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MulanPSL-2.0
 
 /*
- * 系统内核。
+ * 系统内核 - 进入点。
  * 创建于 2022年7月1日
  */
 
@@ -16,6 +16,7 @@
 #include <lib/collections/ArrayList.hpp>
 #include <machine/Machine.h>
 #include <machine/X86Assembly.h>
+#include <memory/memory.h>
 #include <memory/MemoryManager.h>
 #include <memory/KernelMemoryAllocator.h>
 #include <task/TaskManager.h>
@@ -30,6 +31,8 @@
 #include <lib/syscalls.h>
 #include <device/pci.h>
 #include <device/acpi/acpi.h>
+
+#include <video/vga/vga.h>
 
 /**
  * 调用内核所有模块的对象的构造函数。
@@ -103,15 +106,7 @@ extern "C" void kernel_bridge() {
     __callKernelModuleDestructors();
 }
 
-void Kernel::panic(const char* s) {
-    x86asmCli();
 
-    CRT::getInstance().write(s);
-
-    while (true) {
-        x86asmHlt();
-    }
-}
 
 void userApp1() {
 
@@ -186,11 +181,11 @@ static inline void initModules() {
     TaskManager::init();
     SystemCall::init();
 
-    /*
-     * 初始化 ACPI
-     * 该过程包含对 PCIe 的初始化。
-     */
-    device::acpi::init();
+    // todo: vga 驱动有问题。
+    video::vga::init(
+        (int8_t*) (memory::addrOfPhysicalMemoryMap + 0xa0000),
+        640, 480
+    );
 }
 
 
@@ -221,17 +216,12 @@ void Kernel::main() {
 
     Msr::write(Msr::KERNEL_GS_BASE, (uint64_t) perCpuCargo);
 
-    x86asmCli();
-    x86asmHlt();
-
     Task* idleTask = TaskManager::create(
         IdleTask::entrance, 
         "kerneld", 
         false, 
         true
     );
-
-
 
     TaskManager::create(userApp1, "ua1");
     TaskManager::create(userApp2, "ua2");

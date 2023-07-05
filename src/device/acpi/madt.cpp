@@ -12,6 +12,8 @@
 #include <crt/CRT.h>
 #include <lib/stdio.h>
 #include <machine/X86Assembly.h>
+#include <machine/apic/apic.h>
+#include <memory/memory.h>
 
 namespace device {
 namespace acpi {
@@ -25,7 +27,22 @@ static void processMADTRecordType0(MADTRecordType0* record) {
 
 
 static void processMADTRecordType1(MADTRecordType1* record) {
-    // todo
+    // io apic
+
+    static bool processed = false;
+
+    if (processed) {
+        return; // todo: 暂时只支持1个ioapic.
+    }
+
+    processed = true;
+
+    auto ioApic = new machine::apic::IOApic(
+        record->ioApicId, record->ioApicAddr, record->globalSystemInterruptBase
+    );
+
+    machine::apic::ioApicList.push(ioApic);
+
 }
 
 static void processMADTRecordType2(MADTRecordType2* record) {
@@ -43,11 +60,12 @@ void initMultipleAPICDescriptionTable(SystemDescriptorTableHeader* table) {
     char s[128];
 
     for (auto& record : *madt) {
-        sprintf(s, "(0x%llx) MADT Record: len=%d, type=%d\n",
+
+        Kernel::printLog(
+            Kernel::LogColor::YELLOW,
+            "(0x%llx) MADT Record: len=%d, type=%d\n",
             &record, record.length, record.entryType
         );
-
-        CRT::getInstance().write(s);
 
         if (record.entryType == 0) {
             auto t0 = (MADTRecordType0*) &record;
@@ -73,11 +91,11 @@ void initMultipleAPICDescriptionTable(SystemDescriptorTableHeader* table) {
 
         CRT::getInstance().write(s);
 
-
-
     }
 
-    x86asmHlt();
+    machine::apic::initLocalAPIC(
+        madt->localAPICAddress
+    );
 }
 
 }

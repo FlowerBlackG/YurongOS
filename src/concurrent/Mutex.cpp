@@ -29,7 +29,7 @@ void Mutex::lock() {
     while (this->occupied) {
         auto pTask = TaskManager::getCurrentTask();
         this->waiters.append(&(pTask->linkedListNode));
-        pTask->state = TaskStatus::BLOCKED;
+        pTask->status = TaskStatus::BLOCKED;
         TaskManager::schedule();
         Machine::setInterruptState(false);
     }
@@ -47,7 +47,7 @@ void Mutex::unlock() {
     // 将等待队列里的所有进程设为就绪状态。
     for (auto& it : this->waiters) {
         auto pTask = (Task*) (intptr_t(&it) - offsetof(Task, linkedListNode));
-        pTask->state = TaskStatus::READY;
+        pTask->status = TaskStatus::READY;
     }
 
     this->waiters.clear();

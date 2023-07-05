@@ -29,7 +29,9 @@ namespace MemoryManager {
 }
 
 void MemoryManager::init() {
-    
+
+    memory::addrOfPhysicalMemoryMap = ADDRESS_OF_PHYSICAL_MEMORY_MAP;
+
     FreeMemoryManager::init();
 
     systemTotalMemory = 0;

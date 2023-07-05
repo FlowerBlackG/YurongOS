@@ -16,6 +16,7 @@
 #include <misc/io.h>
 #include <lib/stdio.h>
 #include <lib/AsciiChar.h>
+#include <machine/apic/apic.h>
 
 #include <task/TaskManager.h>
 
@@ -54,25 +55,11 @@ namespace KeyboardInterrupt {
         //    CRT::getInstance().write(s);
         }
 
-        ///////////////////////////////// 滚屏测试专用 - 开始
-
-        if (key == 'w') {
-
-            CRT::getInstance().scrollUp();
-
-        } else if (key == 's') {
-
-            CRT::getInstance().scrollDown();
-
-        }
-
-
-        ///////////////////////////////// 滚屏测试专用 - 结束
-
 
         /* 通知中断控制器，该中断处理完毕。 */
         io::outByte(Machine::PIC_MASTER_CTRL, Machine::PIC_EOI);
+        machine::apic::localApicEOI();
 
-        TaskManager::schedule();
+        // TaskManager::schedule(); 感觉没必要切换任务。
     }
 }

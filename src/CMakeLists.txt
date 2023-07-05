@@ -66,6 +66,7 @@ add_subdirectory(misc)
 add_subdirectory(serial)
 add_subdirectory(task)
 add_subdirectory(device)
+add_subdirectory(video)
 
 
 # 构建 kernel.exe
@@ -92,6 +93,7 @@ target_link_libraries(
     serial
     concurrent
     device
+    video
 )
 
 set_target_properties(kernel PROPERTIES SUFFIX ".exe")

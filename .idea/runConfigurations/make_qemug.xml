@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="make qemug" type="CLionExternalRunConfiguration" factoryName="Application" singleton="false" PROGRAM_PARAMS="qemug" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" WORKING_DIR="file://$ProjectFileDir$/src" PASS_PARENT_ENVS_2="true" PROJECT_NAME="YurongOS" TARGET_NAME="GNU Make" CONFIG_NAME="GNU Make" RUN_PATH="/bin/make">
+    <method v="2" />
+  </configuration>
+</component>

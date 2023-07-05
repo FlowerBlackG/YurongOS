@@ -22,6 +22,16 @@ namespace Msr {
     const int GS_BASE = 0xC0000101;
     const int KERNEL_GS_BASE = 0xC0000102;
 
+    const int IA32_APIC_BASE = 0x1B;
+
+    const int IA32_X2APIC_APICID = 0x802;
+    const int IA32_X2APIC_VERSION = 0x803;
+
+    /**
+     * x2APIC Spurious Interrupt Vector Register (R/W)
+     */
+    const int IA32_X2APIC_SIVR = 0x80f;
+
     inline uint64_t read(uint32_t msr) {
         uint32_t low, high;
 

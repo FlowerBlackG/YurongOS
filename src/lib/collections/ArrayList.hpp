@@ -120,6 +120,8 @@ public:
         }
 
         _data[_size++] = data;
+
+        return 0; // 插入成功。
     }
 
     inline int32_t push(const DataType& data) {

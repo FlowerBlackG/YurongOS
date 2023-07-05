@@ -3,6 +3,8 @@
 /*
  * Memory Mapped Configuration Space Access Table
  *
+ * 用于初始化 PCIe 设备。
+ *
  * 创建于 2023年7月2日 上海市嘉定区安亭镇
  */
 

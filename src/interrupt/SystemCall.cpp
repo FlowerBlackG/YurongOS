@@ -272,9 +272,8 @@ void SystemCall::write(int64_t fd, const char* buffer, size_t count) {
 
 void SystemCall::sleep(int64_t milliseconds) {
 
-    TaskManager::putToSleep(TaskManager::getCurrentTask(), milliseconds);
+    TaskManager::getCurrentTask()->putToSleep(milliseconds);
     TaskManager::schedule();
-
 
 }
 

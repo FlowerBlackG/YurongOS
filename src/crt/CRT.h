@@ -83,6 +83,24 @@ public:
 
         */
 
+        int8_t fgBlack : 1;
+        int8_t fgGreen : 1;
+        int8_t fgRed : 1;
+        int8_t highlight : 1;
+        int8_t bgBlue : 1;
+        int8_t bgGreen : 1;
+        int8_t bgRed : 1;
+        int8_t blink : 1;
+
+        inline CharAttr() {}
+        inline CharAttr(int8_t ch) {
+            *(int8_t*) this = ch;
+        }
+
+        inline operator int8_t () {
+            return *(int8_t*) this;
+        }
+
         /**
          * 闪烁位。
          */
@@ -113,7 +131,7 @@ public:
             static const uint8_t BLUE = 1;
             static const uint8_t BLACK = 0;
         };
-    }; // struct CharAttr
+    } __packed; // struct CharAttr
 
 
 public:
@@ -133,11 +151,16 @@ public:
         uint8_t highlight = 3
     );
 
+    static CharAttr makeAttr(uint8_t bgColor, uint8_t fgColor, bool highlight, bool blink);
+
     void scrollDown(uint16_t lines = 1);
     void scrollUp(uint16_t lines = 1);
 
     void putchar(uint8_t ch);
+    void putchar(uint8_t ch, CRT::CharAttr attr);
+
     size_t write(const char* str, size_t len = -1);
+    size_t write(const char* str, CRT::CharAttr attr, size_t len = -1);
 
 protected:
     /**

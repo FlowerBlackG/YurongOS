@@ -17,6 +17,7 @@
 #include <interrupt/KeyboardInterrupt.h>
 #include <interrupt/PageFaultException.h>
 #include <memory/MemoryManager.h>
+#include <device/acpi/acpi.h>
 
 Machine Machine::instance;
 
@@ -33,6 +34,13 @@ void Machine::init() {
     memory::MemoryManager::init();
 
     this->initIdt();
+
+    /*
+     * 初始化 ACPI
+     * 该过程包含对 PCIe 的初始化。
+     */
+    device::acpi::init();
+
     this->initPit();
     this->initPic();
 
@@ -201,7 +209,8 @@ void Machine::initPit() {
         ref: https://wiki.osdev.org/Programmable_Interval_Timer
     */
 
-    io::outByte(0x43, 0b00110110);
-    io::outByte(0x40, ClockInterrupt::CLOCK_COUNTER & 0xff);
-    io::outByte(0x40, (ClockInterrupt::CLOCK_COUNTER >> 8) & 0xff);
+    // todo: 关闭 pit 芯片。使用 hpet 产生时钟信号。
+    // io::outByte(0x43, 0b00110110);
+    // io::outByte(0x40, ClockInterrupt::CLOCK_COUNTER & 0xff);
+    // io::outByte(0x40, (ClockInterrupt::CLOCK_COUNTER >> 8) & 0xff);
 }

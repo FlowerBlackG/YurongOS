@@ -1,0 +1,6 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="qemu debug" type="CLion_Remote" singleton="false" version="1" remoteCommand="127.0.0.1:1234" symbolFile="$ProjectFileDir$/target/objs/kernel.exe" sysroot="">
+    <debugger kind="GDB" isBundled="true" />
+    <method v="2" />
+  </configuration>
+</component>

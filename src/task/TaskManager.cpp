@@ -69,7 +69,7 @@ namespace TaskManager {
 
             next = taskTable[prevId];
 
-            if (next && next->state == TaskStatus::READY) {
+            if (next && next->status == TaskStatus::READY) {
                 break;
             }
 
@@ -109,11 +109,6 @@ namespace TaskManager {
         tss.rsp0High = ((sp >> 16) >> 16) & 0xFFFFFFFF;
 
         loadTaskToCargo(task);
-
-        const auto kernelPml4Addr = memory::MemoryManager::KERNEL_PML4_ADDRESS 
-            + memory::MemoryManager::ADDRESS_OF_PHYSICAL_MEMORY_MAP;
-        
-        auto kernelPml4 = (PageMapLevel4) kernelPml4Addr;
 
         Machine::setCR3(task->pml4Address);
     }

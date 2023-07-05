@@ -15,103 +15,106 @@
 #include <misc/io.h>
 #include <machine/Machine.h>
 #include <task/TaskManager.h>
+#include <machine/apic/apic.h>
 
 #include <lib/collections/LinkedList.h>
 #include <lib/stddef.h>
 
 namespace ClockInterrupt {
 
-    uint64_t jiffyCounter = 0;
-    uint64_t timePassedSinceBoot = 0;
+uint64_t jiffyCounter = 0;
+uint64_t timePassedSinceBoot = 0;
+int64_t interruptFrequency = WANTED_CLOCK_INTERRUPT_HZ;
 
 
-    /**
-     * 休眠列表。
-     */
-    LinkedList sleepingTaskList;
+/**
+ * 休眠列表。
+ */
+LinkedList sleepingTaskList;
 
-    IMPLEMENT_EXCEPTION_ENTRANCE(entrance, ClockInterrupt::handler)
+IMPLEMENT_EXCEPTION_ENTRANCE(entrance, ClockInterrupt::handler)
 
-    void wakeupSleptEnoughTasks() {
-        LinkedListNode* currNode = sleepingTaskList.getFirst();
-        while (currNode) {
-            Task* task = (Task*) ((intptr_t) currNode - offsetof(Task, linkedListNode));
-            if (task->wakeupMoment <= timePassedSinceBoot) {
-                task->state = TaskStatus::READY;
-                sleepingTaskList.removeFirst();
-                currNode = sleepingTaskList.getFirst();
-            } else {
-                break;
-            }
+void wakeupSleptEnoughTasks() {
+    LinkedListNode* currNode = sleepingTaskList.getFirst();
+    while (currNode) {
+        Task* task = (Task*) ((intptr_t) currNode - offsetof(Task, linkedListNode));
+        if (task->wakeupMoment <= timePassedSinceBoot) {
+            task->status = TaskStatus::READY;
+            sleepingTaskList.removeFirst();
+            currNode = sleepingTaskList.getFirst();
+        } else {
+            break;
         }
     }
+}
 
-    void handler(
-        InterruptSoftwareFrame* softwareRegs, 
-        InterruptHardwareFrame* hardwareRegs
-    ) {
+void handler(
+    InterruptSoftwareFrame* softwareRegs,
+    InterruptHardwareFrame* hardwareRegs
+) {
+    jiffyCounter++;
+    timePassedSinceBoot += 1000 / interruptFrequency;
 
-        jiffyCounter++;
-        timePassedSinceBoot += ClockInterrupt::JIFFY;
+    wakeupSleptEnoughTasks();
 
-        wakeupSleptEnoughTasks();
-        
-        io::outByte(Machine::PIC_MASTER_CTRL, Machine::PIC_EOI);
-        TaskManager::schedule();
+    // io::outByte(Machine::PIC_MASTER_CTRL, Machine::PIC_EOI); // 8259 chip
+    machine::apic::localApicEOI();
+
+    TaskManager::schedule();
+}
+
+
+void putToSleep(Task* task, uint64_t milliseconds) {
+    if (milliseconds == 0) {
+        return; // 逗我呢？不给睡！
     }
 
+    task->wakeupMoment = timePassedSinceBoot + milliseconds;
+    task->status = TaskStatus::BLOCKED;
 
-    void putToSleep(Task* task, uint64_t milliseconds) {
-        if (milliseconds == 0) {
-            return; // 逗我呢？不给睡！
-        }
+    const auto insertJudge = [] (
+        const int64_t cargo, LinkedListNode* before, LinkedListNode* after
+    ) -> int {
 
-        task->wakeupMoment = timePassedSinceBoot + milliseconds;
-        task->state = TaskStatus::BLOCKED;
+        const auto targetTime = cargo;
+        auto taskBefore = (Task*) ((intptr_t) before - offsetof(Task, linkedListNode));
+        auto taskAfter = (Task*) ((intptr_t) after - offsetof(Task, linkedListNode));
 
-        const auto insertJudge = [] (
-            const int64_t cargo, LinkedListNode* before, LinkedListNode* after
-        ) -> int {
+        if (before && after) {
 
-            const auto targetTime = cargo;
-            auto taskBefore = (Task*) ((intptr_t) before - offsetof(Task, linkedListNode));
-            auto taskAfter = (Task*) ((intptr_t) after - offsetof(Task, linkedListNode));
-
-            if (before && after) {
-
-                if (taskBefore->wakeupMoment <= targetTime
-                    && taskAfter->wakeupMoment >= targetTime
-                ) {
-                    return 0;
-                } else {
-                    return 1;
-                }
-
-            } else if (before) {
-
+            if (taskBefore->wakeupMoment <= targetTime
+                && taskAfter->wakeupMoment >= targetTime
+            ) {
                 return 0;
-
-            } else if (after) {
-
-                if (taskAfter->wakeupMoment >= targetTime) {
-                    return 0;
-                } else {
-                    return 1;
-                }
-
             } else {
-                return 0;
+                return 1;
             }
 
-        };
+        } else if (before) {
 
-        sleepingTaskList.insertWhen(
-            task->linkedListNode, 
-            task->wakeupMoment,
-            insertJudge  
-        );
+            return 0;
 
-    }
+        } else if (after) {
+
+            if (taskAfter->wakeupMoment >= targetTime) {
+                return 0;
+            } else {
+                return 1;
+            }
+
+        } else {
+            return 0;
+        }
+
+    };
+
+    sleepingTaskList.insertWhen(
+        task->linkedListNode,
+        task->wakeupMoment,
+        insertJudge
+    );
+
+}
 
 
 }

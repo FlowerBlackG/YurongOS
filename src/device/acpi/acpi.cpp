@@ -10,6 +10,7 @@
 #include "./fadt.h"
 #include "./mcfg.h"
 #include "./madt.h"
+#include "./hpet.h"
 
 #include <memory/MemoryManager.h>
 #include <lib/stdio.h>
@@ -113,7 +114,9 @@ static void processSystemDescriptorTable(SystemDescriptorTableHeader* table) {
         // MADT
         { *reinterpret_cast<const uint32_t*>("APIC"), acpi::initMultipleAPICDescriptionTable },
         // MCFG
-        { *reinterpret_cast<const uint32_t*>("MCFG"), acpi::initMemoryMappedConfigurationSpaceAccessTable }
+        { *reinterpret_cast<const uint32_t*>("MCFG"), acpi::initMemoryMappedConfigurationSpaceAccessTable },
+        // HPET
+        { *reinterpret_cast<const uint32_t*>("HPET"), acpi::initHighPrecisionEventTimer }
     };
 
 

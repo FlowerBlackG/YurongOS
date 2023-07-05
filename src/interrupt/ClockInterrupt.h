@@ -20,38 +20,47 @@ struct Task;
  */
 namespace ClockInterrupt {
 
-    /**
-     * 震荡频率。
-     */
-    const int OSCILLATOR_FREQUENCY = 1193182;
+/**
+ * 震荡频率。
+ * 
+ * @deprecated 该值是 8254 芯片使用的。现在时钟使用 hpet 产生。
+ */
+const int OSCILLATOR_FREQUENCY = 1193182;
 
-    /**
-     * 系统希望的时钟频率。
-     */
-    const int WANTED_CLOCK_INTERRUPT_HZ = 100;
-    
-    const int CLOCK_COUNTER = OSCILLATOR_FREQUENCY / WANTED_CLOCK_INTERRUPT_HZ;
+/**
+ * 系统希望的时钟频率。
+ */
+const int WANTED_CLOCK_INTERRUPT_HZ = 100;
 
-    /**
-     * 每时间片的毫秒数。
-     */
-    const int JIFFY = 1000 / WANTED_CLOCK_INTERRUPT_HZ;
+/**
+ * 
+ * 
+ * @deprecated 该值是 8254 芯片使用的。现在时钟使用 hpet 产生。
+ */
+const int CLOCK_COUNTER = OSCILLATOR_FREQUENCY / WANTED_CLOCK_INTERRUPT_HZ;
 
-    extern uint64_t jiffyCounter;
+/**
+ * 每时间片的毫秒数。
+ */
+const int JIFFY = 1000 / WANTED_CLOCK_INTERRUPT_HZ;
 
-    /**
-     * 从启动算起，经历的时间。单位为毫秒。
-     */
-    extern uint64_t timePassedSinceBoot;
+extern int64_t interruptFrequency;
 
-    void entrance();
+extern uint64_t jiffyCounter;
 
-    void handler(
-        InterruptSoftwareFrame* softwareRegs, 
-        InterruptHardwareFrame* hardwareRegs
-    );
+/**
+ * 从启动算起，经历的时间。单位为毫秒。
+ */
+extern uint64_t timePassedSinceBoot;
+
+void entrance();
+
+void handler(
+    InterruptSoftwareFrame* softwareRegs,
+    InterruptHardwareFrame* hardwareRegs
+);
 
 
-    void putToSleep(Task* task, uint64_t milliseconds);
+void putToSleep(Task* task, uint64_t milliseconds);
 
 }

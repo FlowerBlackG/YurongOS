@@ -15,6 +15,8 @@
 
 namespace memory {
 
+extern intptr_t addrOfPhysicalMemoryMap;
+
 /**
  * malloc for the Kernel
  */
@@ -30,6 +32,8 @@ inline void kfree(void* addr) {
 }
 
 
-}
+} // namespace memory
 
 
+void* operator new (size_t size);
+void operator delete (void* addr);

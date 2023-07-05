@@ -40,7 +40,7 @@ namespace IdleTask {
         while (true) {
 
             Task* task = TaskManager::getCurrentTask();
-            if (task->state == TaskStatus::READY) {
+            if (task->status == TaskStatus::READY) {
                 // 处理一些事务，如清理已经挂掉的进程。
             }
             

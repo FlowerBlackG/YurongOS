@@ -103,6 +103,17 @@ void CRT::setForegroundColor(uint8_t color, uint8_t blink, uint8_t highlight) {
     crtMutex.unlock();
 }
 
+CRT::CharAttr CRT::makeAttr(uint8_t bgColor, uint8_t fgColor, bool highlight, bool blink) {
+    int8_t res = 0;
+
+    res |= fgColor;
+    res |= bgColor << 4;
+    res |= blink << 7;
+    res |= highlight << 3;
+
+    return res;
+}
+
 void CRT::scrollDown(uint16_t lines) {
     if (lines == 0) {
         return;
@@ -170,6 +181,10 @@ void CRT::setCurrentScreenPos(size_t pos) { // protected
 }
 
 void CRT::putchar(uint8_t ch) {
+    this->putchar(ch, this->charAttr);
+}
+
+void CRT::putchar(uint8_t ch, CRT::CharAttr attr) {
 
     crtMutex.lock();
 
@@ -181,7 +196,7 @@ void CRT::putchar(uint8_t ch) {
     if (ch >= AsciiChar::START_OF_VISIBLE_CHARS && ch <= AsciiChar::END_OF_VISIBLE_CHARS) {
         // 输出字符。
         *cursorMemAddr = ch;
-        *(cursorMemAddr + 1) = this->charAttr;
+        *(cursorMemAddr + 1) = (int8_t) attr;
 
         // 移动光标。
         if (cursorX + 1 < CRT::COLS) {
@@ -214,8 +229,14 @@ void CRT::putchar(uint8_t ch) {
 
 }
 
-
 size_t CRT::write(const char* str, size_t len) {
+
+    return write(str, this->charAttr, len);
+
+}
+
+size_t CRT::write(const char* str, CRT::CharAttr attr, size_t len) {
+
     if (len == 0) {
         return 0;
     }
@@ -228,7 +249,7 @@ size_t CRT::write(const char* str, size_t len) {
             CRT::putchar(AsciiChar::CR);
         }
 
-        CRT::putchar(*p);
+        CRT::putchar(*p, attr);
         ++p;
     }
 
