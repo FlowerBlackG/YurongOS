@@ -155,7 +155,7 @@ struct MultipleAPICDescriptionTable {
             ++itr;
         }
 
-        return itr;
+        return ++itr;
     }
 
 } __packed;

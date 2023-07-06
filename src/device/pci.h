@@ -62,6 +62,13 @@ struct ConfigAddress {
 
 } __packed;
 
+struct Capability {
+    int8_t capabilityId;
+    uint8_t nextCapabilityPtr;
+    uint16_t messageControl;
+    uint32_t messageAddress;
+    uint16_t messageData;
+};
 
 struct SegmentGroup {
     intptr_t baseAddrOfEnhancedConfMechanism;

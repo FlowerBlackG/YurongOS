@@ -16,9 +16,10 @@ prepare:
 	&& cmake -G"Unix Makefiles" ../src
 
 # 通过调用 cmake 完成构建。具体构建命令在 CMakeLists.txt 内。
+# -j 8: 多线程（8线程）编译。
 .PHONY: build
 build: prepare
-	cd ../build && cmake --build .
+	cd ../build && cmake --build . -- -j 8
 
 
 TARGET_DIR := ../target

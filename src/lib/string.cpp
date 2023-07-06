@@ -292,7 +292,52 @@ void* memset(void* dest, int ch, size_t count) {
     return dest;
 }
 
+/**
+ * 快速内存拷贝。调用时，假设传入的内存可以互相对齐，否则性能会降低。
+ *
+ * 传统内存拷贝时，一次只能拷贝1个字节，速度较慢。
+ * 本方法在观察到源地址和目的地址低 n 位相同时，
+ * 每次拷贝一个 CPU 字长。其中，n 为机器字长除以字节长度 8。
+ *
+ * 例如，当 src 为 0x345A, dest 为 0x987A 时，
+ * src 和 dest 的低 4 位相同。当机器字长为 4 位时，可以先使用单字节拷贝方法，
+ * 将 src 和 dest 与内存对齐。将 src 和 dest 分别对齐到 0b..000，
+ * 即可借助机器字长的优势，一次性拷贝更多字符。
+ *
+ * 覆盖问题：memcpy 本身不允许拷贝区间互相覆盖。因此，本方法不保证此方面安全性。
+ * 短拷贝：当 src 和 dest 的距离小于一个寄存器的长度时，根本无法互相对齐。因此，不存在此问题。
+ *
+ * @param dest 拷贝目标地址。需要与 src 距离对齐，不要求与内存单元对齐。
+ * @param src 拷贝源地址。
+ * @param count 拷贝字符总数。
+ * @return dest
+ */
+static inline void* memcpy_aligned(void* dest, const void* src, size_t count) {
+    char* pDest = (char*) dest;
+    char* pSrc = (char*) src;
+    while (pSrc < ((char*) src) + count && (intptr_t(pSrc) & (sizeof(long) - 1))) {
+        *pDest++ = *pSrc++;
+    }
+
+    while (pSrc + sizeof(long) - 1 < ((char*) src) + count) {
+        *(long*) pDest = *(long*) pSrc;
+        pSrc += sizeof(long);
+        pDest += sizeof(long);
+    }
+
+    return dest;
+
+}
+
+
 void* memcpy(void* dest, const void* src, size_t count) {
+
+    // 如果 src 和 dest 可以互相对齐，则使用快速拷贝。
+    if (!((intptr_t(dest) ^ intptr_t(src)) & (sizeof(long) - 1))) {
+        return memcpy_aligned(dest, src, count);
+    }
+
+    // 单字节拷贝。
     char* pDest = (char*) dest;
     char* pSrc = (char*) src;
     while (pSrc < ((char*) src) + count) {

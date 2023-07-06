@@ -34,24 +34,24 @@ public:
     ElementType& operator * () const { return *node; };
 
     Self& operator ++ () {
-        node++;
+        node = node->next;
         return *this;
     };
 
     Self operator ++ (int) {
         auto tmp = *this;
-        node++;
+        node = node->next;
         return tmp;
     }
 
     Self& operator -- () {
-        node--;
+        node = node->prev;
         return *this;
     }
 
     Self operator -- (int) {
         auto tmp = *this;
-        node--;
+        node = node->prev;
         return tmp;
     }
 
@@ -124,12 +124,12 @@ struct LinkedList {
 
     // ------ 迭代相关 ------
 
-    LinkedListIterator begin() const {
+    inline LinkedListIterator begin() const {
         return LinkedListIterator(this->head);
     }
 
-    LinkedListIterator end() const {
-        return LinkedListIterator(this->tail);
+    inline LinkedListIterator end() const {
+        return LinkedListIterator(nullptr);
     }
 };
 

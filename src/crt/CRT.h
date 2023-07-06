@@ -83,7 +83,7 @@ public:
 
         */
 
-        int8_t fgBlack : 1;
+        int8_t fgBlue : 1;
         int8_t fgGreen : 1;
         int8_t fgRed : 1;
         int8_t highlight : 1;

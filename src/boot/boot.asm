@@ -117,6 +117,15 @@
 ; 进入 0x7c00 时，cpu 处于实模式，16位。
 org 0x7c00
 
+
+
+vesa_block_info equ 0x9f000
+vesa_block_info_seg equ 0x9000
+vesa_block_info_offset equ 0xf000
+vesa_video_mode equ 0x118
+vesa_video_mode_code equ (vesa_video_mode | 0x4000)
+
+
 [bits 16] ; 提醒编译器后面是处于 16 位模式的代码。
 
 start:
@@ -131,11 +140,26 @@ start:
 
 .flush_cs:
 
+
+
+    ; 读取 VESA 信息。
+    xor ax, ax
+    mov es, ax
+    mov di, 0x7e00
+    mov ax, 0x4f01
+    mov cx, vesa_video_mode
+    int 0x10
+
     ; 设置屏幕模式为文本模式，并清空屏幕。
     ; 中断指令号为 10H，当 AH=0H 时表示设置显示模式，模式具体为 AL。
     ; AL=3H 表示文本模式，80×25，16色。
     ; AL=12H 表示图形模式，VGA 640×480 16色
-    mov ax, 3
+    ; AX=0x4F02, BX=0x4180 表示 1440×900 32位色
+    ; AX=0x4F02, BX=0x4143 表示 800×600 32位色
+
+    mov bx, vesa_video_mode_code
+    mov ax, 0x4F02
+    ;mov ax, 0x3
     int 0x10
 
     ; 初始化段寄存器。

@@ -2,6 +2,8 @@
 
 /*
  * VGA
+ * 
+ * * deprecated! use svga instead. *
  *
  * 创建于 2023年7月4日 上海市嘉定区安亭镇
  */

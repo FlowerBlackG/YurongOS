@@ -13,6 +13,7 @@
 
 #include <misc/Kernel.h>
 #include <concurrent/Mutex.h>
+#include <video/console/console.h>
 
 CRT CRT::instance;
 
@@ -235,7 +236,38 @@ size_t CRT::write(const char* str, size_t len) {
 
 }
 
+static int32_t charAttrColor2TrueColor(CRT::CharAttr attr) {
+    uint8_t bits = int8_t(attr) & 0x7;
+    const int32_t map[] = {
+        0x0,
+        0x82111f,
+        0x1a6840,
+        0xe8b004,
+        0x61649f,
+        0x681752,
+        0x3b818c,
+        0xfefefe
+
+    };
+
+    const int32_t hmap[] = {
+        0x0,
+        0xee2746,
+        0x5dbe8a,
+        0xfeba07,
+        0x2775b6,
+        0x894276,
+        0x12aa9c,
+        0xffffff
+    };
+
+    return attr.highlight ? hmap[bits] : map[bits];
+}
+
 size_t CRT::write(const char* str, CRT::CharAttr attr, size_t len) {
+
+    // todo: 暂时重定向到 svga。
+    return video::console::write(str, len, charAttrColor2TrueColor(attr));
 
     if (len == 0) {
         return 0;

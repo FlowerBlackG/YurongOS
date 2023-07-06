@@ -33,6 +33,8 @@
 #include <device/acpi/acpi.h>
 
 #include <video/vga/vga.h>
+#include <video/svga/svga.h>
+#include <video/console/console.h>
 
 /**
  * 调用内核所有模块的对象的构造函数。
@@ -174,6 +176,14 @@ void userApp2() {
 }
 
 static inline void initModules() {
+
+    intptr_t vesaModeInfoAddr = memory::addrOfPhysicalMemoryMap + 0x7e00;
+    video::svga::init(
+        (video::svga::VbeModeInfo*) vesaModeInfoAddr
+    );
+
+    video::console::init();
+
     CRT::getInstance().init();
     CRT::getInstance().write("welcome to yros!\n");
 
@@ -181,11 +191,7 @@ static inline void initModules() {
     TaskManager::init();
     SystemCall::init();
 
-    // todo: vga 驱动有问题。
-    video::vga::init(
-        (int8_t*) (memory::addrOfPhysicalMemoryMap + 0xa0000),
-        640, 480
-    );
+
 }
 
 
@@ -206,7 +212,6 @@ static inline void launchKernelDaemon(Task* pTask) {
     x86asmNearJmp(interruptExit);
     x86asmUd2();
 }
-
 
 void Kernel::main() {
 

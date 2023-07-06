@@ -146,7 +146,7 @@ public:
     }
 
     ArrayListIterator<DataType> end() const {
-        return ArrayListIterator<DataType>(_data, _size, _size - 1);
+        return ArrayListIterator<DataType>(_data, _size, _size);
     }
 
 };
